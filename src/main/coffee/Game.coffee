@@ -28,11 +28,11 @@ class Game
   
   render: ->
     if @_pause
-        return;
+        return
     _renderEngine.render _input
     
   start: ->
-    _stage.addEventListener(Event.ENTER_FRAME, render);
+    _stage.addEventListener(Event.ENTER_FRAME, render)
     
   dispose: -> 
     removeListeners()    
@@ -51,6 +51,112 @@ class Game
     _input = null
     _subscribers = null
     _screen = null
+
+  preinitialize: (parent, width, height) ->
+    _parent = parent
+    @ViewportHeight = height
+    @ViewportWidth = width
+    _screen = document.createElement("canvas")
+    _screen.setAttribute "width", @ViewportWidth
+    _screen.setAttribute "height", @ViewportHeight
+    document.body.appendChild _screen
+    initialize()
+  
+  initialize: ->
+    if @_renderEngineClass == null
+        _renderEngine = new RenderEngine()
+    else
+        _renderEngine = new _renderEngineClass()
+    
+    if @_collisionEngineClass == null
+        _renderEngine.collisionEngine = new CollisionEngine()
+    else
+        _renderEngine.collisionEngine = new _collisionEngineClass()
+    
+    if @_physicsEngineClass == null
+        _renderEngine.physicsEngine = new PhysicsEngine()
+    else
+        _renderEngine.physicsEngine = new _physicsEngineClass()
+    
+    if @_maps.length == 0
+        console.log "Blitgin_as :: [ERROR] :: you need at least one map."
+    
+    if @_players.length == 0
+        console.log "Blitgin_as :: [ERROR] :: you need at least one player."
+    
+    _soundEngine = new SoundEngine()
+    _renderEngine.soundEngine = _soundEngine
+    
+    map = _maps[_activeMap]
+    player= _players[_activePlayer]
+    
+    _renderEngine.screen = _screen
+    _renderEngine.map = new map()
+    _renderEngine.player = new player()
+    
+    _input = new InputVO();
+    _input.direction = 0;
+    _input.jump = 0;
+    _input.jumpLock = false;
+    _input.customKey = 0;
+    
+    addListeners()
+    
+  addListeners: ->
+    _stage.addEventListener(KeyboardEvent.KEY_UP, manageMovement);
+    _stage.addEventListener(KeyboardEvent.KEY_DOWN, manageMovement);
+  
+    _stage.removeEventListener(KeyboardEvent.KEY_UP, manageMovement);
+    _stage.removeEventListener(KeyboardEvent.KEY_DOWN, manageMovement);
+  
+  removeListeners: ->  
+  
+  manageMovement: ->
+    if _input.disabled
+      return
+    
+    if event.type == KeyboardEvent.KEY_UP
+      _input.direction = if checkKeys(_leftKeys, event.keyCode) then 0 else _input.direction
+      _input.direction = if checkKey(_rightKeys, event.keyCode) then 0 else _input.direction
+      _input.vDirection = if checkKey(_upKeys, event.keyCode) then 0 else _input.vDirection
+      _input.vDirection = if checkKey(_downKeys, event.keyCode) then 0 else _input.vDirection
+      _input.jump = if checkKey(_jumpKeys, event.keyCode) then 0 else _input.jump
+      _input.customKey = if checkKey(_customKeys, event.keyCode) then 0 else _input.customKey
+    else
+      _input.direction = if checkKey(_leftKeys, event.keyCode) then -1 else _input.direction
+      _input.direction = if checkKey(_rightKeys, event.keyCode) then 1 else _input.direction
+      _input.vDirection = if checkKey(_upKeys, event.keyCode) then -1 else _input.direction
+      _input.vDirection = if checkKey(_downKeys, event.keyCode) then 1 else _input.direction
+      _input.jump = if checkKey(_jumpKeys, event.keyCode) then 1 else _input.jump
+    
+    if checkKey(_customKeys, event.keyCode)
+      _input.customKey = _customKeys[_customKey]
+
+  checkKey: (arr, keyCode) ->
+    index = arr.indexOf keyCode, 0
+    _customKey = index
+    return (index != -1);
+  
+  dispose: ->
+    removeListeners()
+
+    @_players = null
+    @_maps = null
+    @_leftKeys = null
+    @_rightKeys = null
+    @_upKeys = null
+    @_downKeys = null
+    @_jumpKeys = null
+    @_customKeys = null
+    
+    @_renderEngineClass = null
+    @_renderEngine.dispose();
+    @_soundEngine = null
+    @_movement = null
+    @_input = null
+    @_subscribers = null
+    @_screen.bitmapData.dispose()
+    @_screen = null
       
 Game::__defineGetter__ "renderEngineClass", ->
   @_renderEngineClass
@@ -135,89 +241,3 @@ Game::__defineGetter__ "pause", ->
 
 Game::__defineSetter__ "pause", (val) ->
   @_pause = value
-
-  preinitialize: (parent, width, height) ->
-  _parent = parent
-  @ViewportHeight = height
-  @ViewportWidth = width
-  _screen = document.createElement("canvas")
-  _screen.setAttribute "width", @ViewportWidth
-  _screen.setAttribute "height", @ViewportHeight
-  document.body.appendChild _screen
-  initialize()
-  
-  initialize: ->
-  if @_renderEngineClass == null
-      _renderEngine = new RenderEngine()
-  else
-      _renderEngine = new _renderEngineClass()
-  
-  if @_collisionEngineClass == null
-      _renderEngine.collisionEngine = new CollisionEngine()
-  else
-      _renderEngine.collisionEngine = new _collisionEngineClass()
-  
-  if @_physicsEngineClass == null
-      _renderEngine.physicsEngine = new PhysicsEngine()
-  else
-      _renderEngine.physicsEngine = new _physicsEngineClass()
-  
-  if @_maps.length == 0
-      console.log "Blitgin_as :: [ERROR] :: you need at least one map."
-  
-  if @_players.length == 0
-      console.log "Blitgin_as :: [ERROR] :: you need at least one player."
-  
-  _soundEngine = new SoundEngine()
-  _renderEngine.soundEngine = _soundEngine
-  
-  map = _maps[_activeMap]
-  player= _players[_activePlayer]
-  
-  _renderEngine.screen = _screen
-  _renderEngine.map = new map()
-  _renderEngine.player = new player()
-  
-  _input = new InputVO();
-  _input.direction = 0;
-  _input.jump = 0;
-  _input.jumpLock = false;
-  _input.customKey = 0;
-  
-  addListeners()
-    
-  addListeners: ->
-  _stage.addEventListener(KeyboardEvent.KEY_UP, manageMovement);
-  _stage.addEventListener(KeyboardEvent.KEY_DOWN, manageMovement);
-
-  _stage.removeEventListener(KeyboardEvent.KEY_UP, manageMovement);
-  _stage.removeEventListener(KeyboardEvent.KEY_DOWN, manageMovement);
-  
-  removeListeners: ->
-  
-  
-  manageMovement: ->
-  if _input.disabled
-    return
-  
-  if event.type == KeyboardEvent.KEY_UP
-    _input.direction = if checkKeys(_leftKeys, event.keyCode) then 0 else _input.direction
-    _input.direction = if checkKey(_rightKeys, event.keyCode) then 0 else _input.direction
-    _input.vDirection = if checkKey(_upKeys, event.keyCode) then 0 else _input.vDirection
-    _input.vDirection = if checkKey(_downKeys, event.keyCode) then 0 else _input.vDirection
-    _input.jump = if checkKey(_jumpKeys, event.keyCode) then 0 else _input.jump
-    _input.customKey = if checkKey(_customKeys, event.keyCode) then 0 else _input.customKey
-  else
-    _input.direction = if checkKey(_leftKeys, event.keyCode) then -1 else _input.direction
-    _input.direction = if checkKey(_rightKeys, event.keyCode) then 1 else _input.direction
-    _input.vDirection = if checkKey(_upKeys, event.keyCode) then -1 else _input.direction
-    _input.vDirection = if checkKey(_downKeys, event.keyCode) then 1 else _input.direction
-    _input.jump = if checkKey(_jumpKeys, event.keyCode) then 1 else _input.jump
-  
-  if checkKey(_customKeys, event.keyCode)
-    _input.customKey = _customKeys[_customKey]
-
-  checkKey: (arr, keyCode) ->
-  index = arr.indexOf keyCode, 0
-  _customKey = index
-  return (index != -1);

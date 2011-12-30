@@ -79,6 +79,112 @@ Game = (function() {
     return _screen = null;
   };
 
+  Game.prototype.preinitialize = function(parent, width, height) {
+    _parent = parent;
+    this.ViewportHeight = height;
+    this.ViewportWidth = width;
+    _screen = document.createElement("canvas");
+    _screen.setAttribute("width", this.ViewportWidth);
+    _screen.setAttribute("height", this.ViewportHeight);
+    document.body.appendChild(_screen);
+    return initialize();
+  };
+
+  Game.prototype.initialize = function() {
+    var map, player;
+    if (this._renderEngineClass === null) {
+      _renderEngine = new RenderEngine();
+    } else {
+      _renderEngine = new _renderEngineClass();
+    }
+    if (this._collisionEngineClass === null) {
+      _renderEngine.collisionEngine = new CollisionEngine();
+    } else {
+      _renderEngine.collisionEngine = new _collisionEngineClass();
+    }
+    if (this._physicsEngineClass === null) {
+      _renderEngine.physicsEngine = new PhysicsEngine();
+    } else {
+      _renderEngine.physicsEngine = new _physicsEngineClass();
+    }
+    if (this._maps.length === 0) {
+      console.log("Blitgin_as :: [ERROR] :: you need at least one map.");
+    }
+    if (this._players.length === 0) {
+      console.log("Blitgin_as :: [ERROR] :: you need at least one player.");
+    }
+    _soundEngine = new SoundEngine();
+    _renderEngine.soundEngine = _soundEngine;
+    map = _maps[_activeMap];
+    player = _players[_activePlayer];
+    _renderEngine.screen = _screen;
+    _renderEngine.map = new map();
+    _renderEngine.player = new player();
+    _input = new InputVO();
+    _input.direction = 0;
+    _input.jump = 0;
+    _input.jumpLock = false;
+    _input.customKey = 0;
+    return addListeners();
+  };
+
+  Game.prototype.addListeners = function() {
+    _stage.addEventListener(KeyboardEvent.KEY_UP, manageMovement);
+    _stage.addEventListener(KeyboardEvent.KEY_DOWN, manageMovement);
+    _stage.removeEventListener(KeyboardEvent.KEY_UP, manageMovement);
+    return _stage.removeEventListener(KeyboardEvent.KEY_DOWN, manageMovement);
+  };
+
+  Game.prototype.removeListeners = function() {};
+
+  Game.prototype.manageMovement = function() {
+    if (_input.disabled) return;
+    if (event.type === KeyboardEvent.KEY_UP) {
+      _input.direction = checkKeys(_leftKeys, event.keyCode) ? 0 : _input.direction;
+      _input.direction = checkKey(_rightKeys, event.keyCode) ? 0 : _input.direction;
+      _input.vDirection = checkKey(_upKeys, event.keyCode) ? 0 : _input.vDirection;
+      _input.vDirection = checkKey(_downKeys, event.keyCode) ? 0 : _input.vDirection;
+      _input.jump = checkKey(_jumpKeys, event.keyCode) ? 0 : _input.jump;
+      _input.customKey = checkKey(_customKeys, event.keyCode) ? 0 : _input.customKey;
+    } else {
+      _input.direction = checkKey(_leftKeys, event.keyCode) ? -1 : _input.direction;
+      _input.direction = checkKey(_rightKeys, event.keyCode) ? 1 : _input.direction;
+      _input.vDirection = checkKey(_upKeys, event.keyCode) ? -1 : _input.direction;
+      _input.vDirection = checkKey(_downKeys, event.keyCode) ? 1 : _input.direction;
+      _input.jump = checkKey(_jumpKeys, event.keyCode) ? 1 : _input.jump;
+    }
+    if (checkKey(_customKeys, event.keyCode)) {
+      return _input.customKey = _customKeys[_customKey];
+    }
+  };
+
+  Game.prototype.checkKey = function(arr, keyCode) {
+    var index;
+    index = arr.indexOf(keyCode, 0);
+    _customKey = index;
+    return index !== -1;
+  };
+
+  Game.prototype.dispose = function() {
+    removeListeners();
+    this._players = null;
+    this._maps = null;
+    this._leftKeys = null;
+    this._rightKeys = null;
+    this._upKeys = null;
+    this._downKeys = null;
+    this._jumpKeys = null;
+    this._customKeys = null;
+    this._renderEngineClass = null;
+    this._renderEngine.dispose();
+    this._soundEngine = null;
+    this._movement = null;
+    this._input = null;
+    this._subscribers = null;
+    this._screen.bitmapData.dispose();
+    return this._screen = null;
+  };
+
   return Game;
 
 })();
@@ -193,89 +299,5 @@ Game.prototype.__defineGetter__("pause", function() {
 });
 
 Game.prototype.__defineSetter__("pause", function(val) {
-  var index, map, player, _customKey, _input, _parent, _renderEngine, _screen, _soundEngine;
-  this._pause = value;
-  ({
-    preinitialize: function(parent, width, height) {}
-  });
-  _parent = parent;
-  this.ViewportHeight = height;
-  this.ViewportWidth = width;
-  _screen = document.createElement("canvas");
-  _screen.setAttribute("width", this.ViewportWidth);
-  _screen.setAttribute("height", this.ViewportHeight);
-  document.body.appendChild(_screen);
-  initialize();
-  ({
-    initialize: function() {}
-  });
-  if (this._renderEngineClass === null) {
-    _renderEngine = new RenderEngine();
-  } else {
-    _renderEngine = new _renderEngineClass();
-  }
-  if (this._collisionEngineClass === null) {
-    _renderEngine.collisionEngine = new CollisionEngine();
-  } else {
-    _renderEngine.collisionEngine = new _collisionEngineClass();
-  }
-  if (this._physicsEngineClass === null) {
-    _renderEngine.physicsEngine = new PhysicsEngine();
-  } else {
-    _renderEngine.physicsEngine = new _physicsEngineClass();
-  }
-  if (this._maps.length === 0) {
-    console.log("Blitgin_as :: [ERROR] :: you need at least one map.");
-  }
-  if (this._players.length === 0) {
-    console.log("Blitgin_as :: [ERROR] :: you need at least one player.");
-  }
-  _soundEngine = new SoundEngine();
-  _renderEngine.soundEngine = _soundEngine;
-  map = _maps[_activeMap];
-  player = _players[_activePlayer];
-  _renderEngine.screen = _screen;
-  _renderEngine.map = new map();
-  _renderEngine.player = new player();
-  _input = new InputVO();
-  _input.direction = 0;
-  _input.jump = 0;
-  _input.jumpLock = false;
-  _input.customKey = 0;
-  addListeners();
-  ({
-    addListeners: function() {}
-  });
-  _stage.addEventListener(KeyboardEvent.KEY_UP, manageMovement);
-  _stage.addEventListener(KeyboardEvent.KEY_DOWN, manageMovement);
-  _stage.removeEventListener(KeyboardEvent.KEY_UP, manageMovement);
-  _stage.removeEventListener(KeyboardEvent.KEY_DOWN, manageMovement);
-  ({
-    removeListeners: function() {},
-    manageMovement: function() {}
-  });
-  if (_input.disabled) return;
-  if (event.type === KeyboardEvent.KEY_UP) {
-    _input.direction = checkKeys(_leftKeys, event.keyCode) ? 0 : _input.direction;
-    _input.direction = checkKey(_rightKeys, event.keyCode) ? 0 : _input.direction;
-    _input.vDirection = checkKey(_upKeys, event.keyCode) ? 0 : _input.vDirection;
-    _input.vDirection = checkKey(_downKeys, event.keyCode) ? 0 : _input.vDirection;
-    _input.jump = checkKey(_jumpKeys, event.keyCode) ? 0 : _input.jump;
-    _input.customKey = checkKey(_customKeys, event.keyCode) ? 0 : _input.customKey;
-  } else {
-    _input.direction = checkKey(_leftKeys, event.keyCode) ? -1 : _input.direction;
-    _input.direction = checkKey(_rightKeys, event.keyCode) ? 1 : _input.direction;
-    _input.vDirection = checkKey(_upKeys, event.keyCode) ? -1 : _input.direction;
-    _input.vDirection = checkKey(_downKeys, event.keyCode) ? 1 : _input.direction;
-    _input.jump = checkKey(_jumpKeys, event.keyCode) ? 1 : _input.jump;
-  }
-  if (checkKey(_customKeys, event.keyCode)) {
-    _input.customKey = _customKeys[_customKey];
-  }
-  ({
-    checkKey: function(arr, keyCode) {}
-  });
-  index = arr.indexOf(keyCode, 0);
-  _customKey = index;
-  return index !== -1;
+  return this._pause = value;
 });
