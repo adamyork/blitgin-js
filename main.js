@@ -21,7 +21,7 @@ function createGame() {
 	game.players = [CustomPlayer];
 	game.activeMap = 0;
 	game.activePlayer = 0;
-	// game.leftKeys = [ Keyboard.LEFT ];
+	game.leftKeys = [ Keyboard.LEFT ];
 	// game.rightKeys = [ Keyboard.RIGHT ];
 	// game.jumpKeys = [ Keyboard.SPACE ];
 	// game.customKeys = [ 76, 66 ];
