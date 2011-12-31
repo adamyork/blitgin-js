@@ -7,8 +7,6 @@ Game = (function() {
 
   _subscribers = [];
 
-  _subscribers = void 0;
-
   _pause = false;
 
   _activeMap = 0;
@@ -33,23 +31,23 @@ Game = (function() {
 
   _customKeys = [];
 
-  _parent = void 0;
+  _parent = {};
 
-  _screen = void 0;
+  _screen = {};
 
-  _renderEngineClass = void 0;
+  _renderEngineClass = {};
 
-  _collisionEngineClass = void 0;
+  _collisionEngineClass = {};
 
-  _physicsEngineClass = void 0;
+  _physicsEngineClass = {};
 
-  _renderEngine = void 0;
+  _renderEngine = {};
 
-  _soundEngine = void 0;
+  _soundEngine = {};
 
-  _movement = void 0;
+  _movement = {};
 
-  _input = void 0;
+  _input = {};
 
   Game.prototype.render = function() {
     if (this._pause) return;
@@ -62,50 +60,50 @@ Game = (function() {
 
   Game.prototype.dispose = function() {
     removeListeners();
-    _players = null;
-    _maps = null;
-    _leftKeys = null;
-    _rightKeys = null;
-    _upKeys = null;
-    _downKeys = null;
-    _jumpKeys = null;
-    _customKeys = null;
-    _renderEngineClass = null;
+    _players = void 0;
+    _maps = void 0;
+    _leftKeys = void 0;
+    _rightKeys = void 0;
+    _upKeys = void 0;
+    _downKeys = void 0;
+    _jumpKeys = void 0;
+    _customKeys = void 0;
+    _renderEngineClass = void 0;
     _renderEngine.dispose();
-    _soundEngine = null;
-    _movement = null;
-    _input = null;
-    _subscribers = null;
-    return _screen = null;
+    _soundEngine = void 0;
+    _movement = void 0;
+    _input = void 0;
+    _subscribers = void 0;
+    return _screen = void 0;
   };
 
   Game.prototype.preinitialize = function(parent, width, height) {
     _parent = parent;
     this.ViewportHeight = height;
     this.ViewportWidth = width;
-    _screen = document.createElement("canvas");
-    _screen.setAttribute("width", this.ViewportWidth);
-    _screen.setAttribute("height", this.ViewportHeight);
-    document.body.appendChild(_screen);
-    return initialize();
+    this._screen = document.createElement("canvas");
+    this._screen.setAttribute("width", this.ViewportWidth);
+    this._screen.setAttribute("height", this.ViewportHeight);
+    document.body.appendChild(this._screen);
+    return this.initialize();
   };
 
   Game.prototype.initialize = function() {
     var map, player;
-    if (this._renderEngineClass === null) {
-      _renderEngine = new RenderEngine();
+    if (!this._renderEngineClass) {
+      this._renderEngine = new RenderEngine();
     } else {
-      _renderEngine = new _renderEngineClass();
+      this._renderEngine = new _renderEngineClass();
     }
-    if (this._collisionEngineClass === null) {
-      _renderEngine.collisionEngine = new CollisionEngine();
+    if (!this._collisionEngineClass) {
+      this._renderEngine.collisionEngine = new CollisionEngine();
     } else {
-      _renderEngine.collisionEngine = new _collisionEngineClass();
+      this._renderEngine.collisionEngine = new _collisionEngineClass();
     }
-    if (this._physicsEngineClass === null) {
-      _renderEngine.physicsEngine = new PhysicsEngine();
+    if (!this._physicsEngineClass) {
+      this._renderEngine.physicsEngine = new PhysicsEngine();
     } else {
-      _renderEngine.physicsEngine = new _physicsEngineClass();
+      this._renderEngine.physicsEngine = new _physicsEngineClass();
     }
     if (this._maps.length === 0) {
       console.log("Blitgin_as :: [ERROR] :: you need at least one map.");
@@ -113,33 +111,40 @@ Game = (function() {
     if (this._players.length === 0) {
       console.log("Blitgin_as :: [ERROR] :: you need at least one player.");
     }
-    _soundEngine = new SoundEngine();
-    _renderEngine.soundEngine = _soundEngine;
+    this._soundEngine = new SoundEngine();
+    this._renderEngine.soundEngine = _soundEngine;
     map = _maps[_activeMap];
     player = _players[_activePlayer];
-    _renderEngine.screen = _screen;
-    _renderEngine.map = new map();
-    _renderEngine.player = new player();
-    _input = new InputVO();
-    _input.direction = 0;
-    _input.jump = 0;
-    _input.jumpLock = false;
-    _input.customKey = 0;
-    return addListeners();
+    this._renderEngine.screen = _screen;
+    this._renderEngine.map = new map();
+    this._renderEngine.player = new player();
+    this._input = new Input();
+    this._input.direction = 0;
+    this._input.jump = 0;
+    this._input.jumpLock = false;
+    this._input.customKey = 0;
+    return this.addListeners();
   };
 
   Game.prototype.addListeners = function() {
-    _stage.addEventListener(KeyboardEvent.KEY_UP, manageMovement);
-    _stage.addEventListener(KeyboardEvent.KEY_DOWN, manageMovement);
-    _stage.removeEventListener(KeyboardEvent.KEY_UP, manageMovement);
-    return _stage.removeEventListener(KeyboardEvent.KEY_DOWN, manageMovement);
+    document.onkeydown = manageMovement;
+    return document.onkeyup = manageMovement;
   };
 
-  Game.prototype.removeListeners = function() {};
+  Game.prototype.removeListeners = function() {
+    document.onkeydown = void 0;
+    return document.onkeyup = void 0;
+  };
 
-  Game.prototype.manageMovement = function() {
+  Game.prototype.manageMovement = function(e) {
+    var key;
     if (_input.disabled) return;
-    if (event.type === KeyboardEvent.KEY_UP) {
+    if (window.event) {
+      key = window.event.keyCode;
+    } else {
+      key = e.keyCode;
+    }
+    if (dir === KeyboardEvent.KEY_UP) {
       _input.direction = checkKeys(_leftKeys, event.keyCode) ? 0 : _input.direction;
       _input.direction = checkKey(_rightKeys, event.keyCode) ? 0 : _input.direction;
       _input.vDirection = checkKey(_upKeys, event.keyCode) ? 0 : _input.vDirection;
@@ -153,7 +158,7 @@ Game = (function() {
       _input.vDirection = checkKey(_downKeys, event.keyCode) ? 1 : _input.direction;
       _input.jump = checkKey(_jumpKeys, event.keyCode) ? 1 : _input.jump;
     }
-    if (checkKey(_customKeys, event.keyCode)) {
+    if (checkKey(_customKeys, key)) {
       return _input.customKey = _customKeys[_customKey];
     }
   };
@@ -167,22 +172,41 @@ Game = (function() {
 
   Game.prototype.dispose = function() {
     removeListeners();
-    this._players = null;
-    this._maps = null;
-    this._leftKeys = null;
-    this._rightKeys = null;
-    this._upKeys = null;
-    this._downKeys = null;
-    this._jumpKeys = null;
-    this._customKeys = null;
-    this._renderEngineClass = null;
+    this._players = void 0;
+    this._maps = void 0;
+    this._leftKeys = void 0;
+    this._rightKeys = void 0;
+    this._upKeys = void 0;
+    this._downKeys = void 0;
+    this._jumpKeys = void 0;
+    this._customKeys = void 0;
+    this._renderEngineClass = void 0;
     this._renderEngine.dispose();
-    this._soundEngine = null;
-    this._movement = null;
-    this._input = null;
-    this._subscribers = null;
+    this._soundEngine = void 0;
+    this._movement = void 0;
+    this._input = void 0;
+    this._subscribers = void 0;
     this._screen.bitmapData.dispose();
-    return this._screen = null;
+    return this._screen = void 0;
+  };
+
+  Game.prototype.notifySubscribers = function(map, player, actions) {
+    var subscriber, _i, _len, _ref, _results;
+    _ref = this._subscribers;
+    _results = [];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      subscriber = _ref[_i];
+      _results.push(subscriber.notify(map, player, actions));
+    }
+    return _results;
+  };
+
+  Game.prototype.subscribe = function(subscriber) {
+    return this._subscribers[subscriber] = subscriber;
+  };
+
+  Game.prototype.unsubscribe = function(subscriber) {
+    return this._subscriber.slice(this._subscribers.indexOf(subscriber), this._subscribers.indexOf(subscriber) + 1 || 9e9);
   };
 
   return Game;
@@ -210,7 +234,7 @@ Game.prototype.__defineGetter__("physicsEngineClass", function() {
 });
 
 Game.prototype.__defineSetter__("physicsEngineClass", function(val) {
-  return this._physicsEngineClass = value;
+  return this._physicsEngineClass = val;
 });
 
 Game.prototype.__defineGetter__("players", function() {
@@ -218,7 +242,7 @@ Game.prototype.__defineGetter__("players", function() {
 });
 
 Game.prototype.__defineSetter__("players", function(val) {
-  return this._players = value;
+  return this._players = val;
 });
 
 Game.prototype.__defineGetter__("maps", function() {
@@ -226,7 +250,7 @@ Game.prototype.__defineGetter__("maps", function() {
 });
 
 Game.prototype.__defineSetter__("maps", function(val) {
-  return this._maps = value;
+  return this._maps = val;
 });
 
 Game.prototype.__defineGetter__("activeMap", function() {
@@ -234,11 +258,11 @@ Game.prototype.__defineGetter__("activeMap", function() {
 });
 
 Game.prototype.__defineSetter__("activeMap", function(val) {
-  return this._activeMap = value;
+  return this._activeMap = val;
 });
 
 Game.prototype.__defineSetter__("activePlayer", function(val) {
-  return this._activePlayer = value;
+  return this._activePlayer = val;
 });
 
 Game.prototype.__defineGetter__("activePlayer", function() {
@@ -251,7 +275,7 @@ Game.prototype.__defineGetter__("leftKeys", function() {
 
 Game.prototype.__defineSetter__("leftKeys", function(val) {
   var _leftKeys;
-  return _leftKeys = value;
+  return _leftKeys = val;
 });
 
 Game.prototype.__defineGetter__("rightKeys", function() {
@@ -259,7 +283,7 @@ Game.prototype.__defineGetter__("rightKeys", function() {
 });
 
 Game.prototype.__defineSetter__("rightKeys", function(val) {
-  return this._rightKeys = value;
+  return this._rightKeys = val;
 });
 
 Game.prototype.__defineGetter__("upKeys", function() {
@@ -267,7 +291,7 @@ Game.prototype.__defineGetter__("upKeys", function() {
 });
 
 Game.prototype.__defineSetter__("upKeys", function(val) {
-  return this._upKeys = value;
+  return this._upKeys = val;
 });
 
 Game.prototype.__defineGetter__("downKeys", function() {
@@ -275,7 +299,7 @@ Game.prototype.__defineGetter__("downKeys", function() {
 });
 
 Game.prototype.__defineSetter__("downKeys", function(val) {
-  return this._downKeys = value;
+  return this._downKeys = val;
 });
 
 Game.prototype.__defineGetter__("jumpKeys", function() {
@@ -283,7 +307,7 @@ Game.prototype.__defineGetter__("jumpKeys", function() {
 });
 
 Game.prototype.__defineSetter__("jumpKeys", function(val) {
-  return this._jumpKeys = value;
+  return this._jumpKeys = val;
 });
 
 Game.prototype.__defineGetter__("customKeys", function() {
@@ -291,7 +315,7 @@ Game.prototype.__defineGetter__("customKeys", function() {
 });
 
 Game.prototype.__defineSetter__("customKeys", function(val) {
-  return this._customKeys = value;
+  return this._customKeys = val;
 });
 
 Game.prototype.__defineGetter__("pause", function() {
@@ -299,5 +323,5 @@ Game.prototype.__defineGetter__("pause", function() {
 });
 
 Game.prototype.__defineSetter__("pause", function(val) {
-  return this._pause = value;
+  return this._pause = val;
 });

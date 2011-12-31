@@ -16,12 +16,12 @@ function createGame() {
 	game = new Game();
 	// game.maps = [ LevelOneMap ];
 	// game.players = [ Bot ];
-	// game.activeMap = 0;
-	// game.activePlayer = 0;
+	game.activeMap = 0;
+	game.activePlayer = 0;
 	// game.leftKeys = [ Keyboard.LEFT ];
 	// game.rightKeys = [ Keyboard.RIGHT ];
 	// game.jumpKeys = [ Keyboard.SPACE ];
 	// game.customKeys = [ 76, 66 ];
-	// game.preinitialize(this, width, height);
+	game.preinitialize(this, 800, 600);
 	game.subscribe(this);
 }

@@ -2,8 +2,6 @@ class Game
   constructor: () ->
     
   _subscribers = []
-  
-  _subscribers = undefined
   _pause = false
   _activeMap = 0
   _activePlayer = 0
@@ -16,15 +14,15 @@ class Game
   _downKeys = []
   _jumpKeys = []
   _customKeys = []
-  _parent = undefined
-  _screen = undefined
-  _renderEngineClass = undefined
-  _collisionEngineClass = undefined
-  _physicsEngineClass = undefined
-  _renderEngine = undefined
-  _soundEngine = undefined
-  _movement = undefined
-  _input = undefined
+  _parent = {}
+  _screen = {}
+  _renderEngineClass = {}
+  _collisionEngineClass = {}
+  _physicsEngineClass = {}
+  _renderEngine = {}
+  _soundEngine = {}
+  _movement = {}
+  _input = {}
   
   render: ->
     if @_pause
@@ -36,47 +34,47 @@ class Game
     
   dispose: -> 
     removeListeners()    
-    _players = null
-    _maps = null
-    _leftKeys = null
-    _rightKeys = null
-    _upKeys = null
-    _downKeys = null
-    _jumpKeys = null
-    _customKeys = null    
-    _renderEngineClass = null
+    _players = undefined
+    _maps = undefined
+    _leftKeys = undefined
+    _rightKeys = undefined
+    _upKeys = undefined
+    _downKeys = undefined
+    _jumpKeys = undefined
+    _customKeys = undefined    
+    _renderEngineClass = undefined
     _renderEngine.dispose()
-    _soundEngine = null
-    _movement = null
-    _input = null
-    _subscribers = null
-    _screen = null
+    _soundEngine = undefined
+    _movement = undefined
+    _input = undefined
+    _subscribers = undefined
+    _screen = undefined
 
   preinitialize: (parent, width, height) ->
     _parent = parent
     @ViewportHeight = height
     @ViewportWidth = width
-    _screen = document.createElement("canvas")
-    _screen.setAttribute "width", @ViewportWidth
-    _screen.setAttribute "height", @ViewportHeight
-    document.body.appendChild _screen
-    initialize()
+    @_screen = document.createElement("canvas")
+    @_screen.setAttribute "width", @ViewportWidth
+    @_screen.setAttribute "height", @ViewportHeight
+    document.body.appendChild @_screen
+    @initialize()
   
   initialize: ->
-    if @_renderEngineClass == null
-        _renderEngine = new RenderEngine()
+    if !@_renderEngineClass
+        @_renderEngine = new RenderEngine()
     else
-        _renderEngine = new _renderEngineClass()
+        @_renderEngine = new _renderEngineClass()
     
-    if @_collisionEngineClass == null
-        _renderEngine.collisionEngine = new CollisionEngine()
+    if !@_collisionEngineClass
+        @_renderEngine.collisionEngine = new CollisionEngine()
     else
-        _renderEngine.collisionEngine = new _collisionEngineClass()
+        @_renderEngine.collisionEngine = new _collisionEngineClass()
     
-    if @_physicsEngineClass == null
-        _renderEngine.physicsEngine = new PhysicsEngine()
+    if !@_physicsEngineClass
+        @_renderEngine.physicsEngine = new PhysicsEngine()
     else
-        _renderEngine.physicsEngine = new _physicsEngineClass()
+        @_renderEngine.physicsEngine = new _physicsEngineClass()
     
     if @_maps.length == 0
         console.log "Blitgin_as :: [ERROR] :: you need at least one map."
@@ -84,38 +82,42 @@ class Game
     if @_players.length == 0
         console.log "Blitgin_as :: [ERROR] :: you need at least one player."
     
-    _soundEngine = new SoundEngine()
-    _renderEngine.soundEngine = _soundEngine
+    @_soundEngine = new SoundEngine()
+    @_renderEngine.soundEngine = _soundEngine
     
     map = _maps[_activeMap]
     player= _players[_activePlayer]
     
-    _renderEngine.screen = _screen
-    _renderEngine.map = new map()
-    _renderEngine.player = new player()
+    @_renderEngine.screen = _screen
+    @_renderEngine.map = new map()
+    @_renderEngine.player = new player()
     
-    _input = new InputVO();
-    _input.direction = 0;
-    _input.jump = 0;
-    _input.jumpLock = false;
-    _input.customKey = 0;
+    @_input = new Input();
+    @_input.direction = 0;
+    @_input.jump = 0;
+    @_input.jumpLock = false;
+    @_input.customKey = 0;
     
-    addListeners()
+    @addListeners()
     
   addListeners: ->
-    _stage.addEventListener(KeyboardEvent.KEY_UP, manageMovement);
-    _stage.addEventListener(KeyboardEvent.KEY_DOWN, manageMovement);
-  
-    _stage.removeEventListener(KeyboardEvent.KEY_UP, manageMovement);
-    _stage.removeEventListener(KeyboardEvent.KEY_DOWN, manageMovement);
+    document.onkeydown = manageMovement
+    document.onkeyup = manageMovement
   
   removeListeners: ->  
-  
-  manageMovement: ->
+    document.onkeydown = undefined
+    document.onkeyup = undefined
+        
+  manageMovement: (e) ->
     if _input.disabled
       return
-    
-    if event.type == KeyboardEvent.KEY_UP
+      
+    if window.event
+      key = window.event.keyCode
+    else    
+      key = e.keyCode
+
+    if dir == KeyboardEvent.KEY_UP
       _input.direction = if checkKeys(_leftKeys, event.keyCode) then 0 else _input.direction
       _input.direction = if checkKey(_rightKeys, event.keyCode) then 0 else _input.direction
       _input.vDirection = if checkKey(_upKeys, event.keyCode) then 0 else _input.vDirection
@@ -129,7 +131,7 @@ class Game
       _input.vDirection = if checkKey(_downKeys, event.keyCode) then 1 else _input.direction
       _input.jump = if checkKey(_jumpKeys, event.keyCode) then 1 else _input.jump
     
-    if checkKey(_customKeys, event.keyCode)
+    if checkKey(_customKeys, key)
       _input.customKey = _customKeys[_customKey]
 
   checkKey: (arr, keyCode) ->
@@ -140,24 +142,33 @@ class Game
   dispose: ->
     removeListeners()
 
-    @_players = null
-    @_maps = null
-    @_leftKeys = null
-    @_rightKeys = null
-    @_upKeys = null
-    @_downKeys = null
-    @_jumpKeys = null
-    @_customKeys = null
+    @_players = undefined
+    @_maps = undefined
+    @_leftKeys = undefined
+    @_rightKeys = undefined
+    @_upKeys = undefined
+    @_downKeys = undefined
+    @_jumpKeys = undefined
+    @_customKeys = undefined
     
-    @_renderEngineClass = null
+    @_renderEngineClass = undefined
     @_renderEngine.dispose();
-    @_soundEngine = null
-    @_movement = null
-    @_input = null
-    @_subscribers = null
+    @_soundEngine = undefined
+    @_movement = undefined
+    @_input = undefined
+    @_subscribers = undefined
     @_screen.bitmapData.dispose()
-    @_screen = null
-      
+    @_screen = undefined
+
+  notifySubscribers: (map,player,actions) ->
+    subscriber.notify(map, player, actions) for subscriber in @_subscribers
+
+  subscribe: (subscriber) ->
+    @_subscribers[subscriber] = subscriber
+
+  unsubscribe: (subscriber) ->
+    @_subscriber[@_subscribers.indexOf(subscriber)..@_subscribers.indexOf(subscriber)]
+            
 Game::__defineGetter__ "renderEngineClass", ->
   @_renderEngineClass
 
@@ -174,28 +185,28 @@ Game::__defineGetter__ "physicsEngineClass", ->
   @_physicsEngineClass
 
 Game::__defineSetter__ "physicsEngineClass", (val) ->
-  @_physicsEngineClass = value
+  @_physicsEngineClass = val
 
 Game::__defineGetter__ "players", ->
   @_players
 
 Game::__defineSetter__ "players", (val) ->
-  @_players = value
+  @_players = val
 
 Game::__defineGetter__ "maps", ->
   @_maps
 
 Game::__defineSetter__ "maps", (val) ->
-  @_maps = value
+  @_maps = val
 
 Game::__defineGetter__ "activeMap", ->
   @_activeMap
 
 Game::__defineSetter__ "activeMap", (val) ->
-  @_activeMap = value
+  @_activeMap = val
 
 Game::__defineSetter__ "activePlayer", (val) ->
-  @_activePlayer = value
+  @_activePlayer = val
 
 Game::__defineGetter__ "activePlayer", ->
   @_activePlayer
@@ -204,40 +215,40 @@ Game::__defineGetter__ "leftKeys", ->
   @_leftKeys
 
 Game::__defineSetter__ "leftKeys", (val) ->
-  _leftKeys = value
+  _leftKeys = val
 
 Game::__defineGetter__ "rightKeys", ->
   @_rightKeys
 
 Game::__defineSetter__ "rightKeys", (val) ->
-  @_rightKeys = value
+  @_rightKeys = val
 
 Game::__defineGetter__ "upKeys", ->
   @_upKeys
 
 Game::__defineSetter__ "upKeys", (val) ->
-  @_upKeys = value
+  @_upKeys = val
 
 Game::__defineGetter__ "downKeys", ->
   @_downKeys
 
 Game::__defineSetter__ "downKeys", (val) ->
-  @_downKeys = value
+  @_downKeys = val
 
 Game::__defineGetter__ "jumpKeys", ->
   @_jumpKeys
 
 Game::__defineSetter__ "jumpKeys", (val) ->
-  @_jumpKeys = value
+  @_jumpKeys = val
 
 Game::__defineGetter__ "customKeys", ->
   @_customKeys
 
 Game::__defineSetter__ "customKeys", (val) ->
-  @_customKeys = value
+  @_customKeys = val
 
 Game::__defineGetter__ "pause", ->
   @_pause
 
 Game::__defineSetter__ "pause", (val) ->
-  @_pause = value
+  @_pause = val
