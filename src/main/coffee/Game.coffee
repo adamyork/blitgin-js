@@ -62,19 +62,19 @@ class Game
   
   initialize: ->
     if !@_renderEngineClass
-        @_renderEngine = new RenderEngine()
+        _renderEngine = new RenderEngine()
     else
-        @_renderEngine = new _renderEngineClass()
+        _renderEngine = new _renderEngineClass()
     
     if !@_collisionEngineClass
-        @_renderEngine.collisionEngine = new CollisionEngine()
+        _renderEngine.collisionEngine = new CollisionEngine()
     else
-        @_renderEngine.collisionEngine = new _collisionEngineClass()
+        _renderEngine.collisionEngine = new _collisionEngineClass()
     
     if !@_physicsEngineClass
-        @_renderEngine.physicsEngine = new PhysicsEngine()
+        _renderEngine.physicsEngine = new PhysicsEngine()
     else
-        @_renderEngine.physicsEngine = new _physicsEngineClass()
+        _renderEngine.physicsEngine = new _physicsEngineClass()
     
     if @_maps.length == 0
         console.log "Blitgin_as :: [ERROR] :: you need at least one map."
@@ -82,27 +82,27 @@ class Game
     if @_players.length == 0
         console.log "Blitgin_as :: [ERROR] :: you need at least one player."
     
-    @_soundEngine = new SoundEngine()
-    @_renderEngine.soundEngine = _soundEngine
+    _soundEngine = new SoundEngine()
+    _renderEngine.soundEngine = @_soundEngine
     
-    map = _maps[_activeMap]
-    player= _players[_activePlayer]
+    map = @_maps[_activeMap]
+    player= @_players[_activePlayer]
     
-    @_renderEngine.screen = _screen
-    @_renderEngine.map = new map()
-    @_renderEngine.player = new player()
+    _renderEngine.screen = @_screen
+    _renderEngine.map = new map()
+    _renderEngine.player = new player()
     
-    @_input = new Input();
-    @_input.direction = 0;
-    @_input.jump = 0;
-    @_input.jumpLock = false;
-    @_input.customKey = 0;
+    _input = new Input();
+    _input.direction = 0;
+    _input.jump = 0;
+    _input.jumpLock = false;
+    _input.customKey = 0;
     
     @addListeners()
     
   addListeners: ->
-    document.onkeydown = manageMovement
-    document.onkeyup = manageMovement
+    document.onkeydown = @manageMovement
+    document.onkeyup = @manageMovement
   
   removeListeners: ->  
     document.onkeydown = undefined

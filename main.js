@@ -8,14 +8,17 @@ function initGame() {
 }
 
 function loadClasses() {
-	//load your custom classes here
-	createGame();
+	$LAB
+	.script("src/custom/CustomPlayer.js")
+	.script("src/custom/CustomMap.js").wait(function(){
+		createGame();
+	});
 }
 
 function createGame() {
 	game = new Game();
-	// game.maps = [ LevelOneMap ];
-	// game.players = [ Bot ];
+	game.maps = [CustomMap];
+	game.players = [CustomPlayer];
 	game.activeMap = 0;
 	game.activePlayer = 0;
 	// game.leftKeys = [ Keyboard.LEFT ];

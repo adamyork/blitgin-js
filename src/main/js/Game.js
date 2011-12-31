@@ -91,19 +91,19 @@ Game = (function() {
   Game.prototype.initialize = function() {
     var map, player;
     if (!this._renderEngineClass) {
-      this._renderEngine = new RenderEngine();
+      _renderEngine = new RenderEngine();
     } else {
-      this._renderEngine = new _renderEngineClass();
+      _renderEngine = new _renderEngineClass();
     }
     if (!this._collisionEngineClass) {
-      this._renderEngine.collisionEngine = new CollisionEngine();
+      _renderEngine.collisionEngine = new CollisionEngine();
     } else {
-      this._renderEngine.collisionEngine = new _collisionEngineClass();
+      _renderEngine.collisionEngine = new _collisionEngineClass();
     }
     if (!this._physicsEngineClass) {
-      this._renderEngine.physicsEngine = new PhysicsEngine();
+      _renderEngine.physicsEngine = new PhysicsEngine();
     } else {
-      this._renderEngine.physicsEngine = new _physicsEngineClass();
+      _renderEngine.physicsEngine = new _physicsEngineClass();
     }
     if (this._maps.length === 0) {
       console.log("Blitgin_as :: [ERROR] :: you need at least one map.");
@@ -111,24 +111,24 @@ Game = (function() {
     if (this._players.length === 0) {
       console.log("Blitgin_as :: [ERROR] :: you need at least one player.");
     }
-    this._soundEngine = new SoundEngine();
-    this._renderEngine.soundEngine = _soundEngine;
-    map = _maps[_activeMap];
-    player = _players[_activePlayer];
-    this._renderEngine.screen = _screen;
-    this._renderEngine.map = new map();
-    this._renderEngine.player = new player();
-    this._input = new Input();
-    this._input.direction = 0;
-    this._input.jump = 0;
-    this._input.jumpLock = false;
-    this._input.customKey = 0;
+    _soundEngine = new SoundEngine();
+    _renderEngine.soundEngine = this._soundEngine;
+    map = this._maps[_activeMap];
+    player = this._players[_activePlayer];
+    _renderEngine.screen = this._screen;
+    _renderEngine.map = new map();
+    _renderEngine.player = new player();
+    _input = new Input();
+    _input.direction = 0;
+    _input.jump = 0;
+    _input.jumpLock = false;
+    _input.customKey = 0;
     return this.addListeners();
   };
 
   Game.prototype.addListeners = function() {
-    document.onkeydown = manageMovement;
-    return document.onkeyup = manageMovement;
+    document.onkeydown = this.manageMovement;
+    return document.onkeyup = this.manageMovement;
   };
 
   Game.prototype.removeListeners = function() {
