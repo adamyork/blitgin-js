@@ -21,10 +21,11 @@ function createGame() {
 	game.players = [CustomPlayer];
 	game.activeMap = 0;
 	game.activePlayer = 0;
-	game.leftKeys = [ Keyboard.LEFT ];
-	// game.rightKeys = [ Keyboard.RIGHT ];
-	// game.jumpKeys = [ Keyboard.SPACE ];
-	// game.customKeys = [ 76, 66 ];
+	game.leftKeys = [game.keyboard.LEFT];
+	game.rightKeys = [game.keyboard.RIGHT];
+	game.jumpKeys = [game.keyboard.SPACE];
+	game.customKeys = [ 76, 66 ];
 	game.preinitialize(this, 800, 600);
 	game.subscribe(this);
+	game.start();
 }

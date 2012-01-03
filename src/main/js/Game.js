@@ -1,9 +1,11 @@
 var Game;
 
 Game = (function() {
-  var _activeMap, _activePlayer, _collisionEngineClass, _customKey, _customKeys, _downKeys, _input, _jumpKeys, _leftKeys, _maps, _movement, _parent, _pause, _physicsEngineClass, _players, _renderEngine, _renderEngineClass, _rightKeys, _screen, _soundEngine, _subscribers, _upKeys;
+  var _activeMap, _activePlayer, _collisionEngineClass, _customKey, _customKeys, _downKeys, _input, _jumpKeys, _leftKeys, _maps, _movement, _parent, _pause, _physicsEngineClass, _players, _renderEngine, _renderEngineClass, _rightKeys, _screen, _soundEngine, _subscribers, _timer, _upKeys;
 
-  function Game() {}
+  function Game() {
+    this.keyboard = new Keyboard();
+  }
 
   _subscribers = [];
 
@@ -49,32 +51,15 @@ Game = (function() {
 
   _input = {};
 
+  _timer = {};
+
   Game.prototype.render = function() {
     if (this._pause) return;
-    return _renderEngine.render(_input);
+    return alert("render");
   };
 
   Game.prototype.start = function() {
-    return _stage.addEventListener(Event.ENTER_FRAME, render);
-  };
-
-  Game.prototype.dispose = function() {
-    removeListeners();
-    _players = void 0;
-    _maps = void 0;
-    _leftKeys = void 0;
-    _rightKeys = void 0;
-    _upKeys = void 0;
-    _downKeys = void 0;
-    _jumpKeys = void 0;
-    _customKeys = void 0;
-    _renderEngineClass = void 0;
-    _renderEngine.dispose();
-    _soundEngine = void 0;
-    _movement = void 0;
-    _input = void 0;
-    _subscribers = void 0;
-    return _screen = void 0;
+    return _timer = setInterval(this.render.bind(this), 2500);
   };
 
   Game.prototype.preinitialize = function(parent, width, height) {
@@ -84,6 +69,7 @@ Game = (function() {
     this._screen = document.createElement("canvas");
     this._screen.setAttribute("width", this.ViewportWidth);
     this._screen.setAttribute("height", this.ViewportHeight);
+    this._screen.setAttribute("tabIndex", 0);
     document.body.appendChild(this._screen);
     return this.initialize();
   };
@@ -127,8 +113,9 @@ Game = (function() {
   };
 
   Game.prototype.addListeners = function() {
-    document.onkeydown = this.manageMovement;
-    return document.onkeyup = this.manageMovement;
+    document.onkeydown = this.manageMovement.bind(this);
+    document.onkeyup = this.manageMovement.bind(this);
+    return this._screen.focus();
   };
 
   Game.prototype.removeListeners = function() {
@@ -144,27 +131,28 @@ Game = (function() {
     } else {
       key = e.keyCode;
     }
-    if (dir === KeyboardEvent.KEY_UP) {
-      _input.direction = checkKeys(_leftKeys, event.keyCode) ? 0 : _input.direction;
-      _input.direction = checkKey(_rightKeys, event.keyCode) ? 0 : _input.direction;
-      _input.vDirection = checkKey(_upKeys, event.keyCode) ? 0 : _input.vDirection;
-      _input.vDirection = checkKey(_downKeys, event.keyCode) ? 0 : _input.vDirection;
-      _input.jump = checkKey(_jumpKeys, event.keyCode) ? 0 : _input.jump;
-      _input.customKey = checkKey(_customKeys, event.keyCode) ? 0 : _input.customKey;
+    if (e.type === Keyboard.prototype.KEY_UP) {
+      _input.direction = this.checkKey(this._leftKeys, key) ? 0 : _input.direction;
+      _input.direction = this.checkKey(this._rightKeys, key) ? 0 : _input.direction;
+      _input.vDirection = this.checkKey(this._upKeys, key) ? 0 : _input.vDirection;
+      _input.vDirection = this.checkKey(this._downKeys, key) ? 0 : _input.vDirection;
+      _input.jump = this.checkKey(this._jumpKeys, key) ? 0 : _input.jump;
+      _input.customKey = this.checkKey(this._customKeys, key) ? 0 : _input.customKey;
     } else {
-      _input.direction = checkKey(_leftKeys, event.keyCode) ? -1 : _input.direction;
-      _input.direction = checkKey(_rightKeys, event.keyCode) ? 1 : _input.direction;
-      _input.vDirection = checkKey(_upKeys, event.keyCode) ? -1 : _input.direction;
-      _input.vDirection = checkKey(_downKeys, event.keyCode) ? 1 : _input.direction;
-      _input.jump = checkKey(_jumpKeys, event.keyCode) ? 1 : _input.jump;
+      _input.direction = this.checkKey(this._leftKeys, key) ? -1 : _input.direction;
+      _input.direction = this.checkKey(this._rightKeys, key) ? 1 : _input.direction;
+      _input.vDirection = this.checkKey(this._upKeys, key) ? -1 : _input.direction;
+      _input.vDirection = this.checkKey(this._downKeys, key) ? 1 : _input.direction;
+      _input.jump = this.checkKey(this._jumpKeys, key) ? 1 : _input.jump;
     }
-    if (checkKey(_customKeys, key)) {
+    if (this.checkKey(_customKeys, key)) {
       return _input.customKey = _customKeys[_customKey];
     }
   };
 
   Game.prototype.checkKey = function(arr, keyCode) {
     var index;
+    if (!arr) return;
     index = arr.indexOf(keyCode, 0);
     _customKey = index;
     return index !== -1;
@@ -202,11 +190,11 @@ Game = (function() {
   };
 
   Game.prototype.subscribe = function(subscriber) {
-    return this._subscribers[subscriber] = subscriber;
+    return _subscribers[subscriber] = subscriber;
   };
 
   Game.prototype.unsubscribe = function(subscriber) {
-    return this._subscriber.slice(this._subscribers.indexOf(subscriber), this._subscribers.indexOf(subscriber) + 1 || 9e9);
+    return _subscriber.slice(this._subscribers.indexOf(subscriber), this._subscribers.indexOf(subscriber) + 1 || 9e9);
   };
 
   return Game;
@@ -274,8 +262,7 @@ Game.prototype.__defineGetter__("leftKeys", function() {
 });
 
 Game.prototype.__defineSetter__("leftKeys", function(val) {
-  var _leftKeys;
-  return _leftKeys = val;
+  return this._leftKeys = val;
 });
 
 Game.prototype.__defineGetter__("rightKeys", function() {
@@ -324,4 +311,12 @@ Game.prototype.__defineGetter__("pause", function() {
 
 Game.prototype.__defineSetter__("pause", function(val) {
   return this._pause = val;
+});
+
+Game.prototype.__defineGetter__("keyboard", function() {
+  return this._keyboard;
+});
+
+Game.prototype.__defineSetter__("keyboard", function(val) {
+  return this._keyboard = val;
 });

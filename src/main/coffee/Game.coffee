@@ -1,6 +1,7 @@
 class Game
   constructor: () ->
-    
+    @keyboard = new Keyboard()
+   
   _subscribers = []
   _pause = false
   _activeMap = 0
@@ -23,32 +24,15 @@ class Game
   _soundEngine = {}
   _movement = {}
   _input = {}
+  _timer = {}
   
   render: ->
     if @_pause
         return
-    _renderEngine.render _input
+    alert "render"
     
   start: ->
-    _stage.addEventListener(Event.ENTER_FRAME, render)
-    
-  dispose: -> 
-    removeListeners()    
-    _players = undefined
-    _maps = undefined
-    _leftKeys = undefined
-    _rightKeys = undefined
-    _upKeys = undefined
-    _downKeys = undefined
-    _jumpKeys = undefined
-    _customKeys = undefined    
-    _renderEngineClass = undefined
-    _renderEngine.dispose()
-    _soundEngine = undefined
-    _movement = undefined
-    _input = undefined
-    _subscribers = undefined
-    _screen = undefined
+    _timer = setInterval @render.bind(this) , 2500
 
   preinitialize: (parent, width, height) ->
     _parent = parent
@@ -57,6 +41,7 @@ class Game
     @_screen = document.createElement("canvas")
     @_screen.setAttribute "width", @ViewportWidth
     @_screen.setAttribute "height", @ViewportHeight
+    @_screen.setAttribute "tabIndex", 0
     document.body.appendChild @_screen
     @initialize()
   
@@ -101,8 +86,9 @@ class Game
     @addListeners()
     
   addListeners: ->
-    document.onkeydown = @manageMovement
-    document.onkeyup = @manageMovement
+    document.onkeydown = @manageMovement.bind(this)
+    document.onkeyup = @manageMovement.bind(this)
+    @_screen.focus()
   
   removeListeners: ->  
     document.onkeydown = undefined
@@ -117,27 +103,29 @@ class Game
     else    
       key = e.keyCode
 
-    if dir == KeyboardEvent.KEY_UP
-      _input.direction = if checkKeys(_leftKeys, event.keyCode) then 0 else _input.direction
-      _input.direction = if checkKey(_rightKeys, event.keyCode) then 0 else _input.direction
-      _input.vDirection = if checkKey(_upKeys, event.keyCode) then 0 else _input.vDirection
-      _input.vDirection = if checkKey(_downKeys, event.keyCode) then 0 else _input.vDirection
-      _input.jump = if checkKey(_jumpKeys, event.keyCode) then 0 else _input.jump
-      _input.customKey = if checkKey(_customKeys, event.keyCode) then 0 else _input.customKey
+    if e.type == Keyboard::KEY_UP
+      _input.direction = if @checkKey(@_leftKeys, key) then 0 else _input.direction
+      _input.direction = if @checkKey(@_rightKeys, key) then 0 else _input.direction
+      _input.vDirection = if @checkKey(@_upKeys, key) then 0 else _input.vDirection
+      _input.vDirection = if @checkKey(@_downKeys, key) then 0 else _input.vDirection
+      _input.jump = if @checkKey(@_jumpKeys, key) then 0 else _input.jump
+      _input.customKey = if @checkKey(@_customKeys, key) then 0 else _input.customKey
     else
-      _input.direction = if checkKey(_leftKeys, event.keyCode) then -1 else _input.direction
-      _input.direction = if checkKey(_rightKeys, event.keyCode) then 1 else _input.direction
-      _input.vDirection = if checkKey(_upKeys, event.keyCode) then -1 else _input.direction
-      _input.vDirection = if checkKey(_downKeys, event.keyCode) then 1 else _input.direction
-      _input.jump = if checkKey(_jumpKeys, event.keyCode) then 1 else _input.jump
+      _input.direction = if @checkKey(@_leftKeys, key) then -1 else _input.direction
+      _input.direction = if @checkKey(@_rightKeys, key) then 1 else _input.direction
+      _input.vDirection = if @checkKey(@_upKeys, key) then -1 else _input.direction
+      _input.vDirection = if @checkKey(@_downKeys, key) then 1 else _input.direction
+      _input.jump = if @checkKey(@_jumpKeys, key) then 1 else _input.jump
     
-    if checkKey(_customKeys, key)
+    if @checkKey _customKeys, key
       _input.customKey = _customKeys[_customKey]
 
   checkKey: (arr, keyCode) ->
+    if !arr
+      return
     index = arr.indexOf keyCode, 0
     _customKey = index
-    return (index != -1);
+    (index != -1)
   
   dispose: ->
     removeListeners()
@@ -164,10 +152,10 @@ class Game
     subscriber.notify(map, player, actions) for subscriber in @_subscribers
 
   subscribe: (subscriber) ->
-    @_subscribers[subscriber] = subscriber
+    _subscribers[subscriber] = subscriber
 
   unsubscribe: (subscriber) ->
-    @_subscriber[@_subscribers.indexOf(subscriber)..@_subscribers.indexOf(subscriber)]
+    _subscriber[@_subscribers.indexOf(subscriber)..@_subscribers.indexOf(subscriber)]
             
 Game::__defineGetter__ "renderEngineClass", ->
   @_renderEngineClass
@@ -215,7 +203,7 @@ Game::__defineGetter__ "leftKeys", ->
   @_leftKeys
 
 Game::__defineSetter__ "leftKeys", (val) ->
-  _leftKeys = val
+  @_leftKeys = val
 
 Game::__defineGetter__ "rightKeys", ->
   @_rightKeys
@@ -252,3 +240,9 @@ Game::__defineGetter__ "pause", ->
 
 Game::__defineSetter__ "pause", (val) ->
   @_pause = val
+  
+Game::__defineGetter__ "keyboard", ->
+  @_keyboard
+
+Game::__defineSetter__ "keyboard", (val) ->
+  @_keyboard = val
