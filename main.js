@@ -27,5 +27,5 @@ function createGame() {
 	game.customKeys = [ 76, 66 ];
 	game.preinitialize(this, 800, 600);
 	game.subscribe(this);
-	game.start();
+	//game.start();
 }

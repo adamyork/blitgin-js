@@ -1,7 +1,9 @@
 class Bootstrap  
   constructor: (@name) ->
 
-  _classes = ["Keyboard","Game","RenderEngine","PhysicsEngine","CollisionEngine","SoundEngine","Input","Player","Map"]
+  _classes = ["Point","Rectangle","Keyboard","Game","GameError","Group","RenderEngine",
+    "PhysicsEngine","CollisionEngine","SoundEngine","Input",
+    "Player","RenderObject","Map"]
   _collection = []
     
   start: (callback,basePath) ->
