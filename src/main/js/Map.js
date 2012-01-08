@@ -2,13 +2,28 @@ var Map,
   __hasProp = Object.prototype.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
-Map = (function() {
+Map = (function(_super) {
   var _activeEnemies, _activeMapObjects, _backgroundAsset, _backgroundAssetClass, _collisionAsset, _collisionAssetClass, _collisionData, _enemies, _foregroundAsset, _foregroundAssetClass, _foregroundData, _friction, _gravity, _inactiveEnemies, _inactiveMapObjects, _mapObjects, _midgroundAsset, _midgroundAssetClass, _midgroundData, _nis, _paralaxing, _platform, _showCollisionMap, _sound, _soundLoops;
 
-  __extends(Map, RenderObject);
+  __extends(Map, _super);
 
   function Map(name) {
     this.name = name;
+    Map.prototype.intialize = function() {
+      if (_paralaxing) {
+        if (void 0 !== this._backgroundAssetClass && void 0 !== this._midgroundAssetClass && void 0 !== this._foregroundAssetClass && void 0 !== this._collisionAssetClass && void 0 !== this._enemies && void 0 !== this._mapObjects) {
+          return this.initializeAssets();
+        } else {
+          return console.log("Maps using paraxling require 3 assets and a collection of enemies.");
+        }
+      } else {
+        if (void 0 !== this._foregroundAssetClass && void 0 !== this._enemies && void 0 !== this._collisionAssetClass) {
+          return this.initializeAssets();
+        } else {
+          return console.log("Maps require a foreground , collision asset , and a collection of enemies.");
+        }
+      }
+    };
   }
 
   _paralaxing = false;
@@ -61,9 +76,143 @@ Map = (function() {
 
   _soundLoops = 0;
 
+  Map.prototype.initializeAssets = function() {
+    if (this._paralaxing) {
+      this._backgroundAsset = new this._backgroundAssetClass();
+      this._midgroundAsset = new this._midgroundAssetClass();
+      this._midgroundData = new BitmapData(this._midgroundAsset.width, this._midgroundAsset.height);
+      this.removeBlackAndCache(this._midgroundAsset, this._midgroundData);
+    }
+    this._foregroundAsset = new this._foregroundAssetClass();
+    this._collisionAsset = new this._collisionAssetClass();
+    this._foregroundData = new BitmapData(this._foregroundAsset.width, this._foregroundAsset.height);
+    this._collisionData = new BitmapData(this._collisionAsset.width, this._collisionAsset.height, true, 0);
+    this.removeBlackAndCache(this._foregroundAsset, this._foregroundData);
+    return this.removeBlackAndCache(this._collisionAsset, this._collisionData);
+  };
+
+  Map.prototype.manageElements = function(type) {
+    var activeTargets, enemy, group, i, inactiveTargets, indep, key, obj, posX, posY, target, targetArray, vh, vw, _i, _j, _len, _len2, _ref;
+    targetArray = type === Map.prototype.MANAGE_ENEMIES ? this._enemies : this._mapObjects;
+    inactiveTargets = type === Map.prototype.MANAGE_ENEMIES ? this._inactiveEnemies : this._inactiveMapObjects;
+    activeTargets = type === Map.prototype.MANAGE_ENEMIES ? _activeEnemies : this._activeMapObjects;
+    for (_i = 0, _len = targetArray.length; _i < _len; _i++) {
+      group = targetArray[_i];
+      _ref = group.positions;
+      for (_j = 0, _len2 = _ref.length; _j < _len2; _j++) {
+        i = _ref[_j];
+        key = this.generateKey(group, i);
+        target = activeTargets[key];
+        obj = {};
+        posX = target ? target.mapX : group.positions[i].x;
+        posY = target ? target.mapY : group.positions[i].y;
+        vw = Game.prototype.VIEWPORT_WIDTH;
+        vh = Game.prototype.VIEWPORT_HEIGHT;
+        if (inactiveTargets[posX + posY]) return;
+        indep = group.independence;
+        if (target === void 0) {
+          if (this.sEnemyOnScreen(posX, posY, vw, vh, indep)) {
+            enemy = group.type;
+            obj = new enemy();
+            obj.mapX = posX;
+            obj.mapY = posY;
+            obj.screenX = posX - x;
+            obj.screenY = obj.mapY - y - gravity;
+            obj.uniqueID = key;
+            activeTargets[obj.uniqueID] = obj;
+          }
+        } else if (target) {
+          if (!this.isEnemyOnScreen(posX, posY, vw, vh, indep || target.isDead)) {
+            delete activeTargets[target.uniqueID];
+          }
+          if (target.isDead) inactiveTargets[target.uniqueID] = true;
+        }
+      }
+    }
+  };
+
+  Map.prototype.generateKey = function(group, i) {
+    return group.type + "" + group.positions[i].x + "" + group.positions[i].y + "" + i;
+  };
+
+  Map.prototype.isEnemyOnScreen = function(posX, posY, vw, vh, indep) {
+    var hBounds, vBounds;
+    hBounds = (((posX - indep) - x) - vw) <= 0 && (((posX + indep) - x) - vw) >= -vw;
+    vBounds = (((posY + indep) - y) - vh) <= 0 && (((posY - indep) - y) - vh) >= -vh;
+    return hBounds && vBounds;
+  };
+
+  Map.prototype.removeBlackAndCache = function(_arg) {
+    var Bitmap, BitmapData;
+    Bitmap = _arg.asset, BitmapData = _arg.targetData;
+  };
+
+  Map.prototype.checkForNIS = function(player) {
+    var nis, _i, _len;
+    if (player === void 0) return;
+    for (_i = 0, _len = _nis.length; _i < _len; _i++) {
+      nis = _nis[_i];
+      nis.player = player;
+      nis.enemies = [];
+      nis.map = this;
+      if (nis.conditionsMet) return nis;
+    }
+  };
+
+  Map.prototype.removeNis = function(nis) {
+    var arr, index;
+    index = _nis.indexOf(nis, 0);
+    arr = _nis.splice(index, 1);
+    return arr = void 0;
+  };
+
+  Map.prototype.dispose = function() {
+    _backgroundAssetClass = void 0;
+    _midgroundAssetClass = void 0;
+    _foregroundAssetClass = void 0;
+    _backgroundAsset.bitmapData.dispose();
+    _midgroundAsset.bitmapData.dispose();
+    _foregroundAsset.bitmapData.dispose();
+    _backgroundAsset = void 0;
+    _midgroundAsset = void 0;
+    _foregroundAsset = void 0;
+    _midgroundData.dispose();
+    _foregroundData.dispose();
+    _midgroundData = void 0;
+    _foregroundData = void 0;
+    _enemies = void 0;
+    _mapObjects = void 0;
+    _activeEnemies = void 0;
+    _inactiveEnemies = void 0;
+    _activeMapObjects = void 0;
+    return _inactiveMapObjects = void 0;
+  };
+
   return Map;
 
-})();
+})(RenderObject);
+
+Map.prototype.__defineGetter__("bitmapData", function() {
+  var tmp, vh, vw, yPos, _ref;
+  tmp = {};
+  yPos = (_ref = this._platform) != null ? _ref : {
+    y: 0
+  };
+  vh = Game.prototype.VIEWPORT_HEIGHT;
+  vw = Game.prototype.VIEWPORT_WIDTH;
+  if (this._paralaxing) {
+    tmp = new BitmapData(this._backgroundAsset.width, this._backgroundAsset.height);
+    tmp.copyPixels(this._backgroundAsset.bitmapData, new Rectangle(this.x * .25, yPos, vw, vh), new Point(0, 0));
+    tmp.copyPixels(this._midgroundData, new Rectangle(this.x * .5, yPos, vw, vh), new Point(0, 0), null, null, true);
+  } else {
+    tmp = new BitmapData(this.foregroundAsset.width, this._foregroundAsset.height);
+  }
+  tmp.copyPixels(this._foregroundData, new Rectangle(this.x, yPos, vw, vh), new Point(0, 0), null, null, true);
+  if (_showCollisionMap) {
+    tmp.copyPixels(this._collisionData, new Rectangle(this.x, yPos, vw, vh), new Point(0, 0), null, null, true);
+  }
+  return tmp;
+});
 
 Map.prototype.__defineSetter__("backgroundAssetClass", function(val) {
   return this._backgroundAssetClass = val;

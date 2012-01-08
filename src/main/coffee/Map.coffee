@@ -1,5 +1,18 @@
 class Map extends RenderObject
   constructor: (@name) ->
+    Map::intialize = ->
+      if _paralaxing
+        if (undefined != @_backgroundAssetClass && undefined != @_midgroundAssetClass && undefined !=
+            @_foregroundAssetClass && undefined != @_collisionAssetClass && undefined != @_enemies &&
+            undefined != @_mapObjects)
+          @initializeAssets()
+        else
+            console.log("Maps using paraxling require 3 assets and a collection of enemies.");
+      else
+        if(undefined != @_foregroundAssetClass && undefined != @_enemies && undefined != @_collisionAssetClass)
+          @initializeAssets()
+        else
+          console.log("Maps require a foreground , collision asset , and a collection of enemies.");
 
   _paralaxing = false
   _platform = false
@@ -34,83 +47,60 @@ class Map extends RenderObject
   _sound = {}
   _soundLoops = 0
   
-  intialize: ->
-    if _paralaxing
-      if (null != _backgroundAssetClass && null != _midgroundAssetClass && null !=
-          _foregroundAssetClass && null != _collisionAssetClass && null != _enemies &&
-          null != _mapObjects)
-        initializeAssets()
-      else
-          console.log("Maps using paraxling require 3 assets and a collection of enemies.");
-    else
-      if(null != _foregroundAssetClass && null != _enemies && null != _collisionAssetClass)
-        initializeAssets()
-      else
-        console.log("Maps require a foreground , collision asset , and a collection of enemies.");
+
 
   initializeAssets: ->
-    if(_paralaxing)
-      _backgroundAsset = new _backgroundAssetClass()
-      _midgroundAsset = new _midgroundAssetClass()
-      _midgroundData = new BitmapData(_midgroundAsset.width, _midgroundAsset.height)
-      removeBlackAndCache _midgroundAsset, _midgroundData
+    if(@_paralaxing)
+      @_backgroundAsset = new @_backgroundAssetClass()
+      @_midgroundAsset = new @_midgroundAssetClass()
+      @_midgroundData = new BitmapData(@_midgroundAsset.width, @_midgroundAsset.height)
+      @removeBlackAndCache @_midgroundAsset, @_midgroundData
 
-    _foregroundAsset = new _foregroundAssetClass()
-    _collisionAsset = new _collisionAssetClass()
+    @_foregroundAsset = new @_foregroundAssetClass()
+    @_collisionAsset = new @_collisionAssetClass()
 
-    _foregroundData = new BitmapData(_foregroundAsset.width, _foregroundAsset.height)
-    _collisionData = new BitmapData(_collisionAsset.width, _collisionAsset.height, true, 0)
+    @_foregroundData = new BitmapData(@_foregroundAsset.width, @_foregroundAsset.height)
+    @_collisionData = new BitmapData(@_collisionAsset.width, @_collisionAsset.height, true, 0)
 
-    removeBlackAndCache _foregroundAsset, _foregroundData
-    removeBlackAndCache _collisionAsset, _collisionData
+    @removeBlackAndCache @_foregroundAsset, @_foregroundData
+    @removeBlackAndCache @_collisionAsset, @_collisionData
 
   manageElements: (type) ->
-    targetArray = (type == MANAGE_ENEMIES) ? _enemies : _mapObjects;
-    inactiveTargets = (type == MANAGE_ENEMIES) ? _inactiveEnemies : _inactiveMapObjects
-    activeTargets = (type == MANAGE_ENEMIES) ? _activeEnemies : _activeMapObjects
+    targetArray = if (type == Map::MANAGE_ENEMIES) then @_enemies else @_mapObjects;
+    inactiveTargets = if (type == Map::MANAGE_ENEMIES) then @_inactiveEnemies else @_inactiveMapObjects
+    activeTargets = if (type == Map::MANAGE_ENEMIES) then _activeEnemies else @_activeMapObjects
   
     for group in targetArray
-        for(var i = 0; i < group.positions.length; i++)
-          var key = generateKey(group, i)
-          var target = activeTargets[key] as Player
-  
-          obj = {}
-          posX = (target) ? target.mapX : group.positions[i].x
-          posY = (target) ? target.mapY : group.positions[i].y
-          vw = Game.VIEWPORT_WIDTH
-          vh = Game.VIEWPORT_HEIGHT
-  
-          if(inactiveTargets[(posX + posY)])
-            return
+      for i in group.positions
+        key = @generateKey group, i
+        target = activeTargets[key]
 
-          indep = group.independence
+        obj = {}
+        posX = if target then target.mapX else group.positions[i].x
+        posY = if target then target.mapY else group.positions[i].y
+        vw = Game::VIEWPORT_WIDTH
+        vh = Game::VIEWPORT_HEIGHT
 
-          if(target == null)
-          {
-              if(isEnemyOnScreen(posX, posY, vw, vh, indep))
-              {
-                  var enemy:Class = group.type;
-                  obj = new enemy() as Player;
-                  obj.mapX = posX;
-                  obj.mapY = posY;
-                  obj.screenX = posX - x;
-                  obj.screenY = obj.mapY - y - gravity;
-                  obj.uniqueID = key;
-                  activeTargets[obj.uniqueID] = obj;
-              }
-          }
-          else if(target)
-          {
-              if(!isEnemyOnScreen(posX, posY, vw, vh, indep) || target.isDead)
-              {
-                  delete activeTargets[target.uniqueID];
-                  if(target.isDead)
-                  {
-                      inactiveTargets[target.uniqueID] = true;
-                  }
-              }
-          }
+        if(inactiveTargets[(posX + posY)])
+          return
 
+        indep = group.independence
+
+        if(target == undefined)
+          if(@sEnemyOnScreen posX, posY, vw, vh, indep)
+            enemy = group.type
+            obj = new enemy()
+            obj.mapX = posX
+            obj.mapY = posY
+            obj.screenX = posX - x
+            obj.screenY = obj.mapY - y - gravity
+            obj.uniqueID = key
+            activeTargets[obj.uniqueID] = obj
+        else if(target)
+          if(!@isEnemyOnScreen posX, posY, vw, vh, indep || target.isDead)
+            delete activeTargets[target.uniqueID]
+          if(target.isDead)
+              inactiveTargets[target.uniqueID] = true
 
   generateKey: (group, i) ->
     return group.type + "" + group.positions[i].x + "" + group.positions[i].y + "" + i
@@ -170,29 +160,23 @@ class Map extends RenderObject
     _inactiveMapObjects = undefined
     
 Map::__defineGetter__ "bitmapData", ->
-  var tmp:BitmapData;
-  var yPos:Number = (_platform) ? y : 0;
-  var vh:Number = Game.VIEWPORT_HEIGHT;
-  var vw:Number = Game.VIEWPORT_WIDTH;
+  tmp = {}
+  yPos = (@_platform) ? y : 0
+  vh = Game::VIEWPORT_HEIGHT
+  vw = Game::VIEWPORT_WIDTH
   
-  if(_paralaxing)
-  {
-      tmp = new BitmapData(_backgroundAsset.width, _backgroundAsset.height);
-      tmp.copyPixels(_backgroundAsset.bitmapData, new Rectangle(x * .25, yPos, vw, vh), new Point(0, 0));
-      tmp.copyPixels(_midgroundData, new Rectangle(x * .5, yPos, vw, vh), new Point(0, 0), null, null, true);
-  }
+  if(@_paralaxing)
+    tmp = new BitmapData(@_backgroundAsset.width, @_backgroundAsset.height)
+    tmp.copyPixels @_backgroundAsset.bitmapData, new Rectangle(@x * .25, yPos, vw, vh), new Point(0, 0)
+    tmp.copyPixels @_midgroundData, new Rectangle(@x * .5, yPos, vw, vh), new Point(0, 0), null, null, true
   else
-  {
-      tmp = new BitmapData(_foregroundAsset.width, _foregroundAsset.height);
-  }
-  
-  tmp.copyPixels(_foregroundData, new Rectangle(x, yPos, vw, vh), new Point(0, 0), null, null, true);
+    tmp = new BitmapData(@foregroundAsset.width, @_foregroundAsset.height)
+
+  tmp.copyPixels @_foregroundData, new Rectangle(@x, yPos, vw, vh), new Point(0, 0), null, null, true
   
   if(_showCollisionMap)
-  {
-      tmp.copyPixels(_collisionData, new Rectangle(x, yPos, vw, vh), new Point(0, 0), null, null, true);
-  }
-  
+    tmp.copyPixels @_collisionData, new Rectangle(@x, yPos, vw, vh), new Point(0, 0), null, null, true
+
   return tmp
 
 Map::__defineSetter__ "backgroundAssetClass", (val) ->

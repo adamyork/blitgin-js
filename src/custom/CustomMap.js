@@ -11,7 +11,7 @@ function CustomMap() {
 	this.initialize();
 }
 function tmp() {}
-tmp.prototype = RenderObject.prototype;
+tmp.prototype = Map.prototype;
 CustomMap.prototype = new tmp();
 CustomMap.prototype.constructor = CustomMap;
 
