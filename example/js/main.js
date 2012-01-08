@@ -1,16 +1,16 @@
 var game;
 var bs;
 function initGame() {
-	$LAB.script("src/main/js/Bootstrap.js").wait(function(){
+	$LAB.script("../src/main/js/Bootstrap.js").wait(function(){
 		bs = new Bootstrap("bs");
-		bs.start(loadClasses,"src/main/js/");
+		bs.start(loadClasses,"../src/main/js/");
 	});
 }
 
 function loadClasses() {
 	$LAB
-	.script("src/custom/CustomPlayer.js")
-	.script("src/custom/CustomMap.js").wait(function(){
+	.script("js/CustomPlayer.js")
+	.script("js/CustomMap.js").wait(function(){
 		createGame();
 	});
 }
