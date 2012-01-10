@@ -9,7 +9,7 @@ RenderObject = (function() {
 
   _transparency = false;
 
-  _workbench = document.createElement("canvas");
+  _workbench = {};
 
   _x = 0;
 
@@ -48,7 +48,8 @@ RenderObject = (function() {
   RenderObject.prototype.initialize = function() {
     if ((void 0 !== this._assetClass) && (0 !== this._cellHeight) && (0 !== this._cellWidth)) {
       this._asset = new Image();
-      return this._asset.src = this._assetClass;
+      this._asset.src = this._assetClass;
+      return this._workbench = document.createElement("canvas");
     } else {
       return console.log("Set a cellwidth , cellheight , and assetClass before calling initialize.");
     }
@@ -104,7 +105,7 @@ RenderObject.prototype.__defineGetter__("cellWidth", function() {
 });
 
 RenderObject.prototype.__defineSetter__("cellWidth", function(val) {
-  return this._cellWidth = value;
+  return this._cellWidth = val;
 });
 
 RenderObject.prototype.__defineGetter__("cellHeight", function() {
@@ -112,11 +113,11 @@ RenderObject.prototype.__defineGetter__("cellHeight", function() {
 });
 
 RenderObject.prototype.__defineSetter__("cellHeight", function(val) {
-  return this._cellHeight = value;
+  return this._cellHeight = val;
 });
 
 RenderObject.prototype.__defineSetter__("velocityX", function(val) {
-  return this._velocityX = value;
+  return this._velocityX = val;
 });
 
 RenderObject.prototype.__defineGetter__("velocityX", function() {
@@ -124,7 +125,7 @@ RenderObject.prototype.__defineGetter__("velocityX", function() {
 });
 
 RenderObject.prototype.__defineSetter__("velocityY", function(val) {
-  return this._velocityY = value;
+  return this._velocityY = val;
 });
 
 RenderObject.prototype.__defineGetter__("velocityY", function() {
@@ -132,7 +133,7 @@ RenderObject.prototype.__defineGetter__("velocityY", function() {
 });
 
 RenderObject.prototype.__defineSetter__("direction", function(val) {
-  return this._direction = value;
+  return this._direction = val;
 });
 
 RenderObject.prototype.__defineGetter__("direction", function() {
@@ -140,7 +141,7 @@ RenderObject.prototype.__defineGetter__("direction", function() {
 });
 
 RenderObject.prototype.__defineSetter__("easeCoefficient", function(val) {
-  return this._easeCoefficient = value;
+  return this._easeCoefficient = val;
 });
 
 RenderObject.prototype.__defineGetter__("easeCoefficient", function() {
@@ -148,7 +149,7 @@ RenderObject.prototype.__defineGetter__("easeCoefficient", function() {
 });
 
 RenderObject.prototype.__defineSetter__("frame", function(val) {
-  return this._frame = value;
+  return this._frame = val;
 });
 
 RenderObject.prototype.__defineGetter__("frame", function() {
@@ -156,7 +157,7 @@ RenderObject.prototype.__defineGetter__("frame", function() {
 });
 
 RenderObject.prototype.__defineSetter__("frameBuffer", function(val) {
-  return this._frameBuffer = value;
+  return this._frameBuffer = val;
 });
 
 RenderObject.prototype.__defineGetter__("frameBuffer", function() {
@@ -164,7 +165,7 @@ RenderObject.prototype.__defineGetter__("frameBuffer", function() {
 });
 
 RenderObject.prototype.__defineSetter__("duration", function(val) {
-  return this._duration = value;
+  return this._duration = val;
 });
 
 RenderObject.prototype.__defineGetter__("duration", function() {
@@ -180,7 +181,7 @@ RenderObject.prototype.__defineGetter__("point", function() {
 });
 
 RenderObject.prototype.__defineSetter__("tranparency", function(val) {
-  return this._transparency = value;
+  return this._transparency = val;
 });
 
 RenderObject.prototype.__defineGetter__("transparency", function() {
@@ -196,5 +197,13 @@ RenderObject.prototype.__defineGetter__("assetClass", function() {
 });
 
 RenderObject.prototype.__defineSetter__("assetClass", function(val) {
-  return this._assetClass = value;
+  return this._assetClass = val;
+});
+
+RenderObject.prototype.__defineGetter__("workbench", function() {
+  return this._workbench;
+});
+
+RenderObject.prototype.__defineSetter__("workbench", function(val) {
+  return this._workbench = val;
 });

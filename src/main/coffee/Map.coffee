@@ -1,19 +1,6 @@
 class Map extends RenderObject
   constructor: (@name) ->
-    Map::intialize = ->
-      if _paralaxing
-        if (undefined != @_backgroundAssetClass && undefined != @_midgroundAssetClass && undefined !=
-            @_foregroundAssetClass && undefined != @_collisionAssetClass && undefined != @_enemies &&
-            undefined != @_mapObjects)
-          @initializeAssets()
-        else
-            console.log("Maps using paraxling require 3 assets and a collection of enemies.");
-      else
-        if(undefined != @_foregroundAssetClass && undefined != @_enemies && undefined != @_collisionAssetClass)
-          @initializeAssets()
-        else
-          console.log("Maps require a foreground , collision asset , and a collection of enemies.");
-
+    
   _paralaxing = false
   _platform = false
   _showCollisionMap = false
@@ -47,23 +34,39 @@ class Map extends RenderObject
   _sound = {}
   _soundLoops = 0
   
+  initialize: ->
+    @workbench = document.createElement "canvas"
+    if @paralaxing
+      if (undefined != @backgroundAssetClass && undefined != @midgroundAssetClass && undefined !=
+          @foregroundAssetClass && undefined != @collisionAssetClass && undefined != @enemies &&
+          undefined != @mapObjects)
+        @initializeAssets()
+      else
+        console.log "Maps using paraxling require 3 assets and a collection of enemies."
+    else
+      if(undefined != @foregroundAssetClass && undefined != @enemies && undefined != @collisionAssetClass)
+        @initializeAssets()
+      else
+        console.log "Maps require a foreground , collision asset , and a collection of enemies."
 
 
   initializeAssets: ->
-    if(@_paralaxing)
-      @_backgroundAsset = new @_backgroundAssetClass()
-      @_midgroundAsset = new @_midgroundAssetClass()
-      @_midgroundData = new BitmapData(@_midgroundAsset.width, @_midgroundAsset.height)
-      @removeBlackAndCache @_midgroundAsset, @_midgroundData
+    if @paralaxing
+      _backgroundAsset = new Image()
+      _midgroundAsset = new Image()
+      _midgroundData = new Image()
+      @removeBlackAndCache _midgroundAsset, _midgroundData
 
-    @_foregroundAsset = new @_foregroundAssetClass()
-    @_collisionAsset = new @_collisionAssetClass()
+    _foregroundAsset = new Image()
+    _foregroundAsset.src = @foregroundAssetClass;
+    _collisionAsset = new Image()
+    _collisionAsset.src = @collisionAssetClass;
 
-    @_foregroundData = new BitmapData(@_foregroundAsset.width, @_foregroundAsset.height)
-    @_collisionData = new BitmapData(@_collisionAsset.width, @_collisionAsset.height, true, 0)
+    _foregroundData = new Image()
+    _collisionData = new Image()
 
-    @removeBlackAndCache @_foregroundAsset, @_foregroundData
-    @removeBlackAndCache @_collisionAsset, @_collisionData
+    @removeBlackAndCache _foregroundAsset, _foregroundData
+    @removeBlackAndCache _collisionAsset, _collisionData
 
   manageElements: (type) ->
     targetArray = if (type == Map::MANAGE_ENEMIES) then @_enemies else @_mapObjects;
@@ -110,10 +113,27 @@ class Map extends RenderObject
     vBounds = (((posY + indep) - y) - vh) <= 0 && (((posY - indep) - y) - vh) >= -(vh)
     return (hBounds && vBounds)
 
-  removeBlackAndCache: (asset:Bitmap, targetData:BitmapData) ->
-    #tmpData  = new BitmapData asset.width, asset.height
-    #tmpData.threshold(asset.bitmapData, new Rectangle(0, 0, asset.width, asset.height), new Point(0, 0), "<=", 0x000000, 0x0000000, 0xFFFFFF, true);
-    #targetData.copyPixels(tmpData, new Rectangle(0, 0, asset.width, asset.height), new Point(0, 0));
+  removeBlackAndCache: (asset, targetData) ->
+    @workbench.width = asset.width
+    @workbench.height = asset.height
+    ctx = @workbench.getContext '2d'
+    ctx.drawImage asset,0,0
+    imageData = ctx.getImageData 0, 0, @workbench.width, @workbench.height
+
+    for xpos in [0 .. imageData.width-1]
+      for ypos in [0 .. imageData.height-1]
+          index = 4 * (ypos * imageData.width + xpos)
+          r = imageData.data[index]
+          g = imageData.data[index + 1]
+          b = imageData.data[index + 2]
+          a = imageData.data[index + 3]
+        if(r+g+b == 0)
+          imageData.data[index + 3] = 0
+
+    ctx.putImageData imageData,0,0
+    targetData.src = null
+    targetData.src = @workbench.toDataURL()
+    ctx.clearRect 0,0,asset.width,asset.height
 
   checkForNIS: (player) ->
     if (player == undefined)
@@ -159,94 +179,102 @@ class Map extends RenderObject
     _activeMapObjects = undefined
     _inactiveMapObjects = undefined
     
+  copyPixels: (asset,target,rect)->
+    @workbench.width = asset.width
+    @workbench.height = asset.height
+    ctx = @workbench.getContext '2d'
+    ctx.drawImage asset,0,0
+    imageData = ctx.getImageData rect.x,rect.y,rect.width,rect.height
+    ctx.putImageData imageData,0,0
+    target.src = null
+    target.src = @workbench.toDataURL()
+    ctx.clearRect 0,0,asset.width,asset.height
+    
 Map::__defineGetter__ "bitmapData", ->
-  tmp = {}
-  yPos = (@_platform) ? y : 0
+  tmp = new Image()
+  yPos = if @platform then @y else 0
   vh = Game::VIEWPORT_HEIGHT
   vw = Game::VIEWPORT_WIDTH
   
-  if(@_paralaxing)
-    tmp = new BitmapData(@_backgroundAsset.width, @_backgroundAsset.height)
-    tmp.copyPixels @_backgroundAsset.bitmapData, new Rectangle(@x * .25, yPos, vw, vh), new Point(0, 0)
-    tmp.copyPixels @_midgroundData, new Rectangle(@x * .5, yPos, vw, vh), new Point(0, 0), null, null, true
+  if(@paralaxing)
+    @copyPixels _backgroundData,tmp,new Rectangle @x * .25, yPos, vw, vh
+    @copyPixels _midgroundData,tmp,new Rectangle @x * .5, yPos, vw, vh
   else
-    tmp = new BitmapData(@foregroundAsset.width, @_foregroundAsset.height)
-
-  tmp.copyPixels @_foregroundData, new Rectangle(@x, yPos, vw, vh), new Point(0, 0), null, null, true
+    @copyPixels _foregroundData,tmp,new Rectangle @x, yPos, vw, vh
   
-  if(_showCollisionMap)
-    tmp.copyPixels @_collisionData, new Rectangle(@x, yPos, vw, vh), new Point(0, 0), null, null, true
-
-  return tmp
+  if(@showCollisionMap)
+    @copyPixels _collisionData,tmp,new Rectangle @x, yPos, vw, vh
+    
+  tmp
 
 Map::__defineSetter__ "backgroundAssetClass", (val) ->
-    @_backgroundAssetClass = val
+  @_backgroundAssetClass = val
 
 Map::__defineGetter__ "backgroundAssetClass", ->
-    return @_backgroundAssetClass
+  @_backgroundAssetClass
 
 Map::__defineSetter__ "midgroundAssetClass", (val) ->
-    @_midgroundAssetClass = val
+  @_midgroundAssetClass = val
 
 Map::__defineGetter__ "midgroundAssetClass", ->
-    return @_midgroundAssetClass
+  @_midgroundAssetClass
 
 Map::__defineSetter__ "foregroundAssetClass", (val) ->
-    @_foregroundAssetClass = val
+  @_foregroundAssetClass = val
 
 Map::__defineGetter__ "foregroundAssetClass", ->
-    return @_foregroundAssetClass;
+  @_foregroundAssetClass;
 
 Map::__defineSetter__ "collisionAssetClass", (val) ->
-    @_collisionAssetClass = val
+  @_collisionAssetClass = val
 
 Map::__defineGetter__ "collisionAssetClass", ->
-    return @_collisionAssetClass;
+  @_collisionAssetClass;
 
 Map::__defineSetter__ "paralaxing", (val) ->
-    @_paralaxing = val
+  @_paralaxing = val
 
 Map::__defineGetter__ "paralaxing", ->
-    return @_paralaxing
+  @_paralaxing
 
 Map::__defineSetter__ "showCollisionMap", (val) ->
-    @_showCollisionMap = val
+  @_showCollisionMap = val
 
 Map::__defineGetter__ "showCollisionMap", ->
-    return @_showCollisionMap
+  @_showCollisionMap
 
 Map::__defineSetter__ "platform", (val) ->
-    @_platform = val
+  @_platform = val
 
 Map::__defineGetter__ "platform", ->
-    return @_platform
+  @_platform
 
 Map::__defineSetter__ "enemies", (val) ->
-    @_enemies = val
+  @_enemies = val
 
 Map::__defineGetter__ "enemies", ->
-    return @_enemies
+  @_enemies
 
 Map::__defineGetter__ "nis", ->
-    return @_nis
+  @_nis
 
 Map::__defineSetter__ "nis", (val) ->
-    @_nis = val
+  @_nis = val
 
 Map::__defineSetter__ "mapObjects", (val) ->
-    @_mapObjects = val
+  @_mapObjects = val
 
 Map::__defineGetter__ "mapObjects", ->
-    return @_mapObjects
+  @_mapObjects
 
 Map::__defineGetter__ "activeMapObjects", ->
-    return @_activeMapObjects
+  @_activeMapObjects
 
 Map::__defineGetter__ "activeEnemies", ->
-    return @_activeEnemies
+  @_activeEnemies
 
 Map::__defineGetter__ "width", ->
-    return @_foregroundAsset.width
+  @_foregroundAsset.width
 
 Map::__defineSetter__ "x", (val) ->
   if (val >= 0) and (val <= @_foregroundAsset.width - Game::VIEWPORT_WIDTH)
@@ -266,37 +294,37 @@ Map::__defineSetter__ "y", (val) ->
   @y = val
 
 Map::__defineGetter__ "collisionData", ->
-    return @_collisionData
+  @_collisionData
 
 Map::__defineSetter__ "gravity", (val) ->
-    @_gravity = val
+  @_gravity = val
 
 Map::__defineGetter__ "gravity", ->
-    return @_gravity;
+  @_gravity;
 
 Map::__defineSetter__ "friction", (val) ->
-    @_friction = val
+  @_friction = val
 
 Map::__defineGetter__ "friction", ->
-    return @_friction
+  @_friction
     
 Map::__defineGetter__ "rect", ->
-    return new Rectangle(0, 0, Game::VIEWPORT_WIDTH, Game::VIEWPORT_HEIGHT);
+  new Rectangle(0, 0, Game::VIEWPORT_WIDTH, Game::VIEWPORT_HEIGHT);
 
 Map::__defineGetter__ "point", ->
-    return new Point(0, 0);
+  new Point(0, 0);
 
 Map::__defineGetter__ "sound", ->
-    return @_sound
+  @_sound
 
 Map::__defineSetter__ "sound", (val) ->
-    @_sound = val
+  @_sound = val
 
 Map::__defineGetter__ "soundLoops", ->
-    return @_soundLoops
+  @_soundLoops
 
 Map::__defineSetter__ "soundLoops", (val) ->
-    @_soundLoops = val
+  @_soundLoops = val
 
 Map::MANAGE_ENEMIES = "manageEnemies"
 Map::MANAGE_MAP_OBJECTS = "manageMapObjects"

@@ -38,33 +38,33 @@ class Game
     _parent = parent
     @ViewportHeight = height
     @ViewportWidth = width
-    @_screen = document.createElement("canvas")
-    @_screen.setAttribute "width", @ViewportWidth
-    @_screen.setAttribute "height", @ViewportHeight
-    @_screen.setAttribute "tabIndex", 0
-    document.body.appendChild @_screen
+    _screen = document.createElement("canvas")
+    _screen.setAttribute "width", @ViewportWidth
+    _screen.setAttribute "height", @ViewportHeight
+    _screen.setAttribute "tabIndex", 0
+    document.body.appendChild _screen
     @initialize()
   
   initialize: ->
-    if !@_renderEngineClass
+    if !@renderEngineClass
         _renderEngine = new RenderEngine()
     else
         _renderEngine = new _renderEngineClass()
     
-    if !@_collisionEngineClass
+    if !@collisionEngineClass
         _renderEngine.collisionEngine = new CollisionEngine()
     else
         _renderEngine.collisionEngine = new _collisionEngineClass()
     
-    if !@_physicsEngineClass
+    if !@physicsEngineClass
         _renderEngine.physicsEngine = new PhysicsEngine()
     else
         _renderEngine.physicsEngine = new _physicsEngineClass()
     
-    if @_maps.length == 0
+    if @maps.length == 0
         console.log "Blitgin_as :: [ERROR] :: you need at least one map."
     
-    if @_players.length == 0
+    if @players.length == 0
         console.log "Blitgin_as :: [ERROR] :: you need at least one player."
     
     _soundEngine = new SoundEngine()
@@ -104,18 +104,18 @@ class Game
       key = e.keyCode
 
     if e.type == Keyboard::KEY_UP
-      _input.direction = if @checkKey(@_leftKeys, key) then 0 else _input.direction
-      _input.direction = if @checkKey(@_rightKeys, key) then 0 else _input.direction
-      _input.vDirection = if @checkKey(@_upKeys, key) then 0 else _input.vDirection
-      _input.vDirection = if @checkKey(@_downKeys, key) then 0 else _input.vDirection
-      _input.jump = if @checkKey(@_jumpKeys, key) then 0 else _input.jump
-      _input.customKey = if @checkKey(@_customKeys, key) then 0 else _input.customKey
+      _input.direction = if @checkKey(@leftKeys, key) then 0 else _input.direction
+      _input.direction = if @checkKey(@rightKeys, key) then 0 else _input.direction
+      _input.vDirection = if @checkKey(@upKeys, key) then 0 else _input.vDirection
+      _input.vDirection = if @checkKey(@downKeys, key) then 0 else _input.vDirection
+      _input.jump = if @checkKey(@jumpKeys, key) then 0 else _input.jump
+      _input.customKey = if @checkKey(@customKeys, key) then 0 else _input.customKey
     else
-      _input.direction = if @checkKey(@_leftKeys, key) then -1 else _input.direction
-      _input.direction = if @checkKey(@_rightKeys, key) then 1 else _input.direction
-      _input.vDirection = if @checkKey(@_upKeys, key) then -1 else _input.direction
-      _input.vDirection = if @checkKey(@_downKeys, key) then 1 else _input.direction
-      _input.jump = if @checkKey(@_jumpKeys, key) then 1 else _input.jump
+      _input.direction = if @checkKey(@leftKeys, key) then -1 else _input.direction
+      _input.direction = if @checkKey(@rightKeys, key) then 1 else _input.direction
+      _input.vDirection = if @checkKey(@upKeys, key) then -1 else _input.direction
+      _input.vDirection = if @checkKey(@downKeys, key) then 1 else _input.direction
+      _input.jump = if @checkKey(@jumpKeys, key) then 1 else _input.jump
     
     if @checkKey _customKeys, key
       _input.customKey = _customKeys[_customKey]
@@ -130,32 +130,31 @@ class Game
   dispose: ->
     removeListeners()
 
-    @_players = undefined
-    @_maps = undefined
-    @_leftKeys = undefined
-    @_rightKeys = undefined
-    @_upKeys = undefined
-    @_downKeys = undefined
-    @_jumpKeys = undefined
-    @_customKeys = undefined
+    @players = undefined
+    @maps = undefined
+    @leftKeys = undefined
+    @rightKeys = undefined
+    @upKeys = undefined
+    @downKeys = undefined
+    @jumpKeys = undefined
+    @customKeys = undefined
     
-    @_renderEngineClass = undefined
-    @_renderEngine.dispose();
-    @_soundEngine = undefined
-    @_movement = undefined
-    @_input = undefined
-    @_subscribers = undefined
-    @_screen.bitmapData.dispose()
-    @_screen = undefined
+    @renderEngineClass = undefined
+    @renderEngine.dispose();
+    _soundEngine = undefined
+    _movement = undefined
+    _input = undefined
+    _subscribers = undefined
+    _screen = undefined
 
   notifySubscribers: (map,player,actions) ->
-    subscriber.notify(map, player, actions) for subscriber in @_subscribers
+    subscriber.notify(map, player, actions) for subscriber in _subscribers
 
   subscribe: (subscriber) ->
     _subscribers[subscriber] = subscriber
 
   unsubscribe: (subscriber) ->
-    _subscriber[@_subscribers.indexOf(subscriber)..@_subscribers.indexOf(subscriber)]
+    _subscriber[@_subscribers.indexOf(subscriber).._subscribers.indexOf(subscriber)]
             
 Game::__defineGetter__ "renderEngineClass", ->
   @_renderEngineClass

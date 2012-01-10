@@ -2,7 +2,7 @@ class RenderObject
   constructor:(@name)->
 
   _transparency = false
-  _workbench = document.createElement "canvas"
+  _workbench = {}
   _x = 0
   _y = 0
   _width = 0
@@ -25,6 +25,7 @@ class RenderObject
     if (undefined != @_assetClass) and (0 != @_cellHeight) and (0 != @_cellWidth)
       @_asset = new Image()
       @_asset.src = @_assetClass
+      @_workbench = document.createElement "canvas"
     else
       console.log("Set a cellwidth , cellheight , and assetClass before calling initialize.")
 
@@ -43,94 +44,100 @@ RenderObject::__defineGetter__ "bitmapData", ->
   return tmpData
     
 RenderObject::__defineGetter__ "x", ->
-  return @_x
+  @_x
 
 RenderObject::__defineSetter__ "x", (val) ->
   @_x = val
     
 RenderObject::__defineGetter__ "y", ->
-  return @_y
+  @_y
 
 RenderObject::__defineSetter__ "y", (val) ->
   @_y = val
   
 RenderObject::__defineGetter__ "width", ->
-  return @_cellWidth
+  @_cellWidth
 
 RenderObject::__defineGetter__ "height", ->
-  return @_cellHeight
+  @_cellHeight
 
 RenderObject::__defineGetter__ "cellWidth", ->
-  return @_cellWidth
+  @_cellWidth
 
 RenderObject::__defineSetter__ "cellWidth", (val) ->
-  @_cellWidth = value
+  @_cellWidth = val
 
 RenderObject::__defineGetter__ "cellHeight", ->
-  return @_cellHeight
+  @_cellHeight
 
 RenderObject::__defineSetter__ "cellHeight", (val) ->
-  @_cellHeight = value
+  @_cellHeight = val
 
 RenderObject::__defineSetter__ "velocityX", (val) ->
-  @_velocityX = value
+  @_velocityX = val
 
 RenderObject::__defineGetter__ "velocityX", ->
-  return @_velocityX
+  @_velocityX
 
 RenderObject::__defineSetter__ "velocityY", (val) ->
-  @_velocityY = value
+  @_velocityY = val
 
 RenderObject::__defineGetter__ "velocityY", ->
-  return @_velocityY
+  @_velocityY
 
 RenderObject::__defineSetter__ "direction", (val) ->
-  @_direction = value
+  @_direction = val
 
 RenderObject::__defineGetter__ "direction", ->
-  return @_direction
+  @_direction
 
 RenderObject::__defineSetter__ "easeCoefficient", (val) ->
-  @_easeCoefficient = value
+  @_easeCoefficient = val
 
 RenderObject::__defineGetter__ "easeCoefficient", ->
-  return @_easeCoefficient
+  @_easeCoefficient
 
 RenderObject::__defineSetter__ "frame", (val) ->
-  @_frame = value
+  @_frame = val
 
 RenderObject::__defineGetter__ "frame", ->
-  return @_frame
+  @_frame
 
 RenderObject::__defineSetter__ "frameBuffer", (val) ->
-  @_frameBuffer = value
+  @_frameBuffer = val
 
 RenderObject::__defineGetter__ "frameBuffer", ->
-  return @_frameBuffer
+  @_frameBuffer
 
 RenderObject::__defineSetter__ "duration", (val) ->
-  @_duration = value
+  @_duration = val
 
 RenderObject::__defineGetter__ "duration", ->
-  return @_duration
+  @_duration
 
 RenderObject::__defineGetter__ "rect", ->
-  return new Rectangle 0, 0, @width, @height
+  new Rectangle 0, 0, @width, @height
 
 RenderObject::__defineGetter__ "point", ->
-  return new Point @x, @y
+  new Point @x, @y
 
 RenderObject::__defineSetter__ "tranparency", (val) ->
-  @_transparency = value
+  @_transparency = val
 
 RenderObject::__defineGetter__ "transparency", ->
-  return @_transparency
+  @_transparency
 
 RenderObject::__defineGetter__ "asset", ->
-  return @_asset
+  @_asset
 
 RenderObject::__defineGetter__ "assetClass", ->
-  return @_assetClass
+  @_assetClass
 
 RenderObject::__defineSetter__ "assetClass", (val) ->
-  @_assetClass = value
+  @_assetClass = val
+
+RenderObject::__defineGetter__ "workbench", ->
+  @_workbench
+
+RenderObject::__defineSetter__ "workbench", (val) ->
+  @_workbench = val

@@ -1,5 +1,14 @@
 var game;
 var bs;
+
+function ext(superClass,subClass) {
+	function tmp() {}
+	tmp.prototype = superClass.prototype;
+	subClass.prototype = new tmp();
+	subClass.prototype.constructor = subClass;
+	return subClass;
+}
+
 function initGame() {
 	$LAB.script("../src/main/js/Bootstrap.js").wait(function(){
 		bs = new Bootstrap("bs");
@@ -10,6 +19,7 @@ function initGame() {
 function loadClasses() {
 	$LAB
 	.script("js/CustomPlayer.js")
+	.script("js/CustomTest.js")
 	.script("js/CustomMap.js").wait(function(){
 		createGame();
 	});

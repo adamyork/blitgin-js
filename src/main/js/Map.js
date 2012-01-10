@@ -9,21 +9,6 @@ Map = (function(_super) {
 
   function Map(name) {
     this.name = name;
-    Map.prototype.intialize = function() {
-      if (_paralaxing) {
-        if (void 0 !== this._backgroundAssetClass && void 0 !== this._midgroundAssetClass && void 0 !== this._foregroundAssetClass && void 0 !== this._collisionAssetClass && void 0 !== this._enemies && void 0 !== this._mapObjects) {
-          return this.initializeAssets();
-        } else {
-          return console.log("Maps using paraxling require 3 assets and a collection of enemies.");
-        }
-      } else {
-        if (void 0 !== this._foregroundAssetClass && void 0 !== this._enemies && void 0 !== this._collisionAssetClass) {
-          return this.initializeAssets();
-        } else {
-          return console.log("Maps require a foreground , collision asset , and a collection of enemies.");
-        }
-      }
-    };
   }
 
   _paralaxing = false;
@@ -76,19 +61,38 @@ Map = (function(_super) {
 
   _soundLoops = 0;
 
-  Map.prototype.initializeAssets = function() {
-    if (this._paralaxing) {
-      this._backgroundAsset = new this._backgroundAssetClass();
-      this._midgroundAsset = new this._midgroundAssetClass();
-      this._midgroundData = new BitmapData(this._midgroundAsset.width, this._midgroundAsset.height);
-      this.removeBlackAndCache(this._midgroundAsset, this._midgroundData);
+  Map.prototype.initialize = function() {
+    this.workbench = document.createElement("canvas");
+    if (this.paralaxing) {
+      if (void 0 !== this.backgroundAssetClass && void 0 !== this.midgroundAssetClass && void 0 !== this.foregroundAssetClass && void 0 !== this.collisionAssetClass && void 0 !== this.enemies && void 0 !== this.mapObjects) {
+        return this.initializeAssets();
+      } else {
+        return console.log("Maps using paraxling require 3 assets and a collection of enemies.");
+      }
+    } else {
+      if (void 0 !== this.foregroundAssetClass && void 0 !== this.enemies && void 0 !== this.collisionAssetClass) {
+        return this.initializeAssets();
+      } else {
+        return console.log("Maps require a foreground , collision asset , and a collection of enemies.");
+      }
     }
-    this._foregroundAsset = new this._foregroundAssetClass();
-    this._collisionAsset = new this._collisionAssetClass();
-    this._foregroundData = new BitmapData(this._foregroundAsset.width, this._foregroundAsset.height);
-    this._collisionData = new BitmapData(this._collisionAsset.width, this._collisionAsset.height, true, 0);
-    this.removeBlackAndCache(this._foregroundAsset, this._foregroundData);
-    return this.removeBlackAndCache(this._collisionAsset, this._collisionData);
+  };
+
+  Map.prototype.initializeAssets = function() {
+    if (this.paralaxing) {
+      _backgroundAsset = new Image();
+      _midgroundAsset = new Image();
+      _midgroundData = new Image();
+      this.removeBlackAndCache(_midgroundAsset, _midgroundData);
+    }
+    _foregroundAsset = new Image();
+    _foregroundAsset.src = this.foregroundAssetClass;
+    _collisionAsset = new Image();
+    _collisionAsset.src = this.collisionAssetClass;
+    _foregroundData = new Image();
+    _collisionData = new Image();
+    this.removeBlackAndCache(_foregroundAsset, _foregroundData);
+    return this.removeBlackAndCache(_collisionAsset, _collisionData);
   };
 
   Map.prototype.manageElements = function(type) {
@@ -142,9 +146,27 @@ Map = (function(_super) {
     return hBounds && vBounds;
   };
 
-  Map.prototype.removeBlackAndCache = function(_arg) {
-    var Bitmap, BitmapData;
-    Bitmap = _arg.asset, BitmapData = _arg.targetData;
+  Map.prototype.removeBlackAndCache = function(asset, targetData) {
+    var a, b, ctx, g, imageData, index, r, xpos, ypos, _ref, _ref2;
+    this.workbench.width = asset.width;
+    this.workbench.height = asset.height;
+    ctx = this.workbench.getContext('2d');
+    ctx.drawImage(asset, 0, 0);
+    imageData = ctx.getImageData(0, 0, this.workbench.width, this.workbench.height);
+    for (xpos = 0, _ref = imageData.width - 1; 0 <= _ref ? xpos <= _ref : xpos >= _ref; 0 <= _ref ? xpos++ : xpos--) {
+      for (ypos = 0, _ref2 = imageData.height - 1; 0 <= _ref2 ? ypos <= _ref2 : ypos >= _ref2; 0 <= _ref2 ? ypos++ : ypos--) {
+        index = 4 * (ypos * imageData.width + xpos);
+        r = imageData.data[index];
+        g = imageData.data[index + 1];
+        b = imageData.data[index + 2];
+        a = imageData.data[index + 3];
+      }
+      if (r + g + b === 0) imageData.data[index + 3] = 0;
+    }
+    ctx.putImageData(imageData, 0, 0);
+    targetData.src = null;
+    targetData.src = this.workbench.toDataURL();
+    return ctx.clearRect(0, 0, asset.width, asset.height);
   };
 
   Map.prototype.checkForNIS = function(player) {
@@ -188,28 +210,37 @@ Map = (function(_super) {
     return _inactiveMapObjects = void 0;
   };
 
+  Map.prototype.copyPixels = function(asset, target, rect) {
+    var ctx, imageData;
+    this.workbench.width = asset.width;
+    this.workbench.height = asset.height;
+    ctx = this.workbench.getContext('2d');
+    ctx.drawImage(asset, 0, 0);
+    imageData = ctx.getImageData(rect.x, rect.y, rect.width, rect.height);
+    ctx.putImageData(imageData, 0, 0);
+    target.src = null;
+    target.src = this.workbench.toDataURL();
+    return ctx.clearRect(0, 0, asset.width, asset.height);
+  };
+
   return Map;
 
 })(RenderObject);
 
 Map.prototype.__defineGetter__("bitmapData", function() {
-  var tmp, vh, vw, yPos, _ref;
-  tmp = {};
-  yPos = (_ref = this._platform) != null ? _ref : {
-    y: 0
-  };
+  var tmp, vh, vw, yPos;
+  tmp = new Image();
+  yPos = this.platform ? this.y : 0;
   vh = Game.prototype.VIEWPORT_HEIGHT;
   vw = Game.prototype.VIEWPORT_WIDTH;
-  if (this._paralaxing) {
-    tmp = new BitmapData(this._backgroundAsset.width, this._backgroundAsset.height);
-    tmp.copyPixels(this._backgroundAsset.bitmapData, new Rectangle(this.x * .25, yPos, vw, vh), new Point(0, 0));
-    tmp.copyPixels(this._midgroundData, new Rectangle(this.x * .5, yPos, vw, vh), new Point(0, 0), null, null, true);
+  if (this.paralaxing) {
+    this.copyPixels(_backgroundData, tmp, new Rectangle(this.x * .25, yPos, vw, vh));
+    this.copyPixels(_midgroundData, tmp, new Rectangle(this.x * .5, yPos, vw, vh));
   } else {
-    tmp = new BitmapData(this.foregroundAsset.width, this._foregroundAsset.height);
+    this.copyPixels(_foregroundData, tmp, new Rectangle(this.x, yPos, vw, vh));
   }
-  tmp.copyPixels(this._foregroundData, new Rectangle(this.x, yPos, vw, vh), new Point(0, 0), null, null, true);
-  if (_showCollisionMap) {
-    tmp.copyPixels(this._collisionData, new Rectangle(this.x, yPos, vw, vh), new Point(0, 0), null, null, true);
+  if (this.showCollisionMap) {
+    this.copyPixels(_collisionData, tmp, new Rectangle(this.x, yPos, vw, vh));
   }
   return tmp;
 });

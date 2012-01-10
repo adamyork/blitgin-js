@@ -1,5 +1,6 @@
-function CustomMap() {	
-	this.backgroundAssetClass = "img/level-one-bg.png";
+var CustomMap = ext(Map,function(){
+	this.foregroundAssetClass = "img/level-one-bg.png";
+	this.collisionAssetClass = "img/level-one-coll.png";
 	this.friction = .5;
 	this.gravity = 13;
 	this.enemies = [];
@@ -9,10 +10,7 @@ function CustomMap() {
 	this.sound = {};
 	this.nis = [];
 	this.initialize();
-}
-function tmp() {}
-tmp.prototype = Map.prototype;
-CustomMap.prototype = new tmp();
-CustomMap.prototype.constructor = CustomMap;
+});
+
 
 
