@@ -29,16 +29,16 @@ class Game
   render: ->
     if @_pause
         return
-    alert "render"
+    _renderEngine.render _input
     
   start: ->
     _timer = setInterval @render.bind(this) , 2500
 
   preinitialize: (parent, width, height) ->
     _parent = parent
-    @ViewportHeight = height
-    @ViewportWidth = width
-    _screen = document.createElement("canvas")
+    Game::ViewportHeight = height
+    Game::ViewportWidth = width
+    _screen = document.createElement "canvas"
     _screen.setAttribute "width", @ViewportWidth
     _screen.setAttribute "height", @ViewportHeight
     _screen.setAttribute "tabIndex", 0
@@ -73,7 +73,7 @@ class Game
     map = @_maps[_activeMap]
     player= @_players[_activePlayer]
     
-    _renderEngine.screen = @_screen
+    _renderEngine.setScreen _screen
     _renderEngine.map = new map()
     _renderEngine.player = new player()
     
@@ -88,7 +88,7 @@ class Game
   addListeners: ->
     document.onkeydown = @manageMovement.bind(this)
     document.onkeyup = @manageMovement.bind(this)
-    @_screen.focus()
+    _screen.focus()
   
   removeListeners: ->  
     document.onkeydown = undefined

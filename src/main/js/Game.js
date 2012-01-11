@@ -55,7 +55,7 @@ Game = (function() {
 
   Game.prototype.render = function() {
     if (this._pause) return;
-    return alert("render");
+    return _renderEngine.render(_input);
   };
 
   Game.prototype.start = function() {
@@ -64,8 +64,8 @@ Game = (function() {
 
   Game.prototype.preinitialize = function(parent, width, height) {
     _parent = parent;
-    this.ViewportHeight = height;
-    this.ViewportWidth = width;
+    Game.prototype.ViewportHeight = height;
+    Game.prototype.ViewportWidth = width;
     _screen = document.createElement("canvas");
     _screen.setAttribute("width", this.ViewportWidth);
     _screen.setAttribute("height", this.ViewportHeight);
@@ -101,7 +101,7 @@ Game = (function() {
     _renderEngine.soundEngine = this._soundEngine;
     map = this._maps[_activeMap];
     player = this._players[_activePlayer];
-    _renderEngine.screen = this._screen;
+    _renderEngine.setScreen(_screen);
     _renderEngine.map = new map();
     _renderEngine.player = new player();
     _input = new Input();
@@ -115,7 +115,7 @@ Game = (function() {
   Game.prototype.addListeners = function() {
     document.onkeydown = this.manageMovement.bind(this);
     document.onkeyup = this.manageMovement.bind(this);
-    return this._screen.focus();
+    return _screen.focus();
   };
 
   Game.prototype.removeListeners = function() {

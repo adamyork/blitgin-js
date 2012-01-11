@@ -3,7 +3,7 @@ var Map,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
 Map = (function(_super) {
-  var _activeEnemies, _activeMapObjects, _backgroundAsset, _backgroundAssetClass, _collisionAsset, _collisionAssetClass, _collisionData, _enemies, _foregroundAsset, _foregroundAssetClass, _foregroundData, _friction, _gravity, _inactiveEnemies, _inactiveMapObjects, _mapObjects, _midgroundAsset, _midgroundAssetClass, _midgroundData, _nis, _paralaxing, _platform, _showCollisionMap, _sound, _soundLoops;
+  var _activeEnemies, _activeMapObjects, _assetsLoaded, _backgroundAsset, _backgroundAssetClass, _backgroundData, _collisionAsset, _collisionAssetClass, _collisionData, _enemies, _foregroundAsset, _foregroundAssetClass, _foregroundData, _friction, _gravity, _inactiveEnemies, _inactiveMapObjects, _mapObjects, _midgroundAsset, _midgroundAssetClass, _midgroundData, _nis, _paralaxing, _platform, _showCollisionMap, _sound, _soundLoops;
 
   __extends(Map, _super);
 
@@ -16,6 +16,8 @@ Map = (function(_super) {
   _platform = false;
 
   _showCollisionMap = false;
+
+  _assetsLoaded = 0;
 
   _gravity = 10;
 
@@ -51,6 +53,8 @@ Map = (function(_super) {
 
   _collisionAsset = {};
 
+  _backgroundData = {};
+
   _midgroundData = {};
 
   _foregroundData = {};
@@ -80,19 +84,38 @@ Map = (function(_super) {
 
   Map.prototype.initializeAssets = function() {
     if (this.paralaxing) {
-      _backgroundAsset = new Image();
-      _midgroundAsset = new Image();
-      _midgroundData = new Image();
-      this.removeBlackAndCache(_midgroundAsset, _midgroundData);
+      this.backgroundAsset = new Image();
+      this.backgroundData = new Image();
+      this.midgroundAsset = new Image();
+      this.midgroundData = new Image();
     }
-    _foregroundAsset = new Image();
-    _foregroundAsset.src = this.foregroundAssetClass;
-    _collisionAsset = new Image();
-    _collisionAsset.src = this.collisionAssetClass;
-    _foregroundData = new Image();
-    _collisionData = new Image();
-    this.removeBlackAndCache(_foregroundAsset, _foregroundData);
-    return this.removeBlackAndCache(_collisionAsset, _collisionData);
+    this.foregroundAsset = new Image();
+    this.foregroundAsset.onload = this.imageLoadComplete.bind(this);
+    this.foregroundAsset.src = this.foregroundAssetClass;
+    this.collisionAsset = new Image();
+    this.collisionAsset.onload = this.imageLoadComplete.bind(this);
+    this.collisionAsset.src = this.collisionAssetClass;
+    this.foregroundData = new Image();
+    this.collisionData = new Image();
+    this.x = 0;
+    return this.y = 0;
+  };
+
+  Map.prototype.imageLoadComplete = function(e) {
+    _assetsLoaded++;
+    if (this.paralaxing) {
+      if (_assetsLoaded === Map.prototype.TOTAL_PARALAX_ASSETS) {
+        this.removeBlackAndCache(this.backgroundAsset, this.bacgroundData);
+        this.removeBlackAndCache(this.midgroundAsset, this.midgroundData);
+        this.removeBlackAndCache(this.foregroundAsset, this.foregroundData);
+        return this.removeBlackAndCache(this.collisionAsset, this.collisionData);
+      }
+    } else {
+      if (_assetsLoaded === Map.prototype.TOTAL_STANDARD_ASSETS) {
+        this.removeBlackAndCache(this.foregroundAsset, this.foregroundData);
+        return this.removeBlackAndCache(this.collisionAsset, this.collisionData);
+      }
+    }
   };
 
   Map.prototype.manageElements = function(type) {
@@ -189,19 +212,14 @@ Map = (function(_super) {
   };
 
   Map.prototype.dispose = function() {
-    _backgroundAssetClass = void 0;
-    _midgroundAssetClass = void 0;
-    _foregroundAssetClass = void 0;
-    _backgroundAsset.bitmapData.dispose();
-    _midgroundAsset.bitmapData.dispose();
-    _foregroundAsset.bitmapData.dispose();
-    _backgroundAsset = void 0;
-    _midgroundAsset = void 0;
-    _foregroundAsset = void 0;
-    _midgroundData.dispose();
-    _foregroundData.dispose();
-    _midgroundData = void 0;
-    _foregroundData = void 0;
+    this.backgroundAssetClass = void 0;
+    this.midgroundAssetClass = void 0;
+    this.foregroundAssetClass = void 0;
+    this.backgroundAsset = void 0;
+    this.midgroundAsset = void 0;
+    this.foregroundAsset = void 0;
+    this.midgroundData = void 0;
+    this.foregroundData = void 0;
     _enemies = void 0;
     _mapObjects = void 0;
     _activeEnemies = void 0;
@@ -230,19 +248,41 @@ Map = (function(_super) {
 Map.prototype.__defineGetter__("bitmapData", function() {
   var tmp, vh, vw, yPos;
   tmp = new Image();
-  yPos = this.platform ? this.y : 0;
-  vh = Game.prototype.VIEWPORT_HEIGHT;
-  vw = Game.prototype.VIEWPORT_WIDTH;
+  yPos = this.platform ? this._y : 0;
+  vh = Game.prototype.ViewportHeight;
+  vw = Game.prototype.ViewportWidth;
   if (this.paralaxing) {
-    this.copyPixels(_backgroundData, tmp, new Rectangle(this.x * .25, yPos, vw, vh));
-    this.copyPixels(_midgroundData, tmp, new Rectangle(this.x * .5, yPos, vw, vh));
+    this.copyPixels(this.backgroundData, tmp, new Rectangle(this._x * .25, yPos, vw, vh));
+    this.copyPixels(this.midgroundData, tmp, new Rectangle(this._x * .5, yPos, vw, vh));
   } else {
-    this.copyPixels(_foregroundData, tmp, new Rectangle(this.x, yPos, vw, vh));
+    this.copyPixels(this.foregroundData, tmp, new Rectangle(this._x, yPos, vw, vh));
   }
   if (this.showCollisionMap) {
-    this.copyPixels(_collisionData, tmp, new Rectangle(this.x, yPos, vw, vh));
+    this.copyPixels(this.collisionData, tmp, new Rectangle(this._x, yPos, vw, vh));
   }
   return tmp;
+});
+
+Map.prototype.__defineSetter__("x", function(val) {
+  if ((val >= 0) && (val <= this.foregroundAsset.width - Game.prototype.ViewportWidth)) {
+    return this._x = val;
+  } else if (val < 0) {
+    return this._x = 0;
+  } else if (val > 0) {
+    return this._x = this.foregroundAsset.width - Game.prototype.ViewportWidth;
+  }
+});
+
+Map.prototype.__defineSetter__("y", function(val) {
+  if (val >= this.collisionData.height - Game.prototype.ViewportWidth) {
+    this._y = this.collisionData.height - Game.prototype.ViewportHeight;
+    return;
+  }
+  if (val < 0) {
+    this._y = 0;
+    return;
+  }
+  return this._y = val;
 });
 
 Map.prototype.__defineSetter__("backgroundAssetClass", function(val) {
@@ -275,6 +315,38 @@ Map.prototype.__defineSetter__("collisionAssetClass", function(val) {
 
 Map.prototype.__defineGetter__("collisionAssetClass", function() {
   return this._collisionAssetClass;
+});
+
+Map.prototype.__defineSetter__("backgroundAsset", function(val) {
+  return this._backgroundAsset = val;
+});
+
+Map.prototype.__defineGetter__("backgroundAsset", function() {
+  return this._backgroundAsset;
+});
+
+Map.prototype.__defineSetter__("midgroundAsset", function(val) {
+  return this._midgroundAsset = val;
+});
+
+Map.prototype.__defineGetter__("midgroundAsset", function() {
+  return this._midgroundAsset;
+});
+
+Map.prototype.__defineSetter__("foregroundAsset", function(val) {
+  return this._foregroundAsset = val;
+});
+
+Map.prototype.__defineGetter__("foregroundAsset", function() {
+  return this._foregroundAsset;
+});
+
+Map.prototype.__defineSetter__("collisionAsset", function(val) {
+  return this._collisionAsset = val;
+});
+
+Map.prototype.__defineGetter__("collisionAsset", function() {
+  return this._collisionAsset;
 });
 
 Map.prototype.__defineSetter__("paralaxing", function(val) {
@@ -337,30 +409,20 @@ Map.prototype.__defineGetter__("width", function() {
   return this._foregroundAsset.width;
 });
 
-Map.prototype.__defineSetter__("x", function(val) {
-  if ((val >= 0) && (val <= this._foregroundAsset.width - Game.prototype.VIEWPORT_WIDTH)) {
-    return this.x = val;
-  } else if (val < 0) {
-    return this.x = 0;
-  } else if (val > 0) {
-    return this.x = this._foregroundAsset.width - Game.prototype.VIEWPORT_WIDTH;
-  }
-});
-
-Map.prototype.__defineSetter__("y", function(val) {
-  if (val >= this._collisionData.height - Game.prototype.VIEWPORT_HEIGHT) {
-    this.y = this._collisionData.height - Game.prototype.VIEWPORT_HEIGHT;
-    return;
-  }
-  if (val < 0) {
-    this.y = 0;
-    return;
-  }
-  return this.y = val;
-});
-
 Map.prototype.__defineGetter__("collisionData", function() {
   return this._collisionData;
+});
+
+Map.prototype.__defineSetter__("collisionData", function(val) {
+  return this._collisionData = val;
+});
+
+Map.prototype.__defineGetter__("foregroundData", function() {
+  return this._foregroundData;
+});
+
+Map.prototype.__defineSetter__("foregroundData", function(val) {
+  return this._foregroundData = val;
 });
 
 Map.prototype.__defineSetter__("gravity", function(val) {
@@ -406,3 +468,7 @@ Map.prototype.__defineSetter__("soundLoops", function(val) {
 Map.prototype.MANAGE_ENEMIES = "manageEnemies";
 
 Map.prototype.MANAGE_MAP_OBJECTS = "manageMapObjects";
+
+Map.prototype.TOTAL_STANDARD_ASSETS = 2;
+
+Map.prototype.TOTAL_PARALAX_ASSETS = 4;

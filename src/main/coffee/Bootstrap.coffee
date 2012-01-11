@@ -3,7 +3,7 @@ class Bootstrap
 
   _classes = ["Point","Rectangle","Keyboard","Game","GameError","Group","RenderEngine",
     "PhysicsEngine","CollisionEngine","SoundEngine","Input",
-    "Player","RenderObject","Map","BaseTest","Test",]
+    "Player","RenderObject","Map","BaseTest","Test"]
   _collection = []
     
   start: (callback,basePath) ->

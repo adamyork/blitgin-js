@@ -4,6 +4,7 @@ class Map extends RenderObject
   _paralaxing = false
   _platform = false
   _showCollisionMap = false
+  _assetsLoaded = 0
   
   _gravity = 10
   _friction = .25
@@ -27,6 +28,7 @@ class Map extends RenderObject
   _foregroundAsset = {}
   _collisionAsset = {}
   
+  _backgroundData = {}
   _midgroundData = {}
   _foregroundData = {}
   _collisionData = {}
@@ -52,21 +54,36 @@ class Map extends RenderObject
 
   initializeAssets: ->
     if @paralaxing
-      _backgroundAsset = new Image()
-      _midgroundAsset = new Image()
-      _midgroundData = new Image()
-      @removeBlackAndCache _midgroundAsset, _midgroundData
+      @backgroundAsset = new Image()
+      @backgroundData = new Image()
+      @midgroundAsset = new Image()
+      @midgroundData = new Image()
 
-    _foregroundAsset = new Image()
-    _foregroundAsset.src = @foregroundAssetClass;
-    _collisionAsset = new Image()
-    _collisionAsset.src = @collisionAssetClass;
+    @foregroundAsset = new Image()
+    @foregroundAsset.onload = @imageLoadComplete.bind this
+    @foregroundAsset.src = @foregroundAssetClass
+    @collisionAsset = new Image()
+    @collisionAsset.onload = @imageLoadComplete.bind this
+    @collisionAsset.src = @collisionAssetClass
 
-    _foregroundData = new Image()
-    _collisionData = new Image()
-
-    @removeBlackAndCache _foregroundAsset, _foregroundData
-    @removeBlackAndCache _collisionAsset, _collisionData
+    @foregroundData = new Image()
+    @collisionData = new Image()
+    
+    @x = 0
+    @y = 0
+  
+  imageLoadComplete: (e) ->
+    _assetsLoaded++
+    if @paralaxing
+      if _assetsLoaded is Map::TOTAL_PARALAX_ASSETS
+        @removeBlackAndCache @backgroundAsset, @bacgroundData
+        @removeBlackAndCache @midgroundAsset, @midgroundData
+        @removeBlackAndCache @foregroundAsset, @foregroundData
+        @removeBlackAndCache @collisionAsset, @collisionData
+    else
+       if _assetsLoaded is Map::TOTAL_STANDARD_ASSETS
+        @removeBlackAndCache @foregroundAsset, @foregroundData
+        @removeBlackAndCache @collisionAsset, @collisionData
 
   manageElements: (type) ->
     targetArray = if (type == Map::MANAGE_ENEMIES) then @_enemies else @_mapObjects;
@@ -153,23 +170,16 @@ class Map extends RenderObject
     arr = undefined
         
   dispose: ->
-    _backgroundAssetClass = undefined
-    _midgroundAssetClass = undefined
-    _foregroundAssetClass = undefined
+    @backgroundAssetClass = undefined
+    @midgroundAssetClass = undefined
+    @foregroundAssetClass = undefined
   
-    _backgroundAsset.bitmapData.dispose()
-    _midgroundAsset.bitmapData.dispose()
-    _foregroundAsset.bitmapData.dispose()
-  
-    _backgroundAsset = undefined
-    _midgroundAsset = undefined
-    _foregroundAsset = undefined
-  
-    _midgroundData.dispose()
-    _foregroundData.dispose()
-  
-    _midgroundData = undefined
-    _foregroundData = undefined
+    @backgroundAsset = undefined
+    @midgroundAsset = undefined
+    @foregroundAsset = undefined
+
+    @midgroundData = undefined
+    @foregroundData = undefined
   
     _enemies = undefined
     _mapObjects = undefined
@@ -192,20 +202,37 @@ class Map extends RenderObject
     
 Map::__defineGetter__ "bitmapData", ->
   tmp = new Image()
-  yPos = if @platform then @y else 0
-  vh = Game::VIEWPORT_HEIGHT
-  vw = Game::VIEWPORT_WIDTH
+  yPos = if @platform then @_y else 0
+  vh = Game::ViewportHeight
+  vw = Game::ViewportWidth
   
   if(@paralaxing)
-    @copyPixels _backgroundData,tmp,new Rectangle @x * .25, yPos, vw, vh
-    @copyPixels _midgroundData,tmp,new Rectangle @x * .5, yPos, vw, vh
+    @copyPixels @backgroundData,tmp,new Rectangle @_x * .25, yPos, vw, vh
+    @copyPixels @midgroundData,tmp,new Rectangle @_x * .5, yPos, vw, vh
   else
-    @copyPixels _foregroundData,tmp,new Rectangle @x, yPos, vw, vh
+    @copyPixels @foregroundData,tmp,new Rectangle @_x, yPos, vw, vh
   
   if(@showCollisionMap)
-    @copyPixels _collisionData,tmp,new Rectangle @x, yPos, vw, vh
-    
+    @copyPixels @collisionData,tmp,new Rectangle @_x, yPos, vw, vh   
+
   tmp
+  
+Map::__defineSetter__ "x", (val) ->
+  if (val >= 0) and (val <= @foregroundAsset.width - Game::ViewportWidth)
+    @_x = val
+  else if (val < 0)
+    @_x = 0
+  else if (val > 0)
+    @_x = (@foregroundAsset.width - Game::ViewportWidth)
+
+Map::__defineSetter__ "y", (val) ->
+  if (val >= @collisionData.height - Game::ViewportWidth)
+    @_y = @collisionData.height - Game::ViewportHeight
+    return
+  if (val < 0)
+    @_y = 0
+    return
+  @_y = val
 
 Map::__defineSetter__ "backgroundAssetClass", (val) ->
   @_backgroundAssetClass = val
@@ -230,6 +257,30 @@ Map::__defineSetter__ "collisionAssetClass", (val) ->
 
 Map::__defineGetter__ "collisionAssetClass", ->
   @_collisionAssetClass;
+
+Map::__defineSetter__ "backgroundAsset", (val) ->
+  @_backgroundAsset = val
+
+Map::__defineGetter__ "backgroundAsset", ->
+  @_backgroundAsset
+
+Map::__defineSetter__ "midgroundAsset", (val) ->
+  @_midgroundAsset = val
+
+Map::__defineGetter__ "midgroundAsset", ->
+  @_midgroundAsset
+
+Map::__defineSetter__ "foregroundAsset", (val) ->
+  @_foregroundAsset = val
+
+Map::__defineGetter__ "foregroundAsset", ->
+  @_foregroundAsset;
+
+Map::__defineSetter__ "collisionAsset", (val) ->
+  @_collisionAsset = val
+
+Map::__defineGetter__ "collisionAsset", ->
+  @_collisionAsset;
 
 Map::__defineSetter__ "paralaxing", (val) ->
   @_paralaxing = val
@@ -276,25 +327,17 @@ Map::__defineGetter__ "activeEnemies", ->
 Map::__defineGetter__ "width", ->
   @_foregroundAsset.width
 
-Map::__defineSetter__ "x", (val) ->
-  if (val >= 0) and (val <= @_foregroundAsset.width - Game::VIEWPORT_WIDTH)
-    @x = val
-  else if (val < 0)
-    @x = 0
-  else if (val > 0)
-    @x = (@_foregroundAsset.width - Game::VIEWPORT_WIDTH)
-
-Map::__defineSetter__ "y", (val) ->
-  if (val >= @_collisionData.height - Game::VIEWPORT_HEIGHT)
-    @y = @_collisionData.height - Game::VIEWPORT_HEIGHT
-    return
-  if (val < 0)
-    @y = 0;
-    return
-  @y = val
-
 Map::__defineGetter__ "collisionData", ->
   @_collisionData
+
+Map::__defineSetter__ "collisionData", (val) ->
+  @_collisionData = val
+
+Map::__defineGetter__ "foregroundData", ->
+  @_foregroundData
+
+Map::__defineSetter__ "foregroundData", (val) ->
+  @_foregroundData = val
 
 Map::__defineSetter__ "gravity", (val) ->
   @_gravity = val
@@ -328,3 +371,5 @@ Map::__defineSetter__ "soundLoops", (val) ->
 
 Map::MANAGE_ENEMIES = "manageEnemies"
 Map::MANAGE_MAP_OBJECTS = "manageMapObjects"
+Map::TOTAL_STANDARD_ASSETS = 2
+Map::TOTAL_PARALAX_ASSETS = 4

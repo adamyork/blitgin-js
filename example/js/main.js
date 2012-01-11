@@ -19,7 +19,6 @@ function initGame() {
 function loadClasses() {
 	$LAB
 	.script("js/CustomPlayer.js")
-	.script("js/CustomTest.js")
 	.script("js/CustomMap.js").wait(function(){
 		createGame();
 	});
@@ -37,5 +36,8 @@ function createGame() {
 	game.customKeys = [ 76, 66 ];
 	game.preinitialize(this, 800, 600);
 	game.subscribe(this);
-	//game.start();
+}
+
+function startGame() {
+	game.start();
 }
