@@ -1,2 +1,2 @@
 class Player
-  constructor: () ->
+  constructor:(@name)->

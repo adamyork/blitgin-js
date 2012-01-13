@@ -2,7 +2,9 @@ var SoundEngine;
 
 SoundEngine = (function() {
 
-  function SoundEngine() {}
+  function SoundEngine(name) {
+    this.name = name;
+  }
 
   return SoundEngine;
 

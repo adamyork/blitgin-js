@@ -1,2 +1,2 @@
 class Input
-  constructor: () ->
+  constructor:(@name)->

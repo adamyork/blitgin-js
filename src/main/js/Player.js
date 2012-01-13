@@ -2,7 +2,9 @@ var Player;
 
 Player = (function() {
 
-  function Player() {}
+  function Player(name) {
+    this.name = name;
+  }
 
   return Player;
 

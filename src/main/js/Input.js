@@ -2,7 +2,9 @@ var Input;
 
 Input = (function() {
 
-  function Input() {}
+  function Input(name) {
+    this.name = name;
+  }
 
   return Input;
 

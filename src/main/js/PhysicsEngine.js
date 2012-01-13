@@ -2,7 +2,9 @@ var PhysicsEngine;
 
 PhysicsEngine = (function() {
 
-  function PhysicsEngine() {}
+  function PhysicsEngine(name) {
+    this.name = name;
+  }
 
   return PhysicsEngine;
 

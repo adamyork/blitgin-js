@@ -2,7 +2,9 @@ var RenderEngine;
 
 RenderEngine = (function() {
 
-  function RenderEngine() {}
+  function RenderEngine(name) {
+    this.name = name;
+  }
 
   RenderEngine._scrn = {};
 

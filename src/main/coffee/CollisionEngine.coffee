@@ -1,2 +1,2 @@
 class CollisionEngine
-  constructor: () ->
+  constructor:(@name)->

@@ -1,2 +1,2 @@
 class SoundEngine
-  constructor: () ->
+  constructor:(@name)->

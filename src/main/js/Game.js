@@ -3,7 +3,8 @@ var Game;
 Game = (function() {
   var _activeMap, _activePlayer, _collisionEngineClass, _customKey, _customKeys, _downKeys, _input, _jumpKeys, _leftKeys, _maps, _movement, _parent, _pause, _physicsEngineClass, _players, _renderEngine, _renderEngineClass, _rightKeys, _screen, _soundEngine, _subscribers, _timer, _upKeys;
 
-  function Game() {
+  function Game(name) {
+    this.name = name;
     this.keyboard = new Keyboard();
   }
 

@@ -1,5 +1,5 @@
 class Game
-  constructor: () ->
+  constructor:(@name)->
     @keyboard = new Keyboard()
    
   _subscribers = []

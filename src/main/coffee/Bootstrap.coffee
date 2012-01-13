@@ -1,17 +1,17 @@
 class Bootstrap  
-  constructor: (@name) ->
+  constructor:(@name)->
 
   _classes = ["Point","Rectangle","Keyboard","Game","GameError","Group","RenderEngine",
-    "PhysicsEngine","CollisionEngine","SoundEngine","Input",
-    "Player","RenderObject","Map"]
+    "PhysicsEngine","CollisionEngine","SoundEngine","Input","Player","RenderObject","Map",
+    "MapObject","MapObjectGroup","Nis","NisCondition","NisGoal"]
   _collection = []
     
-  start: (callback,basePath) ->
+  start:(callback,basePath)->
    _collection[_i] = @prepare clazz,basePath for clazz in _classes
    @load callback
 
-  prepare: (clazz,basePath) ->
+  prepare:(clazz,basePath)->
     basePath + clazz + ".js"
   
-  load: (callback) ->
+  load:(callback)->
     $LAB.script(_collection).wait(callback);

@@ -1,5 +1,5 @@
 class RenderEngine
-  constructor: () ->
+  constructor:(@name)->
     
   @_scrn = {}
     

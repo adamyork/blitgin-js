@@ -1,5 +1,5 @@
 class Keyboard
-  constructor: (@name) ->
+  constructor:(@name)->
 
 Keyboard::KEY_UP = "keyup"    
 Keyboard::KEY_DOWN = "keydown"    

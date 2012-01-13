@@ -1,2 +1,2 @@
 class PhysicsEngine
-  constructor: () ->
+  constructor:(@name)->

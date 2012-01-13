@@ -1,5 +1,5 @@
 class Map extends RenderObject
-  constructor: (@name) ->
+  constructor:(@name)->
     
   _paralaxing = false
   _platform = false
