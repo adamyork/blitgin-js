@@ -5,6 +5,7 @@ class Map extends RenderObject
   _platform = false
   _showCollisionMap = false
   _assetsLoaded = 0
+  _initializeComplete = false
   
   _gravity = 10
   _friction = .25
@@ -35,7 +36,7 @@ class Map extends RenderObject
   
   _sound = {}
   _soundLoops = 0
-  
+
   initialize: ->
     @workbench = document.createElement "canvas"
     if @paralaxing
@@ -51,39 +52,69 @@ class Map extends RenderObject
       else
         console.log "Maps require a foreground , collision asset , and a collection of enemies."
 
-
   initializeAssets: ->
     if @paralaxing
       @backgroundAsset = new Image()
+      @backgroundAsset.onload = @imageLoadComplete.bind this
+      @backgroundAsset.src = @backgroundAssetClass
       @backgroundData = new Image()
+      
       @midgroundAsset = new Image()
+      @midgroundAsset.onload = @imageLoadComplete.bind this
+      @midgroundAsset.src = @backgroundAssetClass
       @midgroundData = new Image()
 
     @foregroundAsset = new Image()
     @foregroundAsset.onload = @imageLoadComplete.bind this
     @foregroundAsset.src = @foregroundAssetClass
+
     @collisionAsset = new Image()
     @collisionAsset.onload = @imageLoadComplete.bind this
     @collisionAsset.src = @collisionAssetClass
 
     @foregroundData = new Image()
     @collisionData = new Image()
-    
-    @x = 0
-    @y = 0
   
   imageLoadComplete: (e) ->
     _assetsLoaded++
     if @paralaxing
       if _assetsLoaded is Map::TOTAL_PARALAX_ASSETS
-        @removeBlackAndCache @backgroundAsset, @bacgroundData
+        @removeBlackAndCache @backgroundAsset, @backgroundData
         @removeBlackAndCache @midgroundAsset, @midgroundData
         @removeBlackAndCache @foregroundAsset, @foregroundData
         @removeBlackAndCache @collisionAsset, @collisionData
+        @finalize()
     else
-       if _assetsLoaded is Map::TOTAL_STANDARD_ASSETS
+      if _assetsLoaded is Map::TOTAL_STANDARD_ASSETS
         @removeBlackAndCache @foregroundAsset, @foregroundData
         @removeBlackAndCache @collisionAsset, @collisionData
+        @finalize()
+        
+  finalize: ->
+    @_initializeComplete = true
+    @x = 0
+    @y = 0
+    
+  removeBlackAndCache: (asset, targetData) ->
+    @workbench.width = asset.width
+    @workbench.height = asset.height
+    ctx = @workbench.getContext '2d'
+    ctx.drawImage asset,0,0
+    imageData = ctx.getImageData 0, 0, @workbench.width, @workbench.height
+    for xpos in [0 .. imageData.width-1]
+      for ypos in [0 .. imageData.height-1]
+        index = 4 * (ypos * imageData.width + xpos)
+        r = imageData.data[index]
+        g = imageData.data[index + 1]
+        b = imageData.data[index + 2]
+        a = imageData.data[index + 3]
+        if(r+g+b is 0)
+          imageData.data[index + 3] = 0
+          
+    ctx.putImageData imageData,0,0
+    targetData.src = null
+    targetData.src = @workbench.toDataURL()
+    ctx.clearRect 0,0,asset.width,asset.height
 
   manageElements: (type) ->
     targetArray = if (type == Map::MANAGE_ENEMIES) then @_enemies else @_mapObjects;
@@ -130,28 +161,6 @@ class Map extends RenderObject
     vBounds = (((posY + indep) - y) - vh) <= 0 && (((posY - indep) - y) - vh) >= -(vh)
     return (hBounds && vBounds)
 
-  removeBlackAndCache: (asset, targetData) ->
-    @workbench.width = asset.width
-    @workbench.height = asset.height
-    ctx = @workbench.getContext '2d'
-    ctx.drawImage asset,0,0
-    imageData = ctx.getImageData 0, 0, @workbench.width, @workbench.height
-
-    for xpos in [0 .. imageData.width-1]
-      for ypos in [0 .. imageData.height-1]
-          index = 4 * (ypos * imageData.width + xpos)
-          r = imageData.data[index]
-          g = imageData.data[index + 1]
-          b = imageData.data[index + 2]
-          a = imageData.data[index + 3]
-        if(r+g+b == 0)
-          imageData.data[index + 3] = 0
-
-    ctx.putImageData imageData,0,0
-    targetData.src = null
-    targetData.src = @workbench.toDataURL()
-    ctx.clearRect 0,0,asset.width,asset.height
-
   checkForNIS: (player) ->
     if (player == undefined)
       return undefined
@@ -189,34 +198,39 @@ class Map extends RenderObject
     _activeMapObjects = undefined
     _inactiveMapObjects = undefined
     
-  copyPixels: (asset,target,rect)->
-    @workbench.width = asset.width
-    @workbench.height = asset.height
+  copyPixels: (asset,rect)->
+    if @workbench.width < asset.width
+      @workbench.width = asset.width
+    if @workbench.height < asset.height
+      @workbench.height = asset.height
     ctx = @workbench.getContext '2d'
     ctx.drawImage asset,0,0
     imageData = ctx.getImageData rect.x,rect.y,rect.width,rect.height
     ctx.putImageData imageData,0,0
-    target.src = null
-    target.src = @workbench.toDataURL()
-    ctx.clearRect 0,0,asset.width,asset.height
     
 Map::__defineGetter__ "bitmapData", ->
-  tmp = new Image()
-  yPos = if @platform then @_y else 0
-  vh = Game::ViewportHeight
-  vw = Game::ViewportWidth
-  
-  if(@paralaxing)
-    @copyPixels @backgroundData,tmp,new Rectangle @_x * .25, yPos, vw, vh
-    @copyPixels @midgroundData,tmp,new Rectangle @_x * .5, yPos, vw, vh
+  if @_initializeComplete
+    tmp = new Image()
+    yPos = if @platform then @_y else 0
+    vh = Game::ViewportHeight
+    vw = Game::ViewportWidth
+    
+    if(@paralaxing)
+      @copyPixels @backgroundData,tmp,new Rectangle @_x * .25, yPos, vw, vh
+      @copyPixels @midgroundData,tmp,new Rectangle @_x * .5, yPos, vw, vh
+    else
+      @copyPixels @foregroundData,new Rectangle @_x, yPos, vw, vh
+    
+    if(@showCollisionMap)
+      @copyPixels @collisionData,new Rectangle @_x, yPos, vw, vh  
+    tmp.src = null
+    tmp.src = @workbench.toDataURL()
+    ctx = @workbench.getContext '2d'
+    ctx.clearRect 0,0,@workbench.width,@workbench.height
+    tmp
   else
-    @copyPixels @foregroundData,tmp,new Rectangle @_x, yPos, vw, vh
-  
-  if(@showCollisionMap)
-    @copyPixels @collisionData,tmp,new Rectangle @_x, yPos, vw, vh   
-
-  tmp
-  
+    console.log 'You cannot start the game yet. Map assets are not loaded.'
+    
 Map::__defineSetter__ "x", (val) ->
   if (val >= 0) and (val <= @foregroundAsset.width - Game::ViewportWidth)
     @_x = val

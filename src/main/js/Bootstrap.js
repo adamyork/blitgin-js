@@ -7,7 +7,7 @@ Bootstrap = (function() {
     this.name = name;
   }
 
-  _classes = ["Point", "Rectangle", "Keyboard", "Game", "GameError", "Group", "RenderEngine", "PhysicsEngine", "CollisionEngine", "SoundEngine", "Input", "Player", "RenderObject", "Map", "BaseTest", "Test"];
+  _classes = ["Point", "Rectangle", "Keyboard", "Game", "GameError", "Group", "RenderEngine", "PhysicsEngine", "CollisionEngine", "SoundEngine", "Input", "Player", "RenderObject", "Map"];
 
   _collection = [];
 

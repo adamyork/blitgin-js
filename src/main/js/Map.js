@@ -3,7 +3,7 @@ var Map,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
 Map = (function(_super) {
-  var _activeEnemies, _activeMapObjects, _assetsLoaded, _backgroundAsset, _backgroundAssetClass, _backgroundData, _collisionAsset, _collisionAssetClass, _collisionData, _enemies, _foregroundAsset, _foregroundAssetClass, _foregroundData, _friction, _gravity, _inactiveEnemies, _inactiveMapObjects, _mapObjects, _midgroundAsset, _midgroundAssetClass, _midgroundData, _nis, _paralaxing, _platform, _showCollisionMap, _sound, _soundLoops;
+  var _activeEnemies, _activeMapObjects, _assetsLoaded, _backgroundAsset, _backgroundAssetClass, _backgroundData, _collisionAsset, _collisionAssetClass, _collisionData, _enemies, _foregroundAsset, _foregroundAssetClass, _foregroundData, _friction, _gravity, _inactiveEnemies, _inactiveMapObjects, _initializeComplete, _mapObjects, _midgroundAsset, _midgroundAssetClass, _midgroundData, _nis, _paralaxing, _platform, _showCollisionMap, _sound, _soundLoops;
 
   __extends(Map, _super);
 
@@ -18,6 +18,8 @@ Map = (function(_super) {
   _showCollisionMap = false;
 
   _assetsLoaded = 0;
+
+  _initializeComplete = false;
 
   _gravity = 10;
 
@@ -85,8 +87,12 @@ Map = (function(_super) {
   Map.prototype.initializeAssets = function() {
     if (this.paralaxing) {
       this.backgroundAsset = new Image();
+      this.backgroundAsset.onload = this.imageLoadComplete.bind(this);
+      this.backgroundAsset.src = this.backgroundAssetClass;
       this.backgroundData = new Image();
       this.midgroundAsset = new Image();
+      this.midgroundAsset.onload = this.imageLoadComplete.bind(this);
+      this.midgroundAsset.src = this.backgroundAssetClass;
       this.midgroundData = new Image();
     }
     this.foregroundAsset = new Image();
@@ -96,26 +102,55 @@ Map = (function(_super) {
     this.collisionAsset.onload = this.imageLoadComplete.bind(this);
     this.collisionAsset.src = this.collisionAssetClass;
     this.foregroundData = new Image();
-    this.collisionData = new Image();
-    this.x = 0;
-    return this.y = 0;
+    return this.collisionData = new Image();
   };
 
   Map.prototype.imageLoadComplete = function(e) {
     _assetsLoaded++;
     if (this.paralaxing) {
       if (_assetsLoaded === Map.prototype.TOTAL_PARALAX_ASSETS) {
-        this.removeBlackAndCache(this.backgroundAsset, this.bacgroundData);
+        this.removeBlackAndCache(this.backgroundAsset, this.backgroundData);
         this.removeBlackAndCache(this.midgroundAsset, this.midgroundData);
         this.removeBlackAndCache(this.foregroundAsset, this.foregroundData);
-        return this.removeBlackAndCache(this.collisionAsset, this.collisionData);
+        this.removeBlackAndCache(this.collisionAsset, this.collisionData);
+        return this.finalize();
       }
     } else {
       if (_assetsLoaded === Map.prototype.TOTAL_STANDARD_ASSETS) {
         this.removeBlackAndCache(this.foregroundAsset, this.foregroundData);
-        return this.removeBlackAndCache(this.collisionAsset, this.collisionData);
+        this.removeBlackAndCache(this.collisionAsset, this.collisionData);
+        return this.finalize();
       }
     }
+  };
+
+  Map.prototype.finalize = function() {
+    this._initializeComplete = true;
+    this.x = 0;
+    return this.y = 0;
+  };
+
+  Map.prototype.removeBlackAndCache = function(asset, targetData) {
+    var a, b, ctx, g, imageData, index, r, xpos, ypos, _ref, _ref2;
+    this.workbench.width = asset.width;
+    this.workbench.height = asset.height;
+    ctx = this.workbench.getContext('2d');
+    ctx.drawImage(asset, 0, 0);
+    imageData = ctx.getImageData(0, 0, this.workbench.width, this.workbench.height);
+    for (xpos = 0, _ref = imageData.width - 1; 0 <= _ref ? xpos <= _ref : xpos >= _ref; 0 <= _ref ? xpos++ : xpos--) {
+      for (ypos = 0, _ref2 = imageData.height - 1; 0 <= _ref2 ? ypos <= _ref2 : ypos >= _ref2; 0 <= _ref2 ? ypos++ : ypos--) {
+        index = 4 * (ypos * imageData.width + xpos);
+        r = imageData.data[index];
+        g = imageData.data[index + 1];
+        b = imageData.data[index + 2];
+        a = imageData.data[index + 3];
+        if (r + g + b === 0) imageData.data[index + 3] = 0;
+      }
+    }
+    ctx.putImageData(imageData, 0, 0);
+    targetData.src = null;
+    targetData.src = this.workbench.toDataURL();
+    return ctx.clearRect(0, 0, asset.width, asset.height);
   };
 
   Map.prototype.manageElements = function(type) {
@@ -169,29 +204,6 @@ Map = (function(_super) {
     return hBounds && vBounds;
   };
 
-  Map.prototype.removeBlackAndCache = function(asset, targetData) {
-    var a, b, ctx, g, imageData, index, r, xpos, ypos, _ref, _ref2;
-    this.workbench.width = asset.width;
-    this.workbench.height = asset.height;
-    ctx = this.workbench.getContext('2d');
-    ctx.drawImage(asset, 0, 0);
-    imageData = ctx.getImageData(0, 0, this.workbench.width, this.workbench.height);
-    for (xpos = 0, _ref = imageData.width - 1; 0 <= _ref ? xpos <= _ref : xpos >= _ref; 0 <= _ref ? xpos++ : xpos--) {
-      for (ypos = 0, _ref2 = imageData.height - 1; 0 <= _ref2 ? ypos <= _ref2 : ypos >= _ref2; 0 <= _ref2 ? ypos++ : ypos--) {
-        index = 4 * (ypos * imageData.width + xpos);
-        r = imageData.data[index];
-        g = imageData.data[index + 1];
-        b = imageData.data[index + 2];
-        a = imageData.data[index + 3];
-      }
-      if (r + g + b === 0) imageData.data[index + 3] = 0;
-    }
-    ctx.putImageData(imageData, 0, 0);
-    targetData.src = null;
-    targetData.src = this.workbench.toDataURL();
-    return ctx.clearRect(0, 0, asset.width, asset.height);
-  };
-
   Map.prototype.checkForNIS = function(player) {
     var nis, _i, _len;
     if (player === void 0) return;
@@ -228,17 +240,14 @@ Map = (function(_super) {
     return _inactiveMapObjects = void 0;
   };
 
-  Map.prototype.copyPixels = function(asset, target, rect) {
+  Map.prototype.copyPixels = function(asset, rect) {
     var ctx, imageData;
-    this.workbench.width = asset.width;
-    this.workbench.height = asset.height;
+    if (this.workbench.width < asset.width) this.workbench.width = asset.width;
+    if (this.workbench.height < asset.height) this.workbench.height = asset.height;
     ctx = this.workbench.getContext('2d');
     ctx.drawImage(asset, 0, 0);
     imageData = ctx.getImageData(rect.x, rect.y, rect.width, rect.height);
-    ctx.putImageData(imageData, 0, 0);
-    target.src = null;
-    target.src = this.workbench.toDataURL();
-    return ctx.clearRect(0, 0, asset.width, asset.height);
+    return ctx.putImageData(imageData, 0, 0);
   };
 
   return Map;
@@ -246,21 +255,29 @@ Map = (function(_super) {
 })(RenderObject);
 
 Map.prototype.__defineGetter__("bitmapData", function() {
-  var tmp, vh, vw, yPos;
-  tmp = new Image();
-  yPos = this.platform ? this._y : 0;
-  vh = Game.prototype.ViewportHeight;
-  vw = Game.prototype.ViewportWidth;
-  if (this.paralaxing) {
-    this.copyPixels(this.backgroundData, tmp, new Rectangle(this._x * .25, yPos, vw, vh));
-    this.copyPixels(this.midgroundData, tmp, new Rectangle(this._x * .5, yPos, vw, vh));
+  var ctx, tmp, vh, vw, yPos;
+  if (this._initializeComplete) {
+    tmp = new Image();
+    yPos = this.platform ? this._y : 0;
+    vh = Game.prototype.ViewportHeight;
+    vw = Game.prototype.ViewportWidth;
+    if (this.paralaxing) {
+      this.copyPixels(this.backgroundData, tmp, new Rectangle(this._x * .25, yPos, vw, vh));
+      this.copyPixels(this.midgroundData, tmp, new Rectangle(this._x * .5, yPos, vw, vh));
+    } else {
+      this.copyPixels(this.foregroundData, new Rectangle(this._x, yPos, vw, vh));
+    }
+    if (this.showCollisionMap) {
+      this.copyPixels(this.collisionData, new Rectangle(this._x, yPos, vw, vh));
+    }
+    tmp.src = null;
+    tmp.src = this.workbench.toDataURL();
+    ctx = this.workbench.getContext('2d');
+    ctx.clearRect(0, 0, this.workbench.width, this.workbench.height);
+    return tmp;
   } else {
-    this.copyPixels(this.foregroundData, tmp, new Rectangle(this._x, yPos, vw, vh));
+    return console.log('You cannot start the game yet. Map assets are not loaded.');
   }
-  if (this.showCollisionMap) {
-    this.copyPixels(this.collisionData, tmp, new Rectangle(this._x, yPos, vw, vh));
-  }
-  return tmp;
 });
 
 Map.prototype.__defineSetter__("x", function(val) {

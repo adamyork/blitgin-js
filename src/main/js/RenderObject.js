@@ -47,9 +47,9 @@ RenderObject = (function() {
 
   RenderObject.prototype.initialize = function() {
     if ((void 0 !== this._assetClass) && (0 !== this._cellHeight) && (0 !== this._cellWidth)) {
-      this._asset = new Image();
-      this._asset.src = this._assetClass;
-      return this._workbench = document.createElement("canvas");
+      _asset = new Image();
+      _asset.src = this._assetClass;
+      return this.workbench = document.createElement("canvas");
     } else {
       return console.log("Set a cellwidth , cellheight , and assetClass before calling initialize.");
     }
@@ -67,8 +67,8 @@ RenderObject = (function() {
 RenderObject.prototype.__defineGetter__("bitmapData", function() {
   var ctx, keyFrame, tmpData;
   tmpData = new Image();
-  this._workbench.width = this._asset.width;
-  this._workbench.height = this._asset.height;
+  this.workbench.width = this._asset.width;
+  this.workbench.height = this._asset.height;
   ctx = workbench.getContext('2d');
   keyFrame = Math.floor(this._frame) * this._cellWidth;
   ctx.drawImage(this._asset, keyFrame, 0);

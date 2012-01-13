@@ -32,7 +32,7 @@ class Game
     _renderEngine.render _input
     
   start: ->
-    _timer = setInterval @render.bind(this) , 2500
+    _timer = setInterval @render.bind(this) , 410
 
   preinitialize: (parent, width, height) ->
     _parent = parent

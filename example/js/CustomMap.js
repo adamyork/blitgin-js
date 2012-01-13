@@ -7,6 +7,7 @@ var CustomMap = ext(Map,function(){
 	this.mapObjects = [];
 	this.paralaxing = false;
 	this.platform = false;
+	this.showCollisionMap = true;
 	this.sound = {};
 	this.nis = [];
 	this.initialize();

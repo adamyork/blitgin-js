@@ -23,9 +23,9 @@ class RenderObject
   
   initialize: ->
     if (undefined != @_assetClass) and (0 != @_cellHeight) and (0 != @_cellWidth)
-      @_asset = new Image()
-      @_asset.src = @_assetClass
-      @_workbench = document.createElement "canvas"
+      _asset = new Image()
+      _asset.src = @_assetClass
+      @workbench = document.createElement "canvas"
     else
       console.log("Set a cellwidth , cellheight , and assetClass before calling initialize.")
 
@@ -35,8 +35,8 @@ class RenderObject
 
 RenderObject::__defineGetter__ "bitmapData", ->
   tmpData = new Image()
-  @_workbench.width = @_asset.width
-  @_workbench.height = @_asset.height
+  @workbench.width = @_asset.width
+  @workbench.height = @_asset.height
   ctx = workbench.getContext('2d')
   keyFrame = Math.floor(@_frame) * @_cellWidth
   ctx.drawImage @_asset,keyFrame,0

@@ -59,7 +59,7 @@ Game = (function() {
   };
 
   Game.prototype.start = function() {
-    return _timer = setInterval(this.render.bind(this), 2500);
+    return _timer = setInterval(this.render.bind(this), 410);
   };
 
   Game.prototype.preinitialize = function(parent, width, height) {
