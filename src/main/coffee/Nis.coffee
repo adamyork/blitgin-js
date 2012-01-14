@@ -26,7 +26,7 @@ class Nis
   checkForEnemyConditions:->
     (@enemies.length is @nisCondition.enemies.length)
 
-Nis::__defineGetter__ "conditionsMet", (val) ->
+Nis::__defineGetter__ "conditionsMet",(val)->
   pCondition:Boolean = checkConditions @_player,@nisCondition.playerCondition
   mCondition:Boolean = checkConditions @_map,@nisCondition.mapCondition
   eCondition:Boolean = @checkForEnemyConditions()

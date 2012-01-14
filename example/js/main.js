@@ -38,6 +38,14 @@ function createGame() {
 	game.subscribe(this);
 }
 
+function notify(args) {
+	//console.log("notified " + args)
+}
+
+function unsubscribeMain() {
+	game.unsubscribe(this);
+}
+
 function startGame() {
 	game.start();
 }

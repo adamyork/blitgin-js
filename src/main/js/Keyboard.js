@@ -14,8 +14,8 @@ Keyboard.prototype.KEY_UP = "keyup";
 
 Keyboard.prototype.KEY_DOWN = "keydown";
 
-Keyboard.prototype.LEFT = "left";
+Keyboard.prototype.LEFT = 65;
 
-Keyboard.prototype.RIGHT = "right";
+Keyboard.prototype.RIGHT = 68;
 
-Keyboard.prototype.SPACE = "space";
+Keyboard.prototype.SPACE = 32;

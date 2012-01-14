@@ -127,7 +127,9 @@ Map = (function(_super) {
   Map.prototype.finalize = function() {
     this._initializeComplete = true;
     this.x = 0;
-    return this.y = 0;
+    this.y = 0;
+    this.activeEnemies = [];
+    return this.activeMapObjects = [];
   };
 
   Map.prototype.removeBlackAndCache = function(asset, targetData) {
@@ -155,9 +157,9 @@ Map = (function(_super) {
 
   Map.prototype.manageElements = function(type) {
     var activeTargets, enemy, group, i, inactiveTargets, indep, key, obj, posX, posY, target, targetArray, vh, vw, _i, _j, _len, _len2, _ref;
-    targetArray = type === Map.prototype.MANAGE_ENEMIES ? this._enemies : this._mapObjects;
-    inactiveTargets = type === Map.prototype.MANAGE_ENEMIES ? this._inactiveEnemies : this._inactiveMapObjects;
-    activeTargets = type === Map.prototype.MANAGE_ENEMIES ? _activeEnemies : this._activeMapObjects;
+    targetArray = type === Map.prototype.MANAGE_ENEMIES ? this.enemies : this.mapObjects;
+    inactiveTargets = type === Map.prototype.MANAGE_ENEMIES ? _inactiveEnemies : _inactiveMapObjects;
+    activeTargets = type === Map.prototype.MANAGE_ENEMIES ? _activeEnemies : _activeMapObjects;
     for (_i = 0, _len = targetArray.length; _i < _len; _i++) {
       group = targetArray[_i];
       _ref = group.positions;
@@ -414,12 +416,20 @@ Map.prototype.__defineGetter__("mapObjects", function() {
   return this._mapObjects;
 });
 
+Map.prototype.__defineSetter__("activeMapObjects", function(val) {
+  return this._activeMapObjects = val;
+});
+
 Map.prototype.__defineGetter__("activeMapObjects", function() {
   return this._activeMapObjects;
 });
 
 Map.prototype.__defineGetter__("activeEnemies", function() {
   return this._activeEnemies;
+});
+
+Map.prototype.__defineSetter__("activeEnemies", function(val) {
+  return this._activeEnemies = val;
 });
 
 Map.prototype.__defineGetter__("width", function() {

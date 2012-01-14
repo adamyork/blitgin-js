@@ -1,10 +1,11 @@
 var Game;
 
 Game = (function() {
-  var _activeMap, _activePlayer, _collisionEngineClass, _customKey, _customKeys, _downKeys, _input, _jumpKeys, _leftKeys, _maps, _movement, _parent, _pause, _physicsEngineClass, _players, _renderEngine, _renderEngineClass, _rightKeys, _screen, _soundEngine, _subscribers, _timer, _upKeys;
+  var _activeMap, _activePlayer, _collisionEngineClass, _customKey, _customKeys, _downKeys, _input, _instance, _jumpKeys, _leftKeys, _maps, _movement, _parent, _pause, _physicsEngineClass, _players, _renderEngine, _renderEngineClass, _rightKeys, _screen, _soundEngine, _subscribers, _timer, _upKeys;
 
   function Game(name) {
     this.name = name;
+    Game.prototype.instance = this;
     this.keyboard = new Keyboard();
   }
 
@@ -54,6 +55,8 @@ Game = (function() {
 
   _timer = {};
 
+  _instance = {};
+
   Game.prototype.render = function() {
     if (this._pause) return;
     return _renderEngine.render(_input);
@@ -99,10 +102,10 @@ Game = (function() {
       console.log("Blitgin_as :: [ERROR] :: you need at least one player.");
     }
     _soundEngine = new SoundEngine();
-    _renderEngine.soundEngine = this._soundEngine;
-    map = this._maps[_activeMap];
-    player = this._players[_activePlayer];
-    _renderEngine.setScreen(_screen);
+    _renderEngine.soundEngine = _soundEngine;
+    map = this.maps[_activeMap];
+    player = this.players[_activePlayer];
+    _renderEngine.scrn = _screen;
     _renderEngine.map = new map();
     _renderEngine.player = new player();
     _input = new Input();
@@ -189,16 +192,24 @@ Game = (function() {
   };
 
   Game.prototype.subscribe = function(subscriber) {
-    return _subscribers[subscriber] = subscriber;
+    return _subscribers.push(subscriber);
   };
 
   Game.prototype.unsubscribe = function(subscriber) {
-    return _subscriber.slice(this._subscribers.indexOf(subscriber), _subscribers.indexOf(subscriber) + 1 || 9e9);
+    return _subscribers.slice(_subscribers.indexOf(subscriber), _subscribers.indexOf(subscriber) + 1 || 9e9);
   };
 
   return Game;
 
 })();
+
+Game.prototype.__defineGetter__("instance", function() {
+  return this._instance;
+});
+
+Game.prototype.__defineSetter__("instance", function(val) {
+  return this._instance = val;
+});
 
 Game.prototype.__defineGetter__("renderEngineClass", function() {
   return this._renderEngineClass;

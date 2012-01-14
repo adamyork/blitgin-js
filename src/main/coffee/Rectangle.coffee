@@ -6,26 +6,26 @@ class Rectangle
   _width = 0
   _height = 0
   
-Rectangle::__defineGetter__ "x", ->
-    return @_x;
+Rectangle::__defineGetter__ "x",->
+  @_x
 
-Rectangle::__defineSetter__ "x", (val) ->
-    @_x = val
+Rectangle::__defineSetter__ "x",(val)->
+  @_x = val
     
-Rectangle::__defineGetter__ "y", ->
-    return @_y;
+Rectangle::__defineGetter__ "y",->
+  @_y
 
-Rectangle::__defineSetter__ "y", (val) ->
-    @_y = val
+Rectangle::__defineSetter__ "y",(val)->
+  @_y = val
 
-Rectangle::__defineGetter__ "width", ->
-    return @_width;
+Rectangle::__defineGetter__ "width",->
+  @_width
 
-Rectangle::__defineSetter__ "width", (val) ->
-    @_width = val
+Rectangle::__defineSetter__ "width",(val)->
+  @_width = val
 
-Rectangle::__defineGetter__ "height", ->
-    return @_height;
+Rectangle::__defineGetter__ "height",->
+  @_height
 
-Rectangle::__defineSetter__ "height", (val) ->
-    @_height = val
+Rectangle::__defineSetter__ "height",(val)->
+  @_height = val

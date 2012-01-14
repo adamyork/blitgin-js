@@ -1,5 +1,6 @@
 class Game
   constructor:(@name)->
+    Game::instance = @
     @keyboard = new Keyboard()
    
   _subscribers = []
@@ -25,6 +26,7 @@ class Game
   _movement = {}
   _input = {}
   _timer = {}
+  _instance = {}
   
   render: ->
     if @_pause
@@ -68,12 +70,12 @@ class Game
         console.log "Blitgin_as :: [ERROR] :: you need at least one player."
     
     _soundEngine = new SoundEngine()
-    _renderEngine.soundEngine = @_soundEngine
+    _renderEngine.soundEngine = _soundEngine
     
-    map = @_maps[_activeMap]
-    player= @_players[_activePlayer]
+    map = @maps[_activeMap]
+    player= @players[_activePlayer]
     
-    _renderEngine.setScreen _screen
+    _renderEngine.scrn = _screen
     _renderEngine.map = new map()
     _renderEngine.player = new player()
     
@@ -147,101 +149,107 @@ class Game
     _subscribers = undefined
     _screen = undefined
 
-  notifySubscribers: (map,player,actions) ->
+  notifySubscribers:(map,player,actions)->
     subscriber.notify(map, player, actions) for subscriber in _subscribers
 
-  subscribe: (subscriber) ->
-    _subscribers[subscriber] = subscriber
+  subscribe:(subscriber)->
+    _subscribers.push(subscriber)
 
-  unsubscribe: (subscriber) ->
-    _subscriber[@_subscribers.indexOf(subscriber).._subscribers.indexOf(subscriber)]
+  unsubscribe:(subscriber)->
+    _subscribers[_subscribers.indexOf(subscriber).._subscribers.indexOf(subscriber)]
+    
+Game::__defineGetter__ "instance",->
+  @_instance
+
+Game::__defineSetter__ "instance",(val)->
+  @_instance = val
             
-Game::__defineGetter__ "renderEngineClass", ->
+Game::__defineGetter__ "renderEngineClass",->
   @_renderEngineClass
 
-Game::__defineSetter__ "renderEngineClass", (val) ->
+Game::__defineSetter__ "renderEngineClass",(val)->
   @_renderEngineClass = val
 
-Game::__defineGetter__ "collisionEngineClass", ->
+Game::__defineGetter__ "collisionEngineClass",->
   @_collisionEngineClass
 
-Game::__defineSetter__ "collisionEngineClass", (val) ->
+Game::__defineSetter__ "collisionEngineClass",(val)->
   @_collisionEngineClass = val
 
-Game::__defineGetter__ "physicsEngineClass", ->
+Game::__defineGetter__ "physicsEngineClass",->
   @_physicsEngineClass
 
-Game::__defineSetter__ "physicsEngineClass", (val) ->
+Game::__defineSetter__ "physicsEngineClass",(val)->
   @_physicsEngineClass = val
 
-Game::__defineGetter__ "players", ->
+Game::__defineGetter__ "players",->
   @_players
 
-Game::__defineSetter__ "players", (val) ->
+Game::__defineSetter__ "players",(val)->
   @_players = val
 
-Game::__defineGetter__ "maps", ->
+Game::__defineGetter__ "maps",->
   @_maps
 
-Game::__defineSetter__ "maps", (val) ->
+Game::__defineSetter__ "maps",(val)->
   @_maps = val
 
-Game::__defineGetter__ "activeMap", ->
+Game::__defineGetter__ "activeMap",->
   @_activeMap
 
-Game::__defineSetter__ "activeMap", (val) ->
+Game::__defineSetter__ "activeMap",(val)->
   @_activeMap = val
 
-Game::__defineSetter__ "activePlayer", (val) ->
+Game::__defineSetter__ "activePlayer",(val)->
   @_activePlayer = val
 
-Game::__defineGetter__ "activePlayer", ->
+Game::__defineGetter__ "activePlayer",->
   @_activePlayer
 
-Game::__defineGetter__ "leftKeys", ->
+Game::__defineGetter__ "leftKeys",->
   @_leftKeys
 
-Game::__defineSetter__ "leftKeys", (val) ->
+Game::__defineSetter__ "leftKeys",(val)->
   @_leftKeys = val
 
-Game::__defineGetter__ "rightKeys", ->
+Game::__defineGetter__ "rightKeys",->
   @_rightKeys
 
-Game::__defineSetter__ "rightKeys", (val) ->
+Game::__defineSetter__ "rightKeys",(val)->
   @_rightKeys = val
 
-Game::__defineGetter__ "upKeys", ->
+Game::__defineGetter__ "upKeys",->
   @_upKeys
 
-Game::__defineSetter__ "upKeys", (val) ->
+Game::__defineSetter__ "upKeys",(val)->
   @_upKeys = val
 
-Game::__defineGetter__ "downKeys", ->
+Game::__defineGetter__ "downKeys",->
   @_downKeys
 
-Game::__defineSetter__ "downKeys", (val) ->
+Game::__defineSetter__ "downKeys",(val)->
   @_downKeys = val
 
-Game::__defineGetter__ "jumpKeys", ->
+Game::__defineGetter__ "jumpKeys",->
   @_jumpKeys
 
-Game::__defineSetter__ "jumpKeys", (val) ->
+Game::__defineSetter__ "jumpKeys",(val)->
   @_jumpKeys = val
 
-Game::__defineGetter__ "customKeys", ->
+Game::__defineGetter__ "customKeys",->
   @_customKeys
 
-Game::__defineSetter__ "customKeys", (val) ->
+Game::__defineSetter__ "customKeys",(val)->
   @_customKeys = val
 
-Game::__defineGetter__ "pause", ->
+Game::__defineGetter__ "pause",->
   @_pause
 
-Game::__defineSetter__ "pause", (val) ->
+Game::__defineSetter__ "pause",(val)->
   @_pause = val
   
-Game::__defineGetter__ "keyboard", ->
+Game::__defineGetter__ "keyboard",->
   @_keyboard
 
-Game::__defineSetter__ "keyboard", (val) ->
+Game::__defineSetter__ "keyboard",(val)->
   @_keyboard = val

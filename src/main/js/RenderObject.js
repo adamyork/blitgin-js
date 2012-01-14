@@ -5,6 +5,8 @@ RenderObject = (function() {
 
   function RenderObject(name) {
     this.name = name;
+    this.x = 0;
+    this.y = 0;
   }
 
   _transparency = false;
