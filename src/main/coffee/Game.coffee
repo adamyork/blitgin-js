@@ -31,18 +31,18 @@ class Game
   render: ->
     if @_pause
         return
-    _renderEngine.render _input
+    window.mozRequestAnimationFrame _renderEngine.render(_input)
     
   start: ->
-    _timer = setInterval @render.bind(this) , 410
+    _timer = setInterval @render.bind(this) , 80
 
   preinitialize: (parent, width, height) ->
     _parent = parent
-    Game::ViewportHeight = height
-    Game::ViewportWidth = width
+    Game::VIEWPORT_HEIGHT = height
+    Game::VIEWPORT_WIDTH = width
     _screen = document.createElement "canvas"
-    _screen.setAttribute "width", @ViewportWidth
-    _screen.setAttribute "height", @ViewportHeight
+    _screen.setAttribute "width", @VIEWPORT_WIDTH
+    _screen.setAttribute "height", @VIEWPORT_HEIGHT
     _screen.setAttribute "tabIndex", 0
     document.body.appendChild _screen
     @initialize()

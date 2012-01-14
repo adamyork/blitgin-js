@@ -29,7 +29,6 @@ RenderEngine = (function() {
       this.manageNIS(this.nis, input);
       return;
     }
-    console.log(input.direction);
     this.manageMap(input);
     this.paint(this.map, this.map.point);
     this.map.manageElements(Map.prototype.MANAGE_ENEMIES);
@@ -66,9 +65,10 @@ RenderEngine = (function() {
   };
 
   RenderEngine.prototype.paint = function(obj, point) {
-    var ctx;
-    ctx = this.scrn.getContext('2d');
-    return ctx.drawImage(this.map.bitmapData, point.x, point.y);
+    var ctxMain, pixels;
+    ctxMain = this.scrn.getContext('2d');
+    pixels = obj.bitmapData;
+    return ctxMain.putImageData(pixels, 0, 0);
   };
 
   RenderEngine.prototype.manageMap = function(input) {

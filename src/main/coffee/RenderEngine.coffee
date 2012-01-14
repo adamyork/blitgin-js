@@ -10,18 +10,11 @@ class RenderEngine
   _collisionEngine = {}
   _physicsEngine = {}
 
-  #render:(input)->
-    # console.log 'render' + @map.bitmapData
-    # console.log @scrn
-    # ctx = @scrn.getContext '2d'
-    # ctx.drawImage @map.bitmapData,0,0
-
   render:(input)->
     if @nis
       @manageNIS @nis,input
       return
     #@managePlayer input
-    console.log input.direction
     @manageMap input
     @paint @map, @map.point
     @map.manageElements Map::MANAGE_ENEMIES
@@ -51,9 +44,9 @@ class RenderEngine
     Game::instance.notifySubscribers @map,@player,@actionObjects
 
   paint:(obj,point)->
-    #@screen.bitmapData.copyPixels obj.bitmapData,obj.rect,point
-    ctx = @scrn.getContext '2d'
-    ctx.drawImage @map.bitmapData,point.x,point.y
+    ctxMain = @scrn.getContext '2d'
+    pixels = obj.bitmapData
+    ctxMain.putImageData pixels,0,0
 
 # 
 # protected function managePlayer(input:InputVO):void

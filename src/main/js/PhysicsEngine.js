@@ -39,7 +39,7 @@ PhysicsEngine = (function() {
   PhysicsEngine.prototype.doesMapNeedToMove = function(player, map) {
     var conditionLeft, conditionRight;
     conditionLeft = (player.x <= player.mapBoundsMin) && (map.x !== 0);
-    conditionRight = (player.x >= player.mapBoundsMax) && (map.x !== map.width - Game.prototype.ViewportWidth);
+    conditionRight = (player.x >= player.mapBoundsMax) && (map.x !== map.width - Game.prototype.VIEWPORT_WIDTH);
     return conditionLeft || conditionRight;
   };
 

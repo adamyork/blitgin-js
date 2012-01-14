@@ -34,7 +34,7 @@ function createGame() {
 	game.rightKeys = [game.keyboard.RIGHT];
 	game.jumpKeys = [game.keyboard.SPACE];
 	game.customKeys = [ 76, 66 ];
-	game.preinitialize(this, 1024, 423);
+	game.preinitialize(this,1024,423);
 	game.subscribe(this);
 }
 

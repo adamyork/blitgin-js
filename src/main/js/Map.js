@@ -257,12 +257,13 @@ Map = (function(_super) {
 })(RenderObject);
 
 Map.prototype.__defineGetter__("bitmapData", function() {
-  var ctx, tmp, vh, vw, yPos;
+  var ctx, vh, vw, yPos;
   if (this._initializeComplete) {
-    tmp = new Image();
+    ctx = this.workbench.getContext('2d');
+    ctx.clearRect(0, 0, this.workbench.width, this.workbench.height);
     yPos = this.platform ? this._y : 0;
-    vh = Game.prototype.ViewportHeight;
-    vw = Game.prototype.ViewportWidth;
+    vh = Game.prototype.VIEWPORT_HEIGHT;
+    vw = Game.prototype.VIEWPORT_WIDTH;
     if (this.paralaxing) {
       this.copyPixels(this.backgroundData, tmp, new Rectangle(this._x * .25, yPos, vw, vh));
       this.copyPixels(this.midgroundData, tmp, new Rectangle(this._x * .5, yPos, vw, vh));
@@ -272,29 +273,25 @@ Map.prototype.__defineGetter__("bitmapData", function() {
     if (this.showCollisionMap) {
       this.copyPixels(this.collisionData, new Rectangle(this._x, yPos, vw, vh));
     }
-    tmp.src = null;
-    tmp.src = this.workbench.toDataURL();
-    ctx = this.workbench.getContext('2d');
-    ctx.clearRect(0, 0, this.workbench.width, this.workbench.height);
-    return tmp;
+    return ctx.getImageData(0, 0, Game.prototype.VIEWPORT_WIDTH, Game.prototype.ViewportHeight);
   } else {
     return console.log('You cannot start the game yet. Map assets are not loaded.');
   }
 });
 
 Map.prototype.__defineSetter__("x", function(val) {
-  if ((val >= 0) && (val <= this.foregroundAsset.width - Game.prototype.ViewportWidth)) {
+  if ((val >= 0) && (val <= this.foregroundAsset.width - Game.prototype.VIEWPORT_WIDTH)) {
     return this._x = val;
   } else if (val < 0) {
     return this._x = 0;
   } else if (val > 0) {
-    return this._x = this.foregroundAsset.width - Game.prototype.ViewportWidth;
+    return this._x = this.foregroundAsset.width - Game.prototype.VIEWPORT_WIDTH;
   }
 });
 
 Map.prototype.__defineSetter__("y", function(val) {
-  if (val >= this.collisionData.height - Game.prototype.ViewportWidth) {
-    this._y = this.collisionData.height - Game.prototype.ViewportHeight;
+  if (val >= this.collisionData.height - Game.prototype.VIEWPORT_WIDTH) {
+    this._y = this.collisionData.height - Game.prototype.VIEWPORT_HEIGHT;
     return;
   }
   if (val < 0) {

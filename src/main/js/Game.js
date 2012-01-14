@@ -59,20 +59,20 @@ Game = (function() {
 
   Game.prototype.render = function() {
     if (this._pause) return;
-    return _renderEngine.render(_input);
+    return window.mozRequestAnimationFrame(_renderEngine.render(_input));
   };
 
   Game.prototype.start = function() {
-    return _timer = setInterval(this.render.bind(this), 410);
+    return _timer = setInterval(this.render.bind(this), 80);
   };
 
   Game.prototype.preinitialize = function(parent, width, height) {
     _parent = parent;
-    Game.prototype.ViewportHeight = height;
-    Game.prototype.ViewportWidth = width;
+    Game.prototype.VIEWPORT_HEIGHT = height;
+    Game.prototype.VIEWPORT_WIDTH = width;
     _screen = document.createElement("canvas");
-    _screen.setAttribute("width", this.ViewportWidth);
-    _screen.setAttribute("height", this.ViewportHeight);
+    _screen.setAttribute("width", this.VIEWPORT_WIDTH);
+    _screen.setAttribute("height", this.VIEWPORT_HEIGHT);
     _screen.setAttribute("tabIndex", 0);
     document.body.appendChild(_screen);
     return this.initialize();

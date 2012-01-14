@@ -27,7 +27,7 @@ class PhysicsEngine
 
   doesMapNeedToMove:(player,map)->
     conditionLeft = (player.x <= player.mapBoundsMin) and (map.x isnt 0)
-    conditionRight = (player.x >= player.mapBoundsMax) and (map.x isnt map.width - Game::ViewportWidth)
+    conditionRight = (player.x >= player.mapBoundsMax) and (map.x isnt map.width - Game::VIEWPORT_WIDTH)
     (conditionLeft or conditionRight)
 
   enforcePositionThreshold:(player)->

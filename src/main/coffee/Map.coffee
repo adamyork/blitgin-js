@@ -212,10 +212,11 @@ class Map extends RenderObject
     
 Map::__defineGetter__ "bitmapData",->
   if @_initializeComplete
-    tmp = new Image()
+    ctx = @workbench.getContext '2d'
+    ctx.clearRect 0,0,@workbench.width,@workbench.height
     yPos = if @platform then @_y else 0
-    vh = Game::ViewportHeight
-    vw = Game::ViewportWidth
+    vh = Game::VIEWPORT_HEIGHT
+    vw = Game::VIEWPORT_WIDTH
     
     if(@paralaxing)
       @copyPixels @backgroundData,tmp,new Rectangle @_x * .25, yPos, vw, vh
@@ -225,25 +226,21 @@ Map::__defineGetter__ "bitmapData",->
     
     if(@showCollisionMap)
       @copyPixels @collisionData,new Rectangle @_x, yPos, vw, vh  
-    tmp.src = null
-    tmp.src = @workbench.toDataURL()
-    ctx = @workbench.getContext '2d'
-    ctx.clearRect 0,0,@workbench.width,@workbench.height
-    tmp
+    ctx.getImageData 0,0,Game::VIEWPORT_WIDTH,Game::ViewportHeight
   else
     console.log 'You cannot start the game yet. Map assets are not loaded.'
     
 Map::__defineSetter__ "x",(val)->
-  if (val >= 0) and (val <= @foregroundAsset.width - Game::ViewportWidth)
+  if (val >= 0) and (val <= @foregroundAsset.width - Game::VIEWPORT_WIDTH)
     @_x = val
   else if (val < 0)
     @_x = 0
   else if (val > 0)
-    @_x = (@foregroundAsset.width - Game::ViewportWidth)
+    @_x = (@foregroundAsset.width - Game::VIEWPORT_WIDTH)
 
 Map::__defineSetter__ "y",(val)->
-  if (val >= @collisionData.height - Game::ViewportWidth)
-    @_y = @collisionData.height - Game::ViewportHeight
+  if (val >= @collisionData.height - Game::VIEWPORT_WIDTH)
+    @_y = @collisionData.height - Game::VIEWPORT_HEIGHT
     return
   if (val < 0)
     @_y = 0
