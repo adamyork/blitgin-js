@@ -4,7 +4,7 @@ class Player extends RenderObject
     @y = 0
     @width = 0
     @height = 0
-    @point = {}
+    @frame = 0
     
   _showBounds = false
   _showCollisionRect = false
@@ -40,32 +40,32 @@ class Player extends RenderObject
   _composite = {}
   _compositePoint = {}
   _emitter = {}
-  _point = {}
   
   initialize:->
     super
     @y = _floor = ((Game::VIEWPORT_HEIGHT) - (@asset.height - @cellHeight))
+    @_frame = 0
     @mapBoundsMin = Game::VIEWPORT_WIDTH * .15
     @mapBoundsMax = (Game::VIEWPORT_WIDTH * .85) - @width
     @updateInherentStates()
 
   updateInherentStates:(action)->
     if(action is undefined)
-      _moveRight = new State Math.round(@asset.width / @cellWidth)-1,0,true,"moveRight"
-      _moveLeft = new State Math.round(@asset.width / @cellWidth)-1,1,true,"moveLeft"
-      _collisionRight = new State Math.round(@asset.width / @cellHeight)-1,2,false,"collisionRight"
-      _collisionLeft = new State Math.round(@asset.width / @cellHeight)-1,3,false,"collsionLeft"
-      _jumpRight = new State Math.round(@asset.width / @cellWidth)-1,0,true,"jumpRight"
-      _jumpLeft = new State Math.round(@asset.width / @cellWidth)-1,1,true,"jumpLeft"
+      @_moveRight = new State Math.round(@asset.width / @cellWidth)-1,0,true,"moveRight"
+      @_moveLeft = new State Math.round(@asset.width / @cellWidth)-1,1,true,"moveLeft"
+      @_collisionRight = new State Math.round(@asset.width / @cellHeight)-1,2,false,"collisionRight"
+      @_collisionLeft = new State Math.round(@asset.width / @cellHeight)-1,3,false,"collsionLeft"
+      @_jumpRight = new State Math.round(@asset.width / @cellWidth)-1,0,true,"jumpRight"
+      @_jumpLeft = new State Math.round(@asset.width / @cellWidth)-1,1,true,"jumpLeft"
     else
-      _moveRight = @assignActionState action.stateRight,_moveRight
-      _moveLeft = @assignActionState action.stateLeft,_moveLeft
-      _collisionRight = @assignActionState action.stateCollisionRight,_collisionRight
-      _collisionLeft = @assignActionState action.stateCollisionLeft,_collisionLeft
-      _jumpRight = @assignActionState action.stateJumpRight,_jumpRight
-      _jumpLeft = @assignActionState action.stateJumpLeft,_jumpLeft
-    _previousState = _moveRight
-    _state = _moveRight
+      @_moveRight = @assignActionState action.stateRight,_moveRight
+      @_moveLeft = @assignActionState action.stateLeft,_moveLeft
+      @_collisionRight = @assignActionState action.stateCollisionRight,_collisionRight
+      @_collisionLeft = @assignActionState action.stateCollisionLeft,_collisionLeft
+      @_jumpRight = @assignActionState action.stateJumpRight,_jumpRight
+      @_jumpLeft = @assignActionState action.stateJumpLeft,_jumpLeft
+    @_previousState = @_moveRight
+    @_state = @_moveRight
 
   assignActionState:(state,inherent)->
     if (state) then state else inherent
@@ -77,24 +77,18 @@ class Player extends RenderObject
     @actions[keyCode] = action
 
 Player::__defineGetter__ "bitmapData",->
-  @workbench.width = @_asset.width
-  @workbench.height = @_asset.height
-  ctx = workbench.getContext('2d')
-  keyFrame = Math.floor(@_frame) * @_cellWidth
-  ctx.drawImage @_asset,keyFrame,0
-  keyFrame = Math.floor(_frame) * cellWidth
-  row = _state.row * cellHeight
-#   
-  # if(_showBounds || transparency)
+  ctx = @workbench.getContext '2d'
+  keyFrame = Math.floor @frame * @cellWidth
+  row = @state.row * @cellHeight
+  @copyPixels @assetData,new Rectangle keyFrame,row,@cellWidth,@cellHeight
+  #This stuff needs to be re-thought. while helpful for development
+  #seems rather expensive.
+  # if(_showBounds )
       # tmpData.copyPixels(asset.bitmapData, new Rectangle(keyFrame, row, width, height), new Point(0, 0))
-  # else
-      # tmpData.threshold(asset.bitmapData, new Rectangle(keyFrame, row, width, height), new Point(0, 0), "<=", 0x000000, 0x0000000, 0xFFFFFF, true);
-#   
   # if(_showCollisionRect)
-      # var collisions:BitmapData = new BitmapData(collisionRect.width, collisionRect.
-                                                 # height, false, 0xFFFF00)
-      # tmpData.copyPixels(collisions, collisions.rect, new Point(thresholdX, thresholdY))
-  # return tmpData  
+      # var collisions:BitmapData = new BitmapData(collisionRect.width, collisionRect.height, false, 0xFFFF00)
+      # tmpData.copyPixels(collisions, collisions.rect, new Point(thresholdX, thresholdY))    
+  ctx.getImageData 0,0,@cellWidth,@cellWidth  
 
 Player::__defineSetter__ "x",(val)->
   if (val >= 0) and (val <= (Game::VIEWPORT_WIDTH - @width))

@@ -1,7 +1,7 @@
 var RenderObject;
 
 RenderObject = (function() {
-  var _asset, _assetClass, _cellHeight, _cellWidth, _direction, _duration, _easeCoefficient, _frame, _frameBuffer, _height, _index, _lifeSpan, _transparency, _velocityX, _velocityY, _width, _workbench, _x, _y;
+  var _asset, _assetClass, _assetData, _cellHeight, _cellWidth, _direction, _duration, _easeCoefficient, _frame, _frameBuffer, _height, _index, _lifeSpan, _transparency, _velocityX, _velocityY, _width, _workbench, _x, _y;
 
   function RenderObject(name) {
     this.name = name;
@@ -47,14 +47,57 @@ RenderObject = (function() {
 
   _asset = {};
 
+  _assetData = {};
+
   RenderObject.prototype.initialize = function() {
     if ((void 0 !== this.assetClass) && (0 !== this.cellHeight) && (0 !== this.cellWidth)) {
       this._asset = new Image();
+      this.assetData = new Image();
+      this._asset.onload = this.assetLoadComplete.bind(this);
       this._asset.src = this.assetClass;
       return this.workbench = document.createElement("canvas");
     } else {
       return console.log("Set a cellwidth , cellheight , and assetClass before calling initialize.");
     }
+  };
+
+  RenderObject.prototype.assetLoadComplete = function() {
+    this.removeBlackAndCache(this.asset, this.assetData);
+    this.x = 0;
+    return this.y = 0;
+  };
+
+  RenderObject.prototype.removeBlackAndCache = function(asset, targetData) {
+    var a, b, ctx, g, imageData, index, r, xpos, ypos, _ref, _ref2;
+    this.workbench.width = asset.width;
+    this.workbench.height = asset.height;
+    ctx = this.workbench.getContext('2d');
+    ctx.drawImage(asset, 0, 0);
+    imageData = ctx.getImageData(0, 0, this.workbench.width, this.workbench.height);
+    for (xpos = 0, _ref = imageData.width - 1; 0 <= _ref ? xpos <= _ref : xpos >= _ref; 0 <= _ref ? xpos++ : xpos--) {
+      for (ypos = 0, _ref2 = imageData.height - 1; 0 <= _ref2 ? ypos <= _ref2 : ypos >= _ref2; 0 <= _ref2 ? ypos++ : ypos--) {
+        index = 4 * (ypos * imageData.width + xpos);
+        r = imageData.data[index];
+        g = imageData.data[index + 1];
+        b = imageData.data[index + 2];
+        a = imageData.data[index + 3];
+        if (r + g + b === 0) imageData.data[index + 3] = 0;
+      }
+    }
+    ctx.putImageData(imageData, 0, 0);
+    targetData.src = null;
+    targetData.src = this.workbench.toDataURL();
+    return ctx.clearRect(0, 0, asset.width, asset.height);
+  };
+
+  RenderObject.prototype.copyPixels = function(asset, rect) {
+    var ctx, imageData;
+    if (this.workbench.width < asset.width) this.workbench.width = asset.width;
+    if (this.workbench.height < asset.height) this.workbench.height = asset.height;
+    ctx = this.workbench.getContext('2d');
+    ctx.drawImage(asset, 0, 0);
+    imageData = ctx.getImageData(rect.x, rect.y, rect.width, rect.height);
+    return ctx.putImageData(imageData, 0, 0);
   };
 
   RenderObject.prototype.dispose = function() {
@@ -177,7 +220,7 @@ RenderObject.prototype.__defineGetter__("rect", function() {
 });
 
 RenderObject.prototype.__defineGetter__("point", function() {
-  return new Point(this.x, this.y);
+  return new Point(this._x, this._y);
 });
 
 RenderObject.prototype.__defineSetter__("tranparency", function(val) {
@@ -198,6 +241,14 @@ RenderObject.prototype.__defineGetter__("assetClass", function() {
 
 RenderObject.prototype.__defineSetter__("assetClass", function(val) {
   return this._assetClass = val;
+});
+
+RenderObject.prototype.__defineGetter__("assetData", function() {
+  return this._assetData;
+});
+
+RenderObject.prototype.__defineSetter__("assetData", function(val) {
+  return this._assetData = val;
 });
 
 RenderObject.prototype.__defineGetter__("workbench", function() {

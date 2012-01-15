@@ -3,7 +3,7 @@ var Player,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
 Player = (function(_super) {
-  var _actions, _applyGravityAndFriction, _collisionCoefficient, _collisionLeft, _collisionRight, _composite, _compositePoint, _damage, _emitter, _floor, _frame, _health, _isBusy, _isDead, _jumpLeft, _jumpRight, _mapBoundsMax, _mapBoundsMin, _mapX, _mapY, _maxVelocityX, _maxVelocityY, _minVelocity, _moveLeft, _moveRight, _point, _previousState, _screenX, _screenY, _showBounds, _showCollisionRect, _state, _thresholdX, _thresholdY, _uniqueID;
+  var _actions, _applyGravityAndFriction, _collisionCoefficient, _collisionLeft, _collisionRight, _composite, _compositePoint, _damage, _emitter, _floor, _frame, _health, _isBusy, _isDead, _jumpLeft, _jumpRight, _mapBoundsMax, _mapBoundsMin, _mapX, _mapY, _maxVelocityX, _maxVelocityY, _minVelocity, _moveLeft, _moveRight, _previousState, _screenX, _screenY, _showBounds, _showCollisionRect, _state, _thresholdX, _thresholdY, _uniqueID;
 
   __extends(Player, _super);
 
@@ -13,7 +13,7 @@ Player = (function(_super) {
     this.y = 0;
     this.width = 0;
     this.height = 0;
-    this.point = {};
+    this.frame = 0;
   }
 
   _showBounds = false;
@@ -84,11 +84,10 @@ Player = (function(_super) {
 
   _emitter = {};
 
-  _point = {};
-
   Player.prototype.initialize = function() {
     Player.__super__.initialize.apply(this, arguments);
     this.y = _floor = Game.prototype.VIEWPORT_HEIGHT - (this.asset.height - this.cellHeight);
+    this._frame = 0;
     this.mapBoundsMin = Game.prototype.VIEWPORT_WIDTH * .15;
     this.mapBoundsMax = (Game.prototype.VIEWPORT_WIDTH * .85) - this.width;
     return this.updateInherentStates();
@@ -96,22 +95,22 @@ Player = (function(_super) {
 
   Player.prototype.updateInherentStates = function(action) {
     if (action === void 0) {
-      _moveRight = new State(Math.round(this.asset.width / this.cellWidth) - 1, 0, true, "moveRight");
-      _moveLeft = new State(Math.round(this.asset.width / this.cellWidth) - 1, 1, true, "moveLeft");
-      _collisionRight = new State(Math.round(this.asset.width / this.cellHeight) - 1, 2, false, "collisionRight");
-      _collisionLeft = new State(Math.round(this.asset.width / this.cellHeight) - 1, 3, false, "collsionLeft");
-      _jumpRight = new State(Math.round(this.asset.width / this.cellWidth) - 1, 0, true, "jumpRight");
-      _jumpLeft = new State(Math.round(this.asset.width / this.cellWidth) - 1, 1, true, "jumpLeft");
+      this._moveRight = new State(Math.round(this.asset.width / this.cellWidth) - 1, 0, true, "moveRight");
+      this._moveLeft = new State(Math.round(this.asset.width / this.cellWidth) - 1, 1, true, "moveLeft");
+      this._collisionRight = new State(Math.round(this.asset.width / this.cellHeight) - 1, 2, false, "collisionRight");
+      this._collisionLeft = new State(Math.round(this.asset.width / this.cellHeight) - 1, 3, false, "collsionLeft");
+      this._jumpRight = new State(Math.round(this.asset.width / this.cellWidth) - 1, 0, true, "jumpRight");
+      this._jumpLeft = new State(Math.round(this.asset.width / this.cellWidth) - 1, 1, true, "jumpLeft");
     } else {
-      _moveRight = this.assignActionState(action.stateRight, _moveRight);
-      _moveLeft = this.assignActionState(action.stateLeft, _moveLeft);
-      _collisionRight = this.assignActionState(action.stateCollisionRight, _collisionRight);
-      _collisionLeft = this.assignActionState(action.stateCollisionLeft, _collisionLeft);
-      _jumpRight = this.assignActionState(action.stateJumpRight, _jumpRight);
-      _jumpLeft = this.assignActionState(action.stateJumpLeft, _jumpLeft);
+      this._moveRight = this.assignActionState(action.stateRight, _moveRight);
+      this._moveLeft = this.assignActionState(action.stateLeft, _moveLeft);
+      this._collisionRight = this.assignActionState(action.stateCollisionRight, _collisionRight);
+      this._collisionLeft = this.assignActionState(action.stateCollisionLeft, _collisionLeft);
+      this._jumpRight = this.assignActionState(action.stateJumpRight, _jumpRight);
+      this._jumpLeft = this.assignActionState(action.stateJumpLeft, _jumpLeft);
     }
-    _previousState = _moveRight;
-    return _state = _moveRight;
+    this._previousState = this._moveRight;
+    return this._state = this._moveRight;
   };
 
   Player.prototype.assignActionState = function(state, inherent) {
@@ -136,13 +135,11 @@ Player = (function(_super) {
 
 Player.prototype.__defineGetter__("bitmapData", function() {
   var ctx, keyFrame, row;
-  this.workbench.width = this._asset.width;
-  this.workbench.height = this._asset.height;
-  ctx = workbench.getContext('2d');
-  keyFrame = Math.floor(this._frame) * this._cellWidth;
-  ctx.drawImage(this._asset, keyFrame, 0);
-  keyFrame = Math.floor(_frame) * cellWidth;
-  return row = _state.row * cellHeight;
+  ctx = this.workbench.getContext('2d');
+  keyFrame = Math.floor(this.frame * this.cellWidth);
+  row = this.state.row * this.cellHeight;
+  this.copyPixels(this.assetData, new Rectangle(keyFrame, row, this.cellWidth, this.cellHeight));
+  return ctx.getImageData(0, 0, this.cellWidth, this.cellWidth);
 });
 
 Player.prototype.__defineSetter__("x", function(val) {

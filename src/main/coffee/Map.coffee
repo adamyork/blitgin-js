@@ -79,15 +79,15 @@ class Map extends RenderObject
     _assetsLoaded++
     if @paralaxing
       if _assetsLoaded is Map::TOTAL_PARALAX_ASSETS
-        @removeBlackAndCache @backgroundAsset, @backgroundData
-        @removeBlackAndCache @midgroundAsset, @midgroundData
-        @removeBlackAndCache @foregroundAsset, @foregroundData
-        @removeBlackAndCache @collisionAsset, @collisionData
+        @removeBlackAndCache @backgroundAsset,@backgroundData
+        @removeBlackAndCache @midgroundAsset,@midgroundData
+        @removeBlackAndCache @foregroundAsset,@foregroundData
+        @removeBlackAndCache @collisionAsset,@collisionData
         @finalize()
     else
       if _assetsLoaded is Map::TOTAL_STANDARD_ASSETS
-        @removeBlackAndCache @foregroundAsset, @foregroundData
-        @removeBlackAndCache @collisionAsset, @collisionData
+        @removeBlackAndCache @foregroundAsset,@foregroundData
+        @removeBlackAndCache @collisionAsset,@collisionData
         @finalize()
         
   finalize:->
@@ -96,27 +96,6 @@ class Map extends RenderObject
     @y = 0
     @activeEnemies = []
     @activeMapObjects = []
-    
-  removeBlackAndCache:(asset,targetData)->
-    @workbench.width = asset.width
-    @workbench.height = asset.height
-    ctx = @workbench.getContext '2d'
-    ctx.drawImage asset,0,0
-    imageData = ctx.getImageData 0, 0, @workbench.width, @workbench.height
-    for xpos in [0 .. imageData.width-1]
-      for ypos in [0 .. imageData.height-1]
-        index = 4 * (ypos * imageData.width + xpos)
-        r = imageData.data[index]
-        g = imageData.data[index + 1]
-        b = imageData.data[index + 2]
-        a = imageData.data[index + 3]
-        if(r+g+b is 0)
-          imageData.data[index + 3] = 0
-          
-    ctx.putImageData imageData,0,0
-    targetData.src = null
-    targetData.src = @workbench.toDataURL()
-    ctx.clearRect 0,0,asset.width,asset.height
 
   manageElements:(type)->
     targetArray = if (type == Map::MANAGE_ENEMIES) then @enemies else @mapObjects;
@@ -200,16 +179,6 @@ class Map extends RenderObject
     _activeMapObjects = undefined
     _inactiveMapObjects = undefined
     
-  copyPixels:(asset,rect)->
-    if @workbench.width < asset.width
-      @workbench.width = asset.width
-    if @workbench.height < asset.height
-      @workbench.height = asset.height
-    ctx = @workbench.getContext '2d'
-    ctx.drawImage asset,0,0
-    imageData = ctx.getImageData rect.x,rect.y,rect.width,rect.height
-    ctx.putImageData imageData,0,0
-    
 Map::__defineGetter__ "bitmapData",->
   if @_initializeComplete
     ctx = @workbench.getContext '2d'
@@ -226,7 +195,7 @@ Map::__defineGetter__ "bitmapData",->
     
     if(@showCollisionMap)
       @copyPixels @collisionData,new Rectangle @_x, yPos, vw, vh  
-    ctx.getImageData 0,0,Game::VIEWPORT_WIDTH,Game::ViewportHeight
+    ctx.getImageData 0,0,Game::VIEWPORT_WIDTH,Game::VIEWPORT_HEIGHT
   else
     console.log 'You cannot start the game yet. Map assets are not loaded.'
     

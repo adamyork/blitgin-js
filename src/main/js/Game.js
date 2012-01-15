@@ -1,12 +1,13 @@
 var Game;
 
 Game = (function() {
-  var _activeMap, _activePlayer, _collisionEngineClass, _customKey, _customKeys, _downKeys, _input, _instance, _jumpKeys, _leftKeys, _maps, _movement, _parent, _pause, _physicsEngineClass, _players, _renderEngine, _renderEngineClass, _rightKeys, _screen, _soundEngine, _subscribers, _timer, _upKeys;
+  var _activeMap, _activePlayer, _animationFrameRequest, _collisionEngineClass, _customKey, _customKeys, _downKeys, _input, _instance, _jumpKeys, _leftKeys, _maps, _movement, _parent, _pause, _physicsEngineClass, _players, _renderEngine, _renderEngineClass, _rightKeys, _screen, _soundEngine, _subscribers, _timer, _upKeys;
 
   function Game(name) {
     this.name = name;
     Game.prototype.instance = this;
     this.keyboard = new Keyboard();
+    this.setAnimationFrameRequest();
   }
 
   _subscribers = [];
@@ -57,9 +58,17 @@ Game = (function() {
 
   _instance = {};
 
+  _animationFrameRequest = {};
+
   Game.prototype.render = function() {
     if (this._pause) return;
-    return window.mozRequestAnimationFrame(_renderEngine.render(_input));
+    return _animationFrameRequest(_renderEngine.render(_input));
+  };
+
+  Game.prototype.setAnimationFrameRequest = function() {
+    var w;
+    w = window;
+    return _animationFrameRequest = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.mozRequestAnimationFrame || w.oRequestAnimationFrame || w.msRequestAnimationFrame;
   };
 
   Game.prototype.start = function() {

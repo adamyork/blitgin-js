@@ -132,29 +132,6 @@ Map = (function(_super) {
     return this.activeMapObjects = [];
   };
 
-  Map.prototype.removeBlackAndCache = function(asset, targetData) {
-    var a, b, ctx, g, imageData, index, r, xpos, ypos, _ref, _ref2;
-    this.workbench.width = asset.width;
-    this.workbench.height = asset.height;
-    ctx = this.workbench.getContext('2d');
-    ctx.drawImage(asset, 0, 0);
-    imageData = ctx.getImageData(0, 0, this.workbench.width, this.workbench.height);
-    for (xpos = 0, _ref = imageData.width - 1; 0 <= _ref ? xpos <= _ref : xpos >= _ref; 0 <= _ref ? xpos++ : xpos--) {
-      for (ypos = 0, _ref2 = imageData.height - 1; 0 <= _ref2 ? ypos <= _ref2 : ypos >= _ref2; 0 <= _ref2 ? ypos++ : ypos--) {
-        index = 4 * (ypos * imageData.width + xpos);
-        r = imageData.data[index];
-        g = imageData.data[index + 1];
-        b = imageData.data[index + 2];
-        a = imageData.data[index + 3];
-        if (r + g + b === 0) imageData.data[index + 3] = 0;
-      }
-    }
-    ctx.putImageData(imageData, 0, 0);
-    targetData.src = null;
-    targetData.src = this.workbench.toDataURL();
-    return ctx.clearRect(0, 0, asset.width, asset.height);
-  };
-
   Map.prototype.manageElements = function(type) {
     var activeTargets, enemy, group, i, inactiveTargets, indep, key, obj, posX, posY, target, targetArray, vh, vw, _i, _j, _len, _len2, _ref;
     targetArray = type === Map.prototype.MANAGE_ENEMIES ? this.enemies : this.mapObjects;
@@ -242,16 +219,6 @@ Map = (function(_super) {
     return _inactiveMapObjects = void 0;
   };
 
-  Map.prototype.copyPixels = function(asset, rect) {
-    var ctx, imageData;
-    if (this.workbench.width < asset.width) this.workbench.width = asset.width;
-    if (this.workbench.height < asset.height) this.workbench.height = asset.height;
-    ctx = this.workbench.getContext('2d');
-    ctx.drawImage(asset, 0, 0);
-    imageData = ctx.getImageData(rect.x, rect.y, rect.width, rect.height);
-    return ctx.putImageData(imageData, 0, 0);
-  };
-
   return Map;
 
 })(RenderObject);
@@ -273,7 +240,7 @@ Map.prototype.__defineGetter__("bitmapData", function() {
     if (this.showCollisionMap) {
       this.copyPixels(this.collisionData, new Rectangle(this._x, yPos, vw, vh));
     }
-    return ctx.getImageData(0, 0, Game.prototype.VIEWPORT_WIDTH, Game.prototype.ViewportHeight);
+    return ctx.getImageData(0, 0, Game.prototype.VIEWPORT_WIDTH, Game.prototype.VIEWPORT_HEIGHT);
   } else {
     return console.log('You cannot start the game yet. Map assets are not loaded.');
   }

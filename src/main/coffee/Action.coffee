@@ -1,319 +1,196 @@
 class Action extends RenderObject
   contructor:(@name)->
 
-        # public static const ENEMY:String = "enemy";
-        # public static const PLAYER:String = "player";
-# 
-        # private var _isComplete:Boolean = false;
-        # private var _isAnimating:Boolean = false;
-        # private var _hasAnimated:Boolean = false;
-        # private var _nonObjectProducing:Boolean = false;
-# 
-        # private var _width:Number;
-        # private var _height:Number;
-        # private var _frame:Number = 0;
-        # private var _lifeSpan:Number = 0;
-        # private var _collisionCoefficient:Number = 0;
-        # private var _health:Number;
-        # private var _damage:Number;
-        # private var _soundLoops:Number = 0;
-        # private var _maxVelocityX:Number = 0;
-# 
-        # private var _owner:String;
-        # private var _id:String;
-# 
-        # private var _bitmapData:BitmapData;
-        # private var _sound:Sound;
-# 
-        # private var _stateLeft:State;
-        # private var _stateRight:State;
-        # private var _stateCollisionRight:State;
-        # private var _stateCollisionLeft:State;
-        # private var _stateJumpRight:State;
-        # private var _stateJumpLeft:State;
-        # private var _state:State;
-# 
-        # private var _composite:Composite;
-        # private var _emitter:Emitter;
-# 
-        # public function Action()
-        # {
-        # }
-# 
-        # public function set width(value:Number):void
-        # {
-            # _width = value;
-        # }
-# 
-        # override public function get width():Number
-        # {
-            # return _width;
-        # }
-# 
-        # public function set height(value:Number):void
-        # {
-            # _height = value;
-        # }
-# 
-        # override public function get height():Number
-        # {
-            # return _height;
-        # }
-# 
-        # override public function set velocityX(value:Number):void
-        # {
-            # if(value <= maxVelocityX)
-            # {
-                # super.velocityX = value;
-            # }
-        # }
-# 
-        # public function set maxVelocityX(value:Number):void
-        # {
-            # _maxVelocityX = value;
-        # }
-# 
-        # public function get maxVelocityX():Number
-        # {
-            # return _maxVelocityX;
-        # }
-# 
-        # public function get collisionRect():Rectangle
-        # {
-            # return new Rectangle(x, y, width, height);
-        # }
-# 
-        # public function get collisionCoefficient():Number
-        # {
-            # return _collisionCoefficient;
-        # }
-# 
-        # public function set collisionCoefficient(value:Number):void
-        # {
-            # _collisionCoefficient = value;
-        # }
-# 
-        # public function set id(value:String):void
-        # {
-            # _id = value;
-        # }
-# 
-        # public function get id():String
-        # {
-            # return _id;
-        # }
-# 
-        # protected function get lifeSpan():Number
-        # {
-            # return _lifeSpan;
-        # }
-# 
-        # protected function set lifeSpan(value:Number):void
-        # {
-            # _lifeSpan = value;
-        # }
-# 
-        # public function get health():Number
-        # {
-            # return _health;
-        # }
-# 
-        # public function get damage():Number
-        # {
-            # return _damage;
-        # }
-# 
-        # public function set health(value:Number):void
-        # {
-            # _health = value;
-            # if(value <= 0)
-            # {
-                # _isComplete = true;
-            # }
-        # }
-# 
-        # public function set damage(value:Number):void
-        # {
-            # _damage = value;
-        # }
-# 
-        # public function get owner():String
-        # {
-            # return _owner;
-        # }
-# 
-        # public function set owner(value:String):void
-        # {
-            # _owner = value;
-        # }
-# 
-        # public function get nonObjectProducing():Boolean
-        # {
-            # return _nonObjectProducing;
-        # }
-# 
-        # public function set nonObjectProducing(value:Boolean):void
-        # {
-            # _nonObjectProducing = value;
-        # }
-# 
-        # public function get isComplete():Boolean
-        # {
-            # return _isComplete;
-        # }
-# 
-        # public function get isAnimating():Boolean
-        # {
-            # return _isAnimating;
-        # }
-# 
-        # public function set isAnimating(value:Boolean):void
-        # {
-            # _isAnimating = value;
-        # }
-# 
-        # public function get hasAnimated():Boolean
-        # {
-            # return _hasAnimated;
-        # }
-# 
-        # public function set hasAnimated(value:Boolean):void
-        # {
-            # _hasAnimated = value;
-        # }
-# 
-        # public function get stateLeft():State
-        # {
-            # return _stateLeft;
-        # }
-# 
-        # public function set stateLeft(value:State):void
-        # {
-            # _stateLeft = value;
-        # }
-# 
-        # public function get stateRight():State
-        # {
-            # return _stateRight;
-        # }
-# 
-        # public function set stateRight(value:State):void
-        # {
-            # _stateRight = value;
-        # }
-# 
-        # public function set stateCollisionLeft(value:State):void
-        # {
-            # _stateCollisionLeft = value;
-        # }
-# 
-        # public function get stateCollisionLeft():State
-        # {
-            # return _stateCollisionLeft;
-        # }
-# 
-        # public function set stateCollisionRight(value:State):void
-        # {
-            # _stateCollisionRight = value;
-        # }
-# 
-        # public function get stateCollisionRight():State
-        # {
-            # return _stateCollisionRight;
-        # }
-# 
-        # public function set stateJumpRight(value:State):void
-        # {
-            # _stateJumpRight = value;
-        # }
-# 
-        # public function get stateJumpRight():State
-        # {
-            # return _stateJumpRight;
-        # }
-# 
-        # public function set stateJumpLeft(value:State):void
-        # {
-            # _stateJumpLeft = value;
-        # }
-# 
-        # public function get stateJumpLeft():State
-        # {
-            # return _stateJumpLeft;
-        # }
-# 
-        # public function get state():State
-        # {
-            # if(direction == 1)
-            # {
-                # return _stateRight;
-            # }
-            # else
-            # {
-                # return _stateLeft;
-            # }
-        # }
-# 
-        # public function set composite(value:Composite):void
-        # {
-            # _composite = value;
-        # }
-# 
-        # public function get composite():Composite
-        # {
-            # return _composite;
-        # }
-# 
-        # public function set emitter(value:Emitter):void
-        # {
-            # _emitter = value;
-        # }
-# 
-        # public function get emitter():Emitter
-        # {
-            # return _emitter;
-        # }
-# 
-        # public function get sound():Sound
-        # {
-            # return _sound;
-        # }
-# 
-        # public function set sound(value:Sound):void
-        # {
-            # _sound = value;
-        # }
-# 
-        # public function get soundLoops():Number
-        # {
-            # return _soundLoops;
-        # }
-# 
-        # public function set soundLoops(value:Number):void
-        # {
-            # _soundLoops = value;
-        # }
-# 
-        # public function set bitmapData(value:BitmapData):void
-        # {
-            # _bitmapData = value;
-        # }
-# 
-        # override public function get bitmapData():BitmapData
-        # {
-            # return _bitmapData;
-        # }
-# 
-        # override public function get frame():Number
-        # {
-            # return _frame;
-        # }
-# 
-        # override public function set frame(value:Number):void
-        # {
-            # if(value >= _lifeSpan)
-            # {
-                # _isComplete = true;
-            # }
-            # _frame = value;
-        # }
+  _isComplete = false
+  _isAnimating = false
+  _hasAnimated = false
+  _nonObjectProducing = false
+  _width = 0
+  _height = 0
+  _frame = 0
+  _lifeSpan = 0
+  _collisionCoefficient = 0
+  _health = 100
+  _damage = 10
+  _soundLoops = 0
+  _maxVelocityX = 0
+  _owner = ""
+  _id = ""
+  _bitmapData = {}
+  _sound = {}
+  _stateLeft = {}
+  _stateRight = {}
+  _stateCollisionRight = {}
+  _stateCollisionLeft = {}
+  _stateJumpRight = {}
+  _stateJumpLeft = {}
+  _state = {}
+  _composite = {}
+  _emitter = {}
+  
+Action::__defineGetter__ "width",->
+  @_width
+  
+Action::__defineSetter__ "width",(val)->
+  @_width = val
+
+Action::__defineGetter__ "height",->
+  @_height
+  
+Action::__defineSetter__ "height",(val)->
+  @_height = val
+
+Action::__defineSetter__ "velocityX",(val)->
+  if val <= @maxVelocityX    
+    @_velocityX = val
+    
+Action::__defineGetter__ "maxVelocityX",->
+  @_maxVelocityX
+
+Action::__defineSetter__ "maxVelocityX",(val)->
+  @_maxVelocityX = val
+
+Action::__defineGetter__ "collisionRect",->
+  new Rectangle @x,@y,@width,@height
+
+Action::__defineGetter__ "collisionCoefficient",->
+  @_collisionCoefficient
+
+Action::__defineSetter__ "collisionCoefficient",(val)->
+  @_collisionCoefficient = val
+
+Action::__defineGetter__ "id",->
+  @_id
+
+Action::__defineSetter__ "id",(val)->
+  @_id = val
+
+Action::__defineGetter__ "lifeSpan",->
+  @_lifeSpan
+
+Action::__defineSetter__ "lifeSpan",(val)->
+  @_lifeSpan = val
+
+Action::__defineGetter__ "damage",->
+  @_damage
+  
+Action::__defineSetter__ "damage",(val)->
+  @_damage = val
+
+Action::__defineGetter__ "health",->
+  @_health
+
+Action::__defineSetter__ "health",(val)->
+  @_health = val
+  if val <= 0
+    @isComplete = true
+
+Action::__defineGetter__ "owner",->
+  @_owner
+    
+Action::__defineSetter__ "owner",(val)->
+  @_owner = val
+
+Action::__defineGetter__ "nonObjectProducing",->
+  @_nonObjectProducing
+
+Action::__defineSetter__ "nonObjectProducing",(val)->
+  @_nonObjectProducing = val
+
+Action::__defineGetter__ "isComplete",->
+  @_isComplete
+
+Action::__defineGetter__ "isAnimating",->
+  @_isAnimating
+
+Action::__defineSetter__ "isAnimating",(val)->
+  @_isAnimating = val
+
+Action::__defineGetter__ "hasAnimated",->
+  @_hasAnimated
+
+Action::__defineSetter__ "hasAnimated",(val)->
+  @_hasAnimated = val
+
+Action::__defineGetter__ "stateLeft",->
+  @_stateLeft
+
+Action::__defineSetter__ "stateLeft",(val)->
+  @_stateLeft = val
+
+Action::__defineGetter__ "stateRight",->
+  @_stateRight
+
+Action::__defineSetter__ "stateRight",(val)->
+  @_stateRight = val
+
+Action::__defineGetter__ "stateCollisionLeft",->
+  @_stateCollisionLeft
+
+Action::__defineSetter__ "stateCollisionLeft",(val)->
+  @_stateCollisionLeft = val
+
+Action::__defineGetter__ "stateCollisionRight",->
+  @_stateCollisionRight
+
+Action::__defineSetter__ "stateCollisionRight",(val)->
+  @_stateCollisionRight = val
+
+Action::__defineGetter__ "stateJumpRight",->
+  @_stateJumpRight
+
+Action::__defineSetter__ "stateJumpRight",(val)->
+  @_stateJumpRight = val
+
+Action::__defineGetter__ "stateJumpLeft",->
+  @_stateJumpLeft
+
+Action::__defineSetter__ "stateJumpLeft",(val)->
+  @_stateJumpLeft = val
+
+Action::__defineGetter__ "state",->
+  if @direction is 1    
+    return @stateRight    
+  else    
+    return @stateLeft
+
+Action::__defineGetter__ "composite",->
+  @_composite
+
+Action::__defineSetter__ "composite",(val)->
+  @_composite = val
+  
+Action::__defineGetter__ "emitter",->
+  @_emitter
+
+Action::__defineSetter__ "emitter",(val)->
+  @_emitter = val
+
+Action::__defineGetter__ "sound",->
+  @_sound
+
+Action::__defineSetter__ "sound",(val)->
+  @_sound = val
+    
+Action::__defineGetter__ "soundLoops",->
+  @_soundLoops
+
+Action::__defineSetter__ "soundLoops",(val)->
+  @_soundLoops = val
+
+Action::__defineGetter__ "bitmapData",->
+  @_bitmapData
+
+Action::__defineSetter__ "bitmapData",(val)->
+  @_bitmapData = val
+  
+Action::__defineGetter__ "frame",->
+  @_frame
+
+Action::__defineSetter__ "frame",(val)->
+  if val >= @lifeSpan    
+    @isComplete = true    
+  _frame = val
+
+Action::ENEMY = "enemy"
+Action::PLAYER = "player"

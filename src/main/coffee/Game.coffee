@@ -2,6 +2,7 @@ class Game
   constructor:(@name)->
     Game::instance = @
     @keyboard = new Keyboard()
+    @setAnimationFrameRequest()
    
   _subscribers = []
   _pause = false
@@ -27,11 +28,16 @@ class Game
   _input = {}
   _timer = {}
   _instance = {}
+  _animationFrameRequest = {}
   
   render: ->
     if @_pause
         return
-    window.mozRequestAnimationFrame _renderEngine.render(_input)
+    _animationFrameRequest _renderEngine.render(_input)
+    
+  setAnimationFrameRequest:->
+    w = window
+    _animationFrameRequest = w.requestAnimationFrame or w.webkitRequestAnimationFrame or w.mozRequestAnimationFrame or w.oRequestAnimationFrame or w.msRequestAnimationFrame
     
   start: ->
     _timer = setInterval @render.bind(this) , 80

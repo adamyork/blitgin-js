@@ -22,15 +22,53 @@ class RenderObject
   _direction = 1
   _assetClass = ""
   _asset = {}
+  _assetData = {}
   
   initialize:->
     if (undefined != @assetClass) and (0 != @cellHeight) and (0 != @cellWidth)
       @_asset = new Image()
-      #needs to be a wait here for image to load
+      @assetData = new Image()
+      @_asset.onload = @assetLoadComplete.bind this
       @_asset.src = @assetClass
       @workbench = document.createElement "canvas"
     else
-      console.log("Set a cellwidth , cellheight , and assetClass before calling initialize.")
+      console.log "Set a cellwidth , cellheight , and assetClass before calling initialize."
+      
+  assetLoadComplete:->
+    @removeBlackAndCache @asset,@assetData
+    @x = 0
+    @y = 0
+
+  removeBlackAndCache:(asset,targetData)->
+    @workbench.width = asset.width
+    @workbench.height = asset.height
+    ctx = @workbench.getContext '2d'
+    ctx.drawImage asset,0,0
+    imageData = ctx.getImageData 0, 0, @workbench.width, @workbench.height
+    for xpos in [0 .. imageData.width-1]
+      for ypos in [0 .. imageData.height-1]
+        index = 4 * (ypos * imageData.width + xpos)
+        r = imageData.data[index]
+        g = imageData.data[index + 1]
+        b = imageData.data[index + 2]
+        a = imageData.data[index + 3]
+        if(r+g+b is 0)
+          imageData.data[index + 3] = 0
+          
+    ctx.putImageData imageData,0,0
+    targetData.src = null
+    targetData.src = @workbench.toDataURL()
+    ctx.clearRect 0,0,asset.width,asset.height
+
+  copyPixels:(asset,rect)->
+    if @workbench.width < asset.width
+      @workbench.width = asset.width
+    if @workbench.height < asset.height
+      @workbench.height = asset.height
+    ctx = @workbench.getContext '2d'
+    ctx.drawImage asset,0,0
+    imageData = ctx.getImageData rect.x,rect.y,rect.width,rect.height
+    ctx.putImageData imageData,0,0
 
   dispose:->
     _assetClass = undefined
@@ -120,7 +158,7 @@ RenderObject::__defineGetter__ "rect",->
   new Rectangle 0, 0, @width, @height
 
 RenderObject::__defineGetter__ "point",->
-  new Point @x, @y
+  new Point @_x, @_y
 
 RenderObject::__defineSetter__ "tranparency",(val)->
   @_transparency = val
@@ -136,6 +174,12 @@ RenderObject::__defineGetter__ "assetClass",->
 
 RenderObject::__defineSetter__ "assetClass",(val)->
   @_assetClass = val
+
+RenderObject::__defineGetter__ "assetData",->
+  @_assetData
+
+RenderObject::__defineSetter__ "assetData",(val)->
+  @_assetData = val
 
 RenderObject::__defineGetter__ "workbench",->
   @_workbench
