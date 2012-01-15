@@ -2,9 +2,9 @@ class Bootstrap
   constructor:(@name)->
 
   _classes = ["Point","Rectangle","Keyboard","Game","GameError","Group","RenderObject",
-    "RenderEngine","State","PhysicsEngine","CollisionEngine","SoundEngine","Input",
-    "Player","Map","MapObject","MapObjectGroup","Nis","NisCondition","NisGoal",
-    "PhysicsEngine","CollisionEngine","SoundEngine"]
+    "Action","RenderEngine","State","PhysicsEngine","CollisionEngine","SoundEngine","Input",
+    "Player","Map","MapObject","MapObjectGroup","Nis","NisCondition","NisGoal","Particle",
+    "PhysicsEngine","CollisionEngine","SoundEngine","Emitter","Enemy","EnemyGroup"]
   _collection = []
     
   start:(callback,basePath)->
