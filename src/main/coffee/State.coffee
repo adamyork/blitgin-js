@@ -1,6 +1,6 @@
 class State
   constructor:(@duration,@row,@persistent,@id,@frameBuffer)->
-
+    
   _persistent = true
   _duration = 0
   _row = 0

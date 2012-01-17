@@ -1,7 +1,7 @@
 var RenderObject;
 
 RenderObject = (function() {
-  var _asset, _assetClass, _assetData, _cellHeight, _cellWidth, _direction, _duration, _easeCoefficient, _frame, _frameBuffer, _height, _index, _lifeSpan, _transparency, _velocityX, _velocityY, _width, _workbench, _x, _y;
+  var _asset, _assetClass, _assetData, _cellHeight, _cellWidth, _colorConstant, _direction, _duration, _easeCoefficient, _frame, _frameBuffer, _height, _index, _lifeSpan, _transparency, _velocityX, _velocityY, _width, _workbench, _x, _y;
 
   function RenderObject(name) {
     this.name = name;
@@ -10,6 +10,8 @@ RenderObject = (function() {
   }
 
   _transparency = false;
+
+  _colorConstant = "#000000";
 
   _workbench = {};
 
@@ -62,18 +64,30 @@ RenderObject = (function() {
   };
 
   RenderObject.prototype.assetLoadComplete = function() {
-    this.removeBlackAndCache(this.asset, this.assetData);
+    if (this.transparency) {
+      this.assetData = this.asset;
+    } else {
+      this.removeColorConstantAndCache(this.asset, this.assetData);
+    }
     this.x = 0;
     return this.y = 0;
   };
 
-  RenderObject.prototype.removeBlackAndCache = function(asset, targetData) {
-    var a, b, ctx, g, imageData, index, r, xpos, ypos, _ref, _ref2;
+  RenderObject.prototype.removeColorConstantAndCache = function(asset, targetData) {
+    var a, b, ctx, g, imageData, index, parsed, r, val, xpos, ypos, _ref, _ref2;
+    if (this.colorConstant === void 0) {
+      console.log("Error : You need to set a hex value for colorConstant , or set tranparency true if no color is to be sampled out.");
+    }
     this.workbench.width = asset.width;
     this.workbench.height = asset.height;
     ctx = this.workbench.getContext('2d');
     ctx.drawImage(asset, 0, 0);
     imageData = ctx.getImageData(0, 0, this.workbench.width, this.workbench.height);
+    parsed = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(this.colorConstant);
+    r = parseInt(parsed[1], 16);
+    g = parseInt(parsed[2], 16);
+    b = parseInt(parsed[3], 16);
+    val = r + g + b;
     for (xpos = 0, _ref = imageData.width - 1; 0 <= _ref ? xpos <= _ref : xpos >= _ref; 0 <= _ref ? xpos++ : xpos--) {
       for (ypos = 0, _ref2 = imageData.height - 1; 0 <= _ref2 ? ypos <= _ref2 : ypos >= _ref2; 0 <= _ref2 ? ypos++ : ypos--) {
         index = 4 * (ypos * imageData.width + xpos);
@@ -81,7 +95,7 @@ RenderObject = (function() {
         g = imageData.data[index + 1];
         b = imageData.data[index + 2];
         a = imageData.data[index + 3];
-        if (r + g + b === 0) imageData.data[index + 3] = 0;
+        if (r + g + b === val) imageData.data[index + 3] = 0;
       }
     }
     ctx.putImageData(imageData, 0, 0);
@@ -92,9 +106,10 @@ RenderObject = (function() {
 
   RenderObject.prototype.copyPixels = function(asset, rect) {
     var ctx, imageData;
+    ctx = this.workbench.getContext('2d');
+    ctx.clearRect(0, 0, asset.width, asset.height);
     if (this.workbench.width < asset.width) this.workbench.width = asset.width;
     if (this.workbench.height < asset.height) this.workbench.height = asset.height;
-    ctx = this.workbench.getContext('2d');
     ctx.drawImage(asset, 0, 0);
     imageData = ctx.getImageData(rect.x, rect.y, rect.width, rect.height);
     return ctx.putImageData(imageData, 0, 0);
@@ -229,6 +244,14 @@ RenderObject.prototype.__defineSetter__("tranparency", function(val) {
 
 RenderObject.prototype.__defineGetter__("transparency", function() {
   return this._transparency;
+});
+
+RenderObject.prototype.__defineSetter__("colorConstant", function(val) {
+  return this._colorConstant = val;
+});
+
+RenderObject.prototype.__defineGetter__("colorConstant", function() {
+  return this._colorConstant;
 });
 
 RenderObject.prototype.__defineGetter__("asset", function() {

@@ -79,15 +79,15 @@ class Map extends RenderObject
     _assetsLoaded++
     if @paralaxing
       if _assetsLoaded is Map::TOTAL_PARALAX_ASSETS
-        @removeBlackAndCache @backgroundAsset,@backgroundData
-        @removeBlackAndCache @midgroundAsset,@midgroundData
-        @removeBlackAndCache @foregroundAsset,@foregroundData
-        @removeBlackAndCache @collisionAsset,@collisionData
+        @removeColorConstantAndCache @backgroundAsset,@backgroundData
+        @removeColorConstantAndCache @midgroundAsset,@midgroundData
+        @removeColorConstantAndCache @foregroundAsset,@foregroundData
+        @removeColorConstantAndCache @collisionAsset,@collisionData
         @finalize()
     else
       if _assetsLoaded is Map::TOTAL_STANDARD_ASSETS
-        @removeBlackAndCache @foregroundAsset,@foregroundData
-        @removeBlackAndCache @collisionAsset,@collisionData
+        @removeColorConstantAndCache @foregroundAsset,@foregroundData
+        @removeColorConstantAndCache @collisionAsset,@collisionData
         @finalize()
         
   finalize:->
@@ -198,7 +198,10 @@ Map::__defineGetter__ "bitmapData",->
     ctx.getImageData 0,0,Game::VIEWPORT_WIDTH,Game::VIEWPORT_HEIGHT
   else
     console.log 'You cannot start the game yet. Map assets are not loaded.'
-    
+
+Map::__defineGetter__ "x",->
+  @_x
+
 Map::__defineSetter__ "x",(val)->
   if (val >= 0) and (val <= @foregroundAsset.width - Game::VIEWPORT_WIDTH)
     @_x = val
@@ -206,6 +209,9 @@ Map::__defineSetter__ "x",(val)->
     @_x = 0
   else if (val > 0)
     @_x = (@foregroundAsset.width - Game::VIEWPORT_WIDTH)
+
+Map::__defineGetter__ "y",->
+  @_y
 
 Map::__defineSetter__ "y",(val)->
   if (val >= @collisionData.height - Game::VIEWPORT_WIDTH)
@@ -216,77 +222,78 @@ Map::__defineSetter__ "y",(val)->
     return
   @_y = val
 
-Map::__defineSetter__ "backgroundAssetClass",(val)->
-  @_backgroundAssetClass = val
-
 Map::__defineGetter__ "backgroundAssetClass",->
   @_backgroundAssetClass
 
-Map::__defineSetter__ "midgroundAssetClass",(val)->
-  @_midgroundAssetClass = val
+Map::__defineSetter__ "backgroundAssetClass",(val)->
+  @_backgroundAssetClass = val
 
 Map::__defineGetter__ "midgroundAssetClass",->
   @_midgroundAssetClass
 
+
+Map::__defineSetter__ "midgroundAssetClass",(val)->
+  @_midgroundAssetClass = val
+
+Map::__defineGetter__ "foregroundAssetClass",->
+  @_foregroundAssetClass
+
 Map::__defineSetter__ "foregroundAssetClass",(val)->
   @_foregroundAssetClass = val
 
-Map::__defineGetter__ "foregroundAssetClass",->
-  @_foregroundAssetClass;
+Map::__defineGetter__ "collisionAssetClass",->
+  @_collisionAssetClass
 
 Map::__defineSetter__ "collisionAssetClass",(val)->
   @_collisionAssetClass = val
 
-Map::__defineGetter__ "collisionAssetClass",->
-  @_collisionAssetClass;
+Map::__defineGetter__ "backgroundAsset",->
+  @_backgroundAsset
 
 Map::__defineSetter__ "backgroundAsset",(val)->
   @_backgroundAsset = val
 
-Map::__defineGetter__ "backgroundAsset",->
-  @_backgroundAsset
+Map::__defineGetter__ "midgroundAsset",->
+  @_midgroundAsset
 
 Map::__defineSetter__ "midgroundAsset",(val)->
   @_midgroundAsset = val
 
-Map::__defineGetter__ "midgroundAsset",->
-  @_midgroundAsset
+Map::__defineGetter__ "foregroundAsset",->
+  @_foregroundAsset
 
 Map::__defineSetter__ "foregroundAsset",(val)->
   @_foregroundAsset = val
 
-Map::__defineGetter__ "foregroundAsset",->
-  @_foregroundAsset;
+Map::__defineGetter__ "collisionAsset",->
+  @_collisionAsset
 
 Map::__defineSetter__ "collisionAsset",(val)->
   @_collisionAsset = val
 
-Map::__defineGetter__ "collisionAsset",->
-  @_collisionAsset;
+Map::__defineGetter__ "paralaxing",->
+  @_paralaxing
 
 Map::__defineSetter__ "paralaxing",(val)->
   @_paralaxing = val
 
-Map::__defineGetter__ "paralaxing",->
-  @_paralaxing
+Map::__defineGetter__ "showCollisionMap",->
+  @_showCollisionMap
 
 Map::__defineSetter__ "showCollisionMap",(val)->
   @_showCollisionMap = val
 
-Map::__defineGetter__ "showCollisionMap",->
-  @_showCollisionMap
+Map::__defineGetter__ "platform",->
+  @_platform
 
 Map::__defineSetter__ "platform",(val)->
   @_platform = val
 
-Map::__defineGetter__ "platform",->
-  @_platform
+Map::__defineGetter__ "enemies",->
+  @_enemies
 
 Map::__defineSetter__ "enemies",(val)->
   @_enemies = val
-
-Map::__defineGetter__ "enemies",->
-  @_enemies
 
 Map::__defineGetter__ "nis",->
   @_nis

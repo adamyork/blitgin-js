@@ -109,16 +109,16 @@ Map = (function(_super) {
     _assetsLoaded++;
     if (this.paralaxing) {
       if (_assetsLoaded === Map.prototype.TOTAL_PARALAX_ASSETS) {
-        this.removeBlackAndCache(this.backgroundAsset, this.backgroundData);
-        this.removeBlackAndCache(this.midgroundAsset, this.midgroundData);
-        this.removeBlackAndCache(this.foregroundAsset, this.foregroundData);
-        this.removeBlackAndCache(this.collisionAsset, this.collisionData);
+        this.removeColorConstantAndCache(this.backgroundAsset, this.backgroundData);
+        this.removeColorConstantAndCache(this.midgroundAsset, this.midgroundData);
+        this.removeColorConstantAndCache(this.foregroundAsset, this.foregroundData);
+        this.removeColorConstantAndCache(this.collisionAsset, this.collisionData);
         return this.finalize();
       }
     } else {
       if (_assetsLoaded === Map.prototype.TOTAL_STANDARD_ASSETS) {
-        this.removeBlackAndCache(this.foregroundAsset, this.foregroundData);
-        this.removeBlackAndCache(this.collisionAsset, this.collisionData);
+        this.removeColorConstantAndCache(this.foregroundAsset, this.foregroundData);
+        this.removeColorConstantAndCache(this.collisionAsset, this.collisionData);
         return this.finalize();
       }
     }
@@ -246,6 +246,10 @@ Map.prototype.__defineGetter__("bitmapData", function() {
   }
 });
 
+Map.prototype.__defineGetter__("x", function() {
+  return this._x;
+});
+
 Map.prototype.__defineSetter__("x", function(val) {
   if ((val >= 0) && (val <= this.foregroundAsset.width - Game.prototype.VIEWPORT_WIDTH)) {
     return this._x = val;
@@ -254,6 +258,10 @@ Map.prototype.__defineSetter__("x", function(val) {
   } else if (val > 0) {
     return this._x = this.foregroundAsset.width - Game.prototype.VIEWPORT_WIDTH;
   }
+});
+
+Map.prototype.__defineGetter__("y", function() {
+  return this._y;
 });
 
 Map.prototype.__defineSetter__("y", function(val) {
@@ -268,100 +276,100 @@ Map.prototype.__defineSetter__("y", function(val) {
   return this._y = val;
 });
 
-Map.prototype.__defineSetter__("backgroundAssetClass", function(val) {
-  return this._backgroundAssetClass = val;
-});
-
 Map.prototype.__defineGetter__("backgroundAssetClass", function() {
   return this._backgroundAssetClass;
 });
 
-Map.prototype.__defineSetter__("midgroundAssetClass", function(val) {
-  return this._midgroundAssetClass = val;
+Map.prototype.__defineSetter__("backgroundAssetClass", function(val) {
+  return this._backgroundAssetClass = val;
 });
 
 Map.prototype.__defineGetter__("midgroundAssetClass", function() {
   return this._midgroundAssetClass;
 });
 
-Map.prototype.__defineSetter__("foregroundAssetClass", function(val) {
-  return this._foregroundAssetClass = val;
+Map.prototype.__defineSetter__("midgroundAssetClass", function(val) {
+  return this._midgroundAssetClass = val;
 });
 
 Map.prototype.__defineGetter__("foregroundAssetClass", function() {
   return this._foregroundAssetClass;
 });
 
-Map.prototype.__defineSetter__("collisionAssetClass", function(val) {
-  return this._collisionAssetClass = val;
+Map.prototype.__defineSetter__("foregroundAssetClass", function(val) {
+  return this._foregroundAssetClass = val;
 });
 
 Map.prototype.__defineGetter__("collisionAssetClass", function() {
   return this._collisionAssetClass;
 });
 
-Map.prototype.__defineSetter__("backgroundAsset", function(val) {
-  return this._backgroundAsset = val;
+Map.prototype.__defineSetter__("collisionAssetClass", function(val) {
+  return this._collisionAssetClass = val;
 });
 
 Map.prototype.__defineGetter__("backgroundAsset", function() {
   return this._backgroundAsset;
 });
 
-Map.prototype.__defineSetter__("midgroundAsset", function(val) {
-  return this._midgroundAsset = val;
+Map.prototype.__defineSetter__("backgroundAsset", function(val) {
+  return this._backgroundAsset = val;
 });
 
 Map.prototype.__defineGetter__("midgroundAsset", function() {
   return this._midgroundAsset;
 });
 
-Map.prototype.__defineSetter__("foregroundAsset", function(val) {
-  return this._foregroundAsset = val;
+Map.prototype.__defineSetter__("midgroundAsset", function(val) {
+  return this._midgroundAsset = val;
 });
 
 Map.prototype.__defineGetter__("foregroundAsset", function() {
   return this._foregroundAsset;
 });
 
-Map.prototype.__defineSetter__("collisionAsset", function(val) {
-  return this._collisionAsset = val;
+Map.prototype.__defineSetter__("foregroundAsset", function(val) {
+  return this._foregroundAsset = val;
 });
 
 Map.prototype.__defineGetter__("collisionAsset", function() {
   return this._collisionAsset;
 });
 
-Map.prototype.__defineSetter__("paralaxing", function(val) {
-  return this._paralaxing = val;
+Map.prototype.__defineSetter__("collisionAsset", function(val) {
+  return this._collisionAsset = val;
 });
 
 Map.prototype.__defineGetter__("paralaxing", function() {
   return this._paralaxing;
 });
 
-Map.prototype.__defineSetter__("showCollisionMap", function(val) {
-  return this._showCollisionMap = val;
+Map.prototype.__defineSetter__("paralaxing", function(val) {
+  return this._paralaxing = val;
 });
 
 Map.prototype.__defineGetter__("showCollisionMap", function() {
   return this._showCollisionMap;
 });
 
-Map.prototype.__defineSetter__("platform", function(val) {
-  return this._platform = val;
+Map.prototype.__defineSetter__("showCollisionMap", function(val) {
+  return this._showCollisionMap = val;
 });
 
 Map.prototype.__defineGetter__("platform", function() {
   return this._platform;
 });
 
-Map.prototype.__defineSetter__("enemies", function(val) {
-  return this._enemies = val;
+Map.prototype.__defineSetter__("platform", function(val) {
+  return this._platform = val;
 });
 
 Map.prototype.__defineGetter__("enemies", function() {
   return this._enemies;
+});
+
+Map.prototype.__defineSetter__("enemies", function(val) {
+  return this._enemies = val;
 });
 
 Map.prototype.__defineGetter__("nis", function() {

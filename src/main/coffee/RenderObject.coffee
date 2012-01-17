@@ -4,6 +4,7 @@ class RenderObject
     @y = 0
     
   _transparency = false
+  _colorConstant = "#000000"
   _workbench = {}
   _x = 0
   _y = 0
@@ -35,16 +36,26 @@ class RenderObject
       console.log "Set a cellwidth , cellheight , and assetClass before calling initialize."
       
   assetLoadComplete:->
-    @removeBlackAndCache @asset,@assetData
+    if @transparency
+      @assetData = @asset
+    else
+      @removeColorConstantAndCache @asset,@assetData
     @x = 0
     @y = 0
 
-  removeBlackAndCache:(asset,targetData)->
+  removeColorConstantAndCache:(asset,targetData)->
+    if @colorConstant is undefined
+      console.log "Error : You need to set a hex value for colorConstant , or set tranparency true if no color is to be sampled out."
     @workbench.width = asset.width
     @workbench.height = asset.height
     ctx = @workbench.getContext '2d'
     ctx.drawImage asset,0,0
     imageData = ctx.getImageData 0, 0, @workbench.width, @workbench.height
+    parsed = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(@colorConstant)
+    r = parseInt parsed[1],16
+    g = parseInt parsed[2],16
+    b = parseInt parsed[3],16
+    val = (r+g+b)
     for xpos in [0 .. imageData.width-1]
       for ypos in [0 .. imageData.height-1]
         index = 4 * (ypos * imageData.width + xpos)
@@ -52,7 +63,7 @@ class RenderObject
         g = imageData.data[index + 1]
         b = imageData.data[index + 2]
         a = imageData.data[index + 3]
-        if(r+g+b is 0)
+        if(r+g+b is val)
           imageData.data[index + 3] = 0
           
     ctx.putImageData imageData,0,0
@@ -61,11 +72,12 @@ class RenderObject
     ctx.clearRect 0,0,asset.width,asset.height
 
   copyPixels:(asset,rect)->
+    ctx = @workbench.getContext '2d'
+    ctx.clearRect 0,0,asset.width,asset.height
     if @workbench.width < asset.width
       @workbench.width = asset.width
     if @workbench.height < asset.height
       @workbench.height = asset.height
-    ctx = @workbench.getContext '2d'
     ctx.drawImage asset,0,0
     imageData = ctx.getImageData rect.x,rect.y,rect.width,rect.height
     ctx.putImageData imageData,0,0
@@ -165,6 +177,12 @@ RenderObject::__defineSetter__ "tranparency",(val)->
 
 RenderObject::__defineGetter__ "transparency",->
   @_transparency
+
+RenderObject::__defineSetter__ "colorConstant",(val)->
+  @_colorConstant = val
+
+RenderObject::__defineGetter__ "colorConstant",->
+  @_colorConstant
 
 RenderObject::__defineGetter__ "asset",->
   @_asset

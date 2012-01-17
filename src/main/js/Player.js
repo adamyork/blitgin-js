@@ -88,6 +88,12 @@ Player = (function(_super) {
     Player.__super__.initialize.apply(this, arguments);
     this.y = _floor = Game.prototype.VIEWPORT_HEIGHT - (this.asset.height - this.cellHeight);
     this._frame = 0;
+    this._minVelocity = 0;
+    if (this.maxVelocityX === void 0) this.maxVelocityX = 15;
+    if (this.maxVelocityY === void 0) this.maxVelocityY = 26;
+    if (this.frameBuffer === void 0) this.frameBuffer = 0;
+    this.velocityX = 0;
+    this.velocityY = 0;
     this.mapBoundsMin = Game.prototype.VIEWPORT_WIDTH * .15;
     this.mapBoundsMax = (Game.prototype.VIEWPORT_WIDTH * .85) - this.width;
     return this.updateInherentStates();
@@ -95,12 +101,12 @@ Player = (function(_super) {
 
   Player.prototype.updateInherentStates = function(action) {
     if (action === void 0) {
-      this._moveRight = new State(Math.round(this.asset.width / this.cellWidth) - 1, 0, true, "moveRight");
-      this._moveLeft = new State(Math.round(this.asset.width / this.cellWidth) - 1, 1, true, "moveLeft");
-      this._collisionRight = new State(Math.round(this.asset.width / this.cellHeight) - 1, 2, false, "collisionRight");
-      this._collisionLeft = new State(Math.round(this.asset.width / this.cellHeight) - 1, 3, false, "collsionLeft");
-      this._jumpRight = new State(Math.round(this.asset.width / this.cellWidth) - 1, 0, true, "jumpRight");
-      this._jumpLeft = new State(Math.round(this.asset.width / this.cellWidth) - 1, 1, true, "jumpLeft");
+      this._moveRight = new State(Math.round(this.asset.width / this.cellWidth) - 1, 0, true, "moveRight", 0);
+      this._moveLeft = new State(Math.round(this.asset.width / this.cellWidth) - 1, 1, true, "moveLeft", 0);
+      this._collisionRight = new State(Math.round(this.asset.width / this.cellHeight) - 1, 2, false, "collisionRight", 0);
+      this._collisionLeft = new State(Math.round(this.asset.width / this.cellHeight) - 1, 3, false, "collsionLeft", 0);
+      this._jumpRight = new State(Math.round(this.asset.width / this.cellWidth) - 1, 0, true, "jumpRight", 0);
+      this._jumpLeft = new State(Math.round(this.asset.width / this.cellWidth) - 1, 1, true, "jumpLeft", 0);
     } else {
       this._moveRight = this.assignActionState(action.stateRight, _moveRight);
       this._moveLeft = this.assignActionState(action.stateLeft, _moveLeft);
@@ -110,7 +116,8 @@ Player = (function(_super) {
       this._jumpLeft = this.assignActionState(action.stateJumpLeft, _jumpLeft);
     }
     this._previousState = this._moveRight;
-    return this._state = this._moveRight;
+    this._state = this._moveRight;
+    return this._direction = 1;
   };
 
   Player.prototype.assignActionState = function(state, inherent) {
@@ -139,7 +146,11 @@ Player.prototype.__defineGetter__("bitmapData", function() {
   keyFrame = Math.floor(this.frame * this.cellWidth);
   row = this.state.row * this.cellHeight;
   this.copyPixels(this.assetData, new Rectangle(keyFrame, row, this.cellWidth, this.cellHeight));
-  return ctx.getImageData(0, 0, this.cellWidth, this.cellWidth);
+  return ctx.getImageData(0, 0, this.cellWidth, this.cellHeight);
+});
+
+Player.prototype.__defineGetter__("x", function() {
+  return this._x;
 });
 
 Player.prototype.__defineSetter__("x", function(val) {
@@ -152,12 +163,20 @@ Player.prototype.__defineSetter__("x", function(val) {
   }
 });
 
+Player.prototype.__defineGetter__("y", function() {
+  return this._y;
+});
+
 Player.prototype.__defineSetter__("y", function(val) {
   if (val >= (Game.prototype.VIEWPORT_HEIGHT - this.cellHeight)) {
     this._y = Game.prototype.VIEWPORT_HEIGHT - this.cellHeight;
     return;
   }
   return this._y = val;
+});
+
+Player.prototype.__defineGetter__("direction", function() {
+  return this._direction;
 });
 
 Player.prototype.__defineSetter__("direction", function(val) {
@@ -173,13 +192,18 @@ Player.prototype.__defineSetter__("frame", function(val) {
   if (val >= this._state.duration) {
     if (!this._state.persistent) {
       this._state = this._previousState;
+      console.log("problem line");
       this.frameBuffer = this._state.frameBuffer;
       this._isBusy = false;
     }
     this._frame = 0;
     return;
   }
-  return this._frame = this._frame === 0 || val === 0 ? val : val - this.frameBuffer;
+  return this._frame = this._frame === 0 || val === 0 ? val : val - this._frameBuffer;
+});
+
+Player.prototype.__defineGetter__("velocityX", function() {
+  return this._velocityX;
 });
 
 Player.prototype.__defineSetter__("velocityX", function(val) {

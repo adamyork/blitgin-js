@@ -29,6 +29,7 @@ RenderEngine = (function() {
       this.manageNIS(this.nis, input);
       return;
     }
+    this.managePlayer(input);
     this.manageMap(input);
     this.paint(this.map, this.map.point);
     this.map.manageElements(Map.prototype.MANAGE_ENEMIES);
@@ -51,7 +52,6 @@ RenderEngine = (function() {
       this.manageMapObject(mapObj);
       this.paint(mapObj, mapObj.point);
     }
-    this.map.manageElements(Map.prototype.MANAGE_MAP_OBJECTS);
     this.paint(this.player, this.player.point);
     if (this.player.composite !== void 0) {
       this.player.composite.frame++;
@@ -68,7 +68,18 @@ RenderEngine = (function() {
     var ctxMain, pixels;
     ctxMain = this.scrn.getContext('2d');
     pixels = obj.bitmapData;
-    return ctxMain.putImageData(pixels, 0, 0);
+    return ctxMain.putImageData(pixels, obj.point.x, obj.point.y);
+  };
+
+  RenderEngine.prototype.managePlayer = function(input) {
+    this.physicsEngine.adjustPlayerVerically(this.player, this.map);
+    if (input.direction !== 0) {
+      this.physicsEngine.applyPlayerInput(this.player, input);
+      this.player.frame++;
+    } else if ((input.direction === 0) && (!this.player.isBusy)) {
+      this.player.frame = 0;
+    }
+    return this.physicsEngine.adjustPlayerHorizontally(this.player, this.map);
   };
 
   RenderEngine.prototype.manageMap = function(input) {

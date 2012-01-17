@@ -45,18 +45,27 @@ class Player extends RenderObject
     super
     @y = _floor = ((Game::VIEWPORT_HEIGHT) - (@asset.height - @cellHeight))
     @_frame = 0
+    @_minVelocity = 0
+    if @maxVelocityX is undefined
+      @maxVelocityX = 15
+    if @maxVelocityY is undefined
+      @maxVelocityY = 26
+    if @frameBuffer is undefined
+      @frameBuffer = 0
+    @velocityX = 0
+    @velocityY = 0
     @mapBoundsMin = Game::VIEWPORT_WIDTH * .15
     @mapBoundsMax = (Game::VIEWPORT_WIDTH * .85) - @width
     @updateInherentStates()
 
   updateInherentStates:(action)->
     if(action is undefined)
-      @_moveRight = new State Math.round(@asset.width / @cellWidth)-1,0,true,"moveRight"
-      @_moveLeft = new State Math.round(@asset.width / @cellWidth)-1,1,true,"moveLeft"
-      @_collisionRight = new State Math.round(@asset.width / @cellHeight)-1,2,false,"collisionRight"
-      @_collisionLeft = new State Math.round(@asset.width / @cellHeight)-1,3,false,"collsionLeft"
-      @_jumpRight = new State Math.round(@asset.width / @cellWidth)-1,0,true,"jumpRight"
-      @_jumpLeft = new State Math.round(@asset.width / @cellWidth)-1,1,true,"jumpLeft"
+      @_moveRight = new State Math.round(@asset.width / @cellWidth)-1,0,true,"moveRight",0
+      @_moveLeft = new State Math.round(@asset.width / @cellWidth)-1,1,true,"moveLeft",0
+      @_collisionRight = new State Math.round(@asset.width / @cellHeight)-1,2,false,"collisionRight",0
+      @_collisionLeft = new State Math.round(@asset.width / @cellHeight)-1,3,false,"collsionLeft",0
+      @_jumpRight = new State Math.round(@asset.width / @cellWidth)-1,0,true,"jumpRight",0
+      @_jumpLeft = new State Math.round(@asset.width / @cellWidth)-1,1,true,"jumpLeft",0
     else
       @_moveRight = @assignActionState action.stateRight,_moveRight
       @_moveLeft = @assignActionState action.stateLeft,_moveLeft
@@ -66,6 +75,7 @@ class Player extends RenderObject
       @_jumpLeft = @assignActionState action.stateJumpLeft,_jumpLeft
     @_previousState = @_moveRight
     @_state = @_moveRight
+    @_direction = 1
 
   assignActionState:(state,inherent)->
     if (state) then state else inherent
@@ -79,6 +89,8 @@ class Player extends RenderObject
 Player::__defineGetter__ "bitmapData",->
   ctx = @workbench.getContext '2d'
   keyFrame = Math.floor @frame * @cellWidth
+  #console.log 'keyframe ' + @frame
+  #console.log 'keyframe ' + keyFrame
   row = @state.row * @cellHeight
   @copyPixels @assetData,new Rectangle keyFrame,row,@cellWidth,@cellHeight
   #This stuff needs to be re-thought. while helpful for development
@@ -88,7 +100,10 @@ Player::__defineGetter__ "bitmapData",->
   # if(_showCollisionRect)
       # var collisions:BitmapData = new BitmapData(collisionRect.width, collisionRect.height, false, 0xFFFF00)
       # tmpData.copyPixels(collisions, collisions.rect, new Point(thresholdX, thresholdY))    
-  ctx.getImageData 0,0,@cellWidth,@cellWidth  
+  ctx.getImageData 0,0,@cellWidth,@cellHeight 
+
+Player::__defineGetter__ "x",->
+  @_x
 
 Player::__defineSetter__ "x",(val)->
   if (val >= 0) and (val <= (Game::VIEWPORT_WIDTH - @width))
@@ -98,12 +113,18 @@ Player::__defineSetter__ "x",(val)->
   else if(val > 0)
     @_x = Game::VIEWPORT_WIDTH - @width
 
+Player::__defineGetter__ "y",->
+  @_y  
+
 Player::__defineSetter__ "y",(val)->
   if val >= (Game::VIEWPORT_HEIGHT - @cellHeight)
     @_y = Game::VIEWPORT_HEIGHT - @cellHeight;
     return
   @_y = val
-  
+
+Player::__defineGetter__ "direction",->
+  @_direction 
+
 Player::__defineSetter__ "direction",(val)->
   @_direction = val
   @state = if @direction is -1 then @_moveLeft else @_moveRight  
@@ -115,12 +136,16 @@ Player::__defineSetter__ "frame",(val)->
   if val >= @_state.duration
     if not @_state.persistent
       @_state = @_previousState
+      console.log "problem line"
       @frameBuffer = @_state.frameBuffer
       @_isBusy = false
     @_frame = 0
     return
-  @_frame = if (@_frame is 0 or val is 0) then val else val - @frameBuffer
+  @_frame = if (@_frame is 0 or val is 0) then val else val - @_frameBuffer
 
+Player::__defineGetter__ "velocityX",->
+  @_velocityX
+  
 Player::__defineSetter__ "velocityX",(val)->
   if(val <= @_maxVelocityX and val >= @_minVelocity)
     @_velocityX = val

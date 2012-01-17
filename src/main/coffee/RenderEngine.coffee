@@ -14,7 +14,7 @@ class RenderEngine
     if @nis
       @manageNIS @nis,input
       return
-    #@managePlayer input
+    @managePlayer input
     @manageMap input
     @paint @map, @map.point
     @map.manageElements Map::MANAGE_ENEMIES
@@ -31,7 +31,7 @@ class RenderEngine
       mapObj.frame++
       @manageMapObject mapObj
       @paint mapObj,mapObj.point
-    @map.manageElements Map::MANAGE_MAP_OBJECTS
+    #@map.manageElements Map::MANAGE_MAP_OBJECTS
     #Render player on screen
     @paint @player,@player.point
     #Render player composites onto player.
@@ -46,35 +46,22 @@ class RenderEngine
   paint:(obj,point)->
     ctxMain = @scrn.getContext '2d'
     pixels = obj.bitmapData
-    ctxMain.putImageData pixels,0,0
+    ctxMain.putImageData pixels,obj.point.x,obj.point.y
 
-# 
-# protected function managePlayer(input:InputVO):void
-# {
-    # manageJump(input);
-# 
-    # _physicsEngine.adjustPlayerVerically(_player, _map);
-# 
-    # if(input.direction != 0)
-    # {
-        # _physicsEngine.applyPlayerInput(_player, input);
-        # _player.frame++;
-    # }
-    # else if(input.direction == 0 && !_player.isBusy)
-    # {
-        # _player.frame = 0;
-    # }
-# 
-    # if(_player.isBusy)
-    # {
-        # _player.frame++;
-    # }
-# 
-    # _physicsEngine.adjustPlayerHorizontally(_player, _map);
-# 
-    # _collisionEngine.checkVerticalMapCollision(_player);
-    # _collisionEngine.checkHorizontalMapCollision();
-# }
+  managePlayer:(input)->
+    #@manageJump input
+    @physicsEngine.adjustPlayerVerically @player,@map
+    if input.direction isnt 0
+      @physicsEngine.applyPlayerInput @player,input
+      @player.frame++
+    else if (input.direction is 0) and (not @player.isBusy)
+      @player.frame = 0
+    # if @player.isBusy
+      # @player.frame++
+    @physicsEngine.adjustPlayerHorizontally @player,@map
+    #@collisionEngine.checkVerticalMapCollision @player
+    # @collisionEngine.checkHorizontalMapCollision()
+
 # 
 # protected function managePlayerState(action:Action, input:InputVO = null):void
 # {
