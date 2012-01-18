@@ -104,17 +104,6 @@ RenderObject = (function() {
     return ctx.clearRect(0, 0, asset.width, asset.height);
   };
 
-  RenderObject.prototype.copyPixels = function(asset, rect) {
-    var ctx, imageData;
-    ctx = this.workbench.getContext('2d');
-    ctx.clearRect(0, 0, asset.width, asset.height);
-    if (this.workbench.width < asset.width) this.workbench.width = asset.width;
-    if (this.workbench.height < asset.height) this.workbench.height = asset.height;
-    ctx.drawImage(asset, 0, 0);
-    imageData = ctx.getImageData(rect.x, rect.y, rect.width, rect.height);
-    return ctx.putImageData(imageData, 0, 0);
-  };
-
   RenderObject.prototype.dispose = function() {
     _assetClass = void 0;
     return _asset = void 0;

@@ -11,6 +11,8 @@ class RenderEngine
   _physicsEngine = {}
 
   render:(input)->
+    ctxMain = @scrn.getContext '2d'
+    ctxMain.clearRect 0,0,Game::VIEWPORT_WIDTH,Game::VIEWPORT_HEIGHT  
     if @nis
       @manageNIS @nis,input
       return
@@ -45,8 +47,13 @@ class RenderEngine
 
   paint:(obj,point)->
     ctxMain = @scrn.getContext '2d'
-    pixels = obj.bitmapData
-    ctxMain.putImageData pixels,obj.point.x,obj.point.y
+    d = obj.bitmapData
+    if d.player
+      ctxMain.drawImage d.player,d.rect.x,d.rect.y,d.rect.width,d.rect.height,obj.point.x,obj.point.y,d.rect.width,d.rect.height
+    else
+      for asset in d.map
+        if asset.data isnt undefined
+          ctxMain.drawImage asset.data,asset.rect.x,asset.rect.y,asset.rect.width,asset.rect.height,obj.point.x,obj.point.y,asset.rect.width,asset.rect.height
 
   managePlayer:(input)->
     #@manageJump input

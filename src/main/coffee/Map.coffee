@@ -179,6 +179,12 @@ class Map extends RenderObject
     _activeMapObjects = undefined
     _inactiveMapObjects = undefined
     
+  buildDataVO:(img,rect)->
+    tmp = {}
+    tmp.data = img
+    tmp.rect = rect
+    tmp
+    
 Map::__defineGetter__ "bitmapData",->
   if @_initializeComplete
     ctx = @workbench.getContext '2d'
@@ -186,16 +192,18 @@ Map::__defineGetter__ "bitmapData",->
     yPos = if @platform then @_y else 0
     vh = Game::VIEWPORT_HEIGHT
     vw = Game::VIEWPORT_WIDTH
-    
+    bg = {}
+    mid = {}
+    fg = {}
+    cd = {}
     if(@paralaxing)
-      @copyPixels @backgroundData,tmp,new Rectangle @_x * .25, yPos, vw, vh
-      @copyPixels @midgroundData,tmp,new Rectangle @_x * .5, yPos, vw, vh
+      bg = @buildDataVO @backgroundData,new Rectangle @_x*.25,yPos,vw,vh
+      mid = @buildDataVO @midgroundData,new Rectangle @_x*.5,yPos,vw,vh
     else
-      @copyPixels @foregroundData,new Rectangle @_x, yPos, vw, vh
-    
+      fg = @buildDataVO @foregroundData,new Rectangle @_x,yPos,vw,vh
     if(@showCollisionMap)
-      @copyPixels @collisionData,new Rectangle @_x, yPos, vw, vh  
-    ctx.getImageData 0,0,Game::VIEWPORT_WIDTH,Game::VIEWPORT_HEIGHT
+      cd = @buildDataVO @collisionData,new Rectangle @_x,yPos,vw,vh
+    {map:[bg,mid,fg,cd]}
   else
     console.log 'You cannot start the game yet. Map assets are not loaded.'
 

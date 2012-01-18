@@ -145,8 +145,10 @@ Player.prototype.__defineGetter__("bitmapData", function() {
   ctx = this.workbench.getContext('2d');
   keyFrame = Math.floor(this.frame * this.cellWidth);
   row = this.state.row * this.cellHeight;
-  this.copyPixels(this.assetData, new Rectangle(keyFrame, row, this.cellWidth, this.cellHeight));
-  return ctx.getImageData(0, 0, this.cellWidth, this.cellHeight);
+  return {
+    player: this.assetData,
+    rect: new Rectangle(keyFrame, row, this.cellWidth, this.cellHeight)
+  };
 });
 
 Player.prototype.__defineGetter__("x", function() {

@@ -89,10 +89,7 @@ class Player extends RenderObject
 Player::__defineGetter__ "bitmapData",->
   ctx = @workbench.getContext '2d'
   keyFrame = Math.floor @frame * @cellWidth
-  #console.log 'keyframe ' + @frame
-  #console.log 'keyframe ' + keyFrame
   row = @state.row * @cellHeight
-  @copyPixels @assetData,new Rectangle keyFrame,row,@cellWidth,@cellHeight
   #This stuff needs to be re-thought. while helpful for development
   #seems rather expensive.
   # if(_showBounds )
@@ -100,7 +97,7 @@ Player::__defineGetter__ "bitmapData",->
   # if(_showCollisionRect)
       # var collisions:BitmapData = new BitmapData(collisionRect.width, collisionRect.height, false, 0xFFFF00)
       # tmpData.copyPixels(collisions, collisions.rect, new Point(thresholdX, thresholdY))    
-  ctx.getImageData 0,0,@cellWidth,@cellHeight 
+  {player:@assetData,rect:new Rectangle keyFrame,row,@cellWidth,@cellHeight}
 
 Player::__defineGetter__ "x",->
   @_x

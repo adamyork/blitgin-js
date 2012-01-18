@@ -47,6 +47,8 @@ class Game
     Game::VIEWPORT_HEIGHT = height
     Game::VIEWPORT_WIDTH = width
     _screen = document.createElement "canvas"
+    ctx = _screen.getContext '2d'
+    ctx.globalCompositeOperation = "xor"
     _screen.setAttribute "width", @VIEWPORT_WIDTH
     _screen.setAttribute "height", @VIEWPORT_HEIGHT
     _screen.setAttribute "tabIndex", 0

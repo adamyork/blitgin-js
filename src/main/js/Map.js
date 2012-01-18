@@ -219,28 +219,42 @@ Map = (function(_super) {
     return _inactiveMapObjects = void 0;
   };
 
+  Map.prototype.buildDataVO = function(img, rect) {
+    var tmp;
+    tmp = {};
+    tmp.data = img;
+    tmp.rect = rect;
+    return tmp;
+  };
+
   return Map;
 
 })(RenderObject);
 
 Map.prototype.__defineGetter__("bitmapData", function() {
-  var ctx, vh, vw, yPos;
+  var bg, cd, ctx, fg, mid, vh, vw, yPos;
   if (this._initializeComplete) {
     ctx = this.workbench.getContext('2d');
     ctx.clearRect(0, 0, this.workbench.width, this.workbench.height);
     yPos = this.platform ? this._y : 0;
     vh = Game.prototype.VIEWPORT_HEIGHT;
     vw = Game.prototype.VIEWPORT_WIDTH;
+    bg = {};
+    mid = {};
+    fg = {};
+    cd = {};
     if (this.paralaxing) {
-      this.copyPixels(this.backgroundData, tmp, new Rectangle(this._x * .25, yPos, vw, vh));
-      this.copyPixels(this.midgroundData, tmp, new Rectangle(this._x * .5, yPos, vw, vh));
+      bg = this.buildDataVO(this.backgroundData, new Rectangle(this._x * .25, yPos, vw, vh));
+      mid = this.buildDataVO(this.midgroundData, new Rectangle(this._x * .5, yPos, vw, vh));
     } else {
-      this.copyPixels(this.foregroundData, new Rectangle(this._x, yPos, vw, vh));
+      fg = this.buildDataVO(this.foregroundData, new Rectangle(this._x, yPos, vw, vh));
     }
     if (this.showCollisionMap) {
-      this.copyPixels(this.collisionData, new Rectangle(this._x, yPos, vw, vh));
+      cd = this.buildDataVO(this.collisionData, new Rectangle(this._x, yPos, vw, vh));
     }
-    return ctx.getImageData(0, 0, Game.prototype.VIEWPORT_WIDTH, Game.prototype.VIEWPORT_HEIGHT);
+    return {
+      map: [bg, mid, fg, cd]
+    };
   } else {
     return console.log('You cannot start the game yet. Map assets are not loaded.');
   }

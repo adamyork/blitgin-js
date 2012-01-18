@@ -70,18 +70,7 @@ class RenderObject
     targetData.src = null
     targetData.src = @workbench.toDataURL()
     ctx.clearRect 0,0,asset.width,asset.height
-
-  copyPixels:(asset,rect)->
-    ctx = @workbench.getContext '2d'
-    ctx.clearRect 0,0,asset.width,asset.height
-    if @workbench.width < asset.width
-      @workbench.width = asset.width
-    if @workbench.height < asset.height
-      @workbench.height = asset.height
-    ctx.drawImage asset,0,0
-    imageData = ctx.getImageData rect.x,rect.y,rect.width,rect.height
-    ctx.putImageData imageData,0,0
-
+    
   dispose:->
     _assetClass = undefined
     _asset = undefined

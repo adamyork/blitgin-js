@@ -24,7 +24,9 @@ RenderEngine = (function() {
   _physicsEngine = {};
 
   RenderEngine.prototype.render = function(input) {
-    var action, enemy, mapObj, _i, _j, _k, _len, _len2, _len3, _ref, _ref2;
+    var action, ctxMain, enemy, mapObj, _i, _j, _k, _len, _len2, _len3, _ref, _ref2;
+    ctxMain = this.scrn.getContext('2d');
+    ctxMain.clearRect(0, 0, Game.prototype.VIEWPORT_WIDTH, Game.prototype.VIEWPORT_HEIGHT);
     if (this.nis) {
       this.manageNIS(this.nis, input);
       return;
@@ -65,10 +67,24 @@ RenderEngine = (function() {
   };
 
   RenderEngine.prototype.paint = function(obj, point) {
-    var ctxMain, pixels;
+    var asset, ctxMain, d, _i, _len, _ref, _results;
     ctxMain = this.scrn.getContext('2d');
-    pixels = obj.bitmapData;
-    return ctxMain.putImageData(pixels, obj.point.x, obj.point.y);
+    d = obj.bitmapData;
+    if (d.player) {
+      return ctxMain.drawImage(d.player, d.rect.x, d.rect.y, d.rect.width, d.rect.height, obj.point.x, obj.point.y, d.rect.width, d.rect.height);
+    } else {
+      _ref = d.map;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        asset = _ref[_i];
+        if (asset.data !== void 0) {
+          _results.push(ctxMain.drawImage(asset.data, asset.rect.x, asset.rect.y, asset.rect.width, asset.rect.height, obj.point.x, obj.point.y, asset.rect.width, asset.rect.height));
+        } else {
+          _results.push(void 0);
+        }
+      }
+      return _results;
+    }
   };
 
   RenderEngine.prototype.managePlayer = function(input) {
