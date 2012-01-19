@@ -244,9 +244,11 @@ Player.prototype.__defineSetter__("state", function(val) {
   if (this._isBusy || (this._state.id === val.id)) return;
   if ((val.id === this._jumpRight.id) || (val.id === this._jumpLeft.id)) {
     this.velocityY = this._maxVelocityY;
+    console.log("vel y " + this.velocityY);
   }
   this._frame = 0;
   this.frameBuffer = val.frameBuffer;
+  console.log("fb is " + this.frameBuffer);
   this._previousState = this._state;
   return this._state = val;
 });

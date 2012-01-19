@@ -96,6 +96,7 @@ RenderEngine = (function() {
     } else if ((input.direction === 0) && (!this.player.isBusy)) {
       this.player.frame = 0;
     }
+    if (this.player.isBusy) this.player.frame++;
     return this.physicsEngine.adjustPlayerHorizontally(this.player, this.map);
   };
 
@@ -104,7 +105,7 @@ RenderEngine = (function() {
       input.jumpLock = true;
       return this.player.state = this.player.direction === 1 ? this.player.jumpRight : this.player.jumpLeft;
     } else if ((input.jump === 0) && input.jumpLock && (this.player.velocityY === 0)) {
-      this.player.state = this.player.direction === 1 ? this.player.moveRight : _player.moveRight;
+      this.player.state = this.player.direction === 1 ? this.player.moveRight : this.player.moveLeft;
       return input.jumpLock = false;
     }
   };

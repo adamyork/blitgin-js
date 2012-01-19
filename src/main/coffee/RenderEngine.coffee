@@ -62,8 +62,8 @@ class RenderEngine
       @player.frame++
     else if (input.direction is 0) and (not @player.isBusy)
       @player.frame = 0
-    # if @player.isBusy
-      # @player.frame++
+    if @player.isBusy
+      @player.frame++
     @physicsEngine.adjustPlayerHorizontally @player,@map
     #@collisionEngine.checkVerticalMapCollision @player
     # @collisionEngine.checkHorizontalMapCollision()
@@ -100,8 +100,8 @@ class RenderEngine
     if (input.jump is 1) and (input.jumpLock is false)
       input.jumpLock = true
       @player.state = if (@player.direction is 1) then @player.jumpRight else @player.jumpLeft
-    else if (input.jump is 0) and input.jumpLock and (@player.velocityY is 0)
-      @player.state = if (@player.direction is 1) then @player.moveRight else _player.moveRight
+    else if (input.jump is 0) and (input.jumpLock) and (@player.velocityY is 0)
+      @player.state = if (@player.direction is 1) then @player.moveRight else @player.moveLeft
       input.jumpLock = false
 
   manageMap:(input)->

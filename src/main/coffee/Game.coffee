@@ -6,6 +6,7 @@ class Game
    
   _subscribers = []
   _pause = false
+  _isStarted = false
   _activeMap = 0
   _activePlayer = 0
   _customKey = 0
@@ -40,7 +41,9 @@ class Game
     _animationFrameRequest = w.requestAnimationFrame or w.webkitRequestAnimationFrame or w.mozRequestAnimationFrame or w.oRequestAnimationFrame or w.msRequestAnimationFrame
     
   start: ->
-    _timer = setInterval @render.bind(this) , 80
+    if not _isStarted
+      _timer = setInterval @render.bind(this) , 80
+      _isStarted = true
 
   preinitialize: (parent, width, height) ->
     _parent = parent

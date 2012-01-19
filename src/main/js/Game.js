@@ -1,7 +1,7 @@
 var Game;
 
 Game = (function() {
-  var _activeMap, _activePlayer, _animationFrameRequest, _collisionEngineClass, _customKey, _customKeys, _downKeys, _input, _instance, _jumpKeys, _leftKeys, _maps, _movement, _parent, _pause, _physicsEngineClass, _players, _renderEngine, _renderEngineClass, _rightKeys, _screen, _soundEngine, _subscribers, _timer, _upKeys;
+  var _activeMap, _activePlayer, _animationFrameRequest, _collisionEngineClass, _customKey, _customKeys, _downKeys, _input, _instance, _isStarted, _jumpKeys, _leftKeys, _maps, _movement, _parent, _pause, _physicsEngineClass, _players, _renderEngine, _renderEngineClass, _rightKeys, _screen, _soundEngine, _subscribers, _timer, _upKeys;
 
   function Game(name) {
     this.name = name;
@@ -13,6 +13,8 @@ Game = (function() {
   _subscribers = [];
 
   _pause = false;
+
+  _isStarted = false;
 
   _activeMap = 0;
 
@@ -72,7 +74,10 @@ Game = (function() {
   };
 
   Game.prototype.start = function() {
-    return _timer = setInterval(this.render.bind(this), 80);
+    if (!_isStarted) {
+      _timer = setInterval(this.render.bind(this), 80);
+      return _isStarted = true;
+    }
   };
 
   Game.prototype.preinitialize = function(parent, width, height) {

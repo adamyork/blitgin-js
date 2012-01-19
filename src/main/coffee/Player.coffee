@@ -171,8 +171,10 @@ Player::__defineSetter__ "state",(val)->
     return  
   if (val.id is @_jumpRight.id) or (val.id is @_jumpLeft.id)
     @velocityY = @_maxVelocityY
+    console.log "vel y " + @velocityY
   @_frame = 0
   @frameBuffer = val.frameBuffer
+  console.log "fb is " + @frameBuffer
   @_previousState = @_state
   @_state = val
     
