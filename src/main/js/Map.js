@@ -69,6 +69,7 @@ Map = (function(_super) {
 
   Map.prototype.initialize = function() {
     this.workbench = document.createElement("canvas");
+    this.ctx = this.workbench.getContext('2d');
     if (this.paralaxing) {
       if (void 0 !== this.backgroundAssetClass && void 0 !== this.midgroundAssetClass && void 0 !== this.foregroundAssetClass && void 0 !== this.collisionAssetClass && void 0 !== this.enemies && void 0 !== this.mapObjects) {
         return this.initializeAssets();
@@ -232,10 +233,9 @@ Map = (function(_super) {
 })(RenderObject);
 
 Map.prototype.__defineGetter__("bitmapData", function() {
-  var bg, cd, ctx, fg, mid, vh, vw, yPos;
+  var bg, cd, fg, mid, vh, vw, yPos;
   if (this._initializeComplete) {
-    ctx = this.workbench.getContext('2d');
-    ctx.clearRect(0, 0, this.workbench.width, this.workbench.height);
+    this.ctx.clearRect(0, 0, this.workbench.width, this.workbench.height);
     yPos = this.platform ? this._y : 0;
     vh = Game.prototype.VIEWPORT_HEIGHT;
     vw = Game.prototype.VIEWPORT_WIDTH;

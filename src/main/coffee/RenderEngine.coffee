@@ -9,10 +9,10 @@ class RenderEngine
   _soundEngine = {}
   _collisionEngine = {}
   _physicsEngine = {}
+  @_ctx = {}
 
   render:(input)->
-    ctxMain = @scrn.getContext '2d'
-    ctxMain.clearRect 0,0,Game::VIEWPORT_WIDTH,Game::VIEWPORT_HEIGHT  
+    @_ctx.clearRect 0,0,Game::VIEWPORT_WIDTH,Game::VIEWPORT_HEIGHT  
     if @nis
       @manageNIS @nis,input
       return
@@ -46,17 +46,16 @@ class RenderEngine
     Game::instance.notifySubscribers @map,@player,@actionObjects
 
   paint:(obj,point)->
-    ctxMain = @scrn.getContext '2d'
     d = obj.bitmapData
     if d.player
-      ctxMain.drawImage d.player,d.rect.x,d.rect.y,d.rect.width,d.rect.height,obj.point.x,obj.point.y,d.rect.width,d.rect.height
+      @_ctx.drawImage d.player,d.rect.x,d.rect.y,d.rect.width,d.rect.height,obj.point.x,obj.point.y,d.rect.width,d.rect.height
     else
       for asset in d.map
         if asset.data isnt undefined
-          ctxMain.drawImage asset.data,asset.rect.x,asset.rect.y,asset.rect.width,asset.rect.height,obj.point.x,obj.point.y,asset.rect.width,asset.rect.height
+          @_ctx.drawImage asset.data,asset.rect.x,asset.rect.y,asset.rect.width,asset.rect.height,obj.point.x,obj.point.y,asset.rect.width,asset.rect.height
 
   managePlayer:(input)->
-    #@manageJump input
+    @manageJump input
     @physicsEngine.adjustPlayerVerically @player,@map
     if input.direction isnt 0
       @physicsEngine.applyPlayerInput @player,input
@@ -97,20 +96,14 @@ class RenderEngine
     # }
 # }
 # 
-# protected function manageJump(input:InputVO):void
-# {
-    # if(input.jump == 1 && input.jumpLock == false)
-    # {
-        # input.jumpLock = true;
-        # _player.state = (_player.direction == 1) ? _player.jumpRight : _player.jumpLeft;
-    # }
-    # else if(input.jump == 0 && input.jumpLock && _player.velocityY == 0)
-    # {
-        # _player.state = (_player.direction == 1) ? _player.moveRight : _player.moveRight;
-        # input.jumpLock = false;
-    # }
-# }
-# 
+  manageJump:(input)->
+    if (input.jump is 1) and (input.jumpLock is false)
+      input.jumpLock = true
+      @player.state = if (@player.direction is 1) then @player.jumpRight else @player.jumpLeft
+    else if (input.jump is 0) and input.jumpLock and (@player.velocityY is 0)
+      @player.state = if (@player.direction is 1) then @player.moveRight else _player.moveRight
+      input.jumpLock = false
+
   manageMap:(input)->
     @soundEngine.checkPlayback @map
     @physicsEngine.adjustMapVerically @map, @player
@@ -265,6 +258,7 @@ RenderEngine::__defineGetter__ "scrn",->
   
 RenderEngine::__defineSetter__ "scrn",(val)->
   @_scrn = val
+  @_ctx = @scrn.getContext '2d'
 
 RenderEngine::__defineGetter__ "map",->
   @_map

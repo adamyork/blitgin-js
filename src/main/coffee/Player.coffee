@@ -42,7 +42,7 @@ class Player extends RenderObject
   _emitter = {}
   
   initialize:->
-    super
+    super @updateInherentStates
     @y = _floor = ((Game::VIEWPORT_HEIGHT) - (@asset.height - @cellHeight))
     @_frame = 0
     @_minVelocity = 0
@@ -87,7 +87,6 @@ class Player extends RenderObject
     @actions[keyCode] = action
 
 Player::__defineGetter__ "bitmapData",->
-  ctx = @workbench.getContext '2d'
   keyFrame = Math.floor @frame * @cellWidth
   row = @state.row * @cellHeight
   #This stuff needs to be re-thought. while helpful for development
@@ -133,7 +132,6 @@ Player::__defineSetter__ "frame",(val)->
   if val >= @_state.duration
     if not @_state.persistent
       @_state = @_previousState
-      console.log "problem line"
       @frameBuffer = @_state.frameBuffer
       @_isBusy = false
     @_frame = 0

@@ -76,13 +76,10 @@ Game = (function() {
   };
 
   Game.prototype.preinitialize = function(parent, width, height) {
-    var ctx;
     _parent = parent;
     Game.prototype.VIEWPORT_HEIGHT = height;
     Game.prototype.VIEWPORT_WIDTH = width;
     _screen = document.createElement("canvas");
-    ctx = _screen.getContext('2d');
-    ctx.globalCompositeOperation = "xor";
     _screen.setAttribute("width", this.VIEWPORT_WIDTH);
     _screen.setAttribute("height", this.VIEWPORT_HEIGHT);
     _screen.setAttribute("tabIndex", 0);

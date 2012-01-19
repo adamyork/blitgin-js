@@ -39,6 +39,7 @@ class Map extends RenderObject
 
   initialize: ->
     @workbench = document.createElement "canvas"
+    @ctx = @workbench.getContext '2d'
     if @paralaxing
       if (undefined != @backgroundAssetClass && undefined != @midgroundAssetClass && undefined !=
           @foregroundAssetClass && undefined != @collisionAssetClass && undefined != @enemies &&
@@ -187,8 +188,7 @@ class Map extends RenderObject
     
 Map::__defineGetter__ "bitmapData",->
   if @_initializeComplete
-    ctx = @workbench.getContext '2d'
-    ctx.clearRect 0,0,@workbench.width,@workbench.height
+    @ctx.clearRect 0,0,@workbench.width,@workbench.height
     yPos = if @platform then @_y else 0
     vh = Game::VIEWPORT_HEIGHT
     vw = Game::VIEWPORT_WIDTH

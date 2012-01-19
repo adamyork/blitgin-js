@@ -11,6 +11,7 @@ var CustomPlayer = ext(Player,function(){
 	this.health = 100;
 	this.damage = 20;
 	this.showBounds = true;
+	this.rgbTolerance = {r:0,g:250,b:0}
 	//this.frameBuffer = .5;
 	//showCollisionRect = true;
 	//setCustomActionForKey(76, Shoot);

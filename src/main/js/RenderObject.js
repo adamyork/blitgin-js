@@ -1,7 +1,7 @@
 var RenderObject;
 
 RenderObject = (function() {
-  var _asset, _assetClass, _assetData, _cellHeight, _cellWidth, _colorConstant, _direction, _duration, _easeCoefficient, _frame, _frameBuffer, _height, _index, _lifeSpan, _transparency, _velocityX, _velocityY, _width, _workbench, _x, _y;
+  var _asset, _assetClass, _assetData, _callback, _cellHeight, _cellWidth, _colorConstant, _ctx, _direction, _duration, _easeCoefficient, _frame, _frameBuffer, _height, _index, _lifeSpan, _rgbTolerance, _transparency, _velocityX, _velocityY, _width, _workbench, _x, _y;
 
   function RenderObject(name) {
     this.name = name;
@@ -12,6 +12,8 @@ RenderObject = (function() {
   _transparency = false;
 
   _colorConstant = "#000000";
+
+  _rgbTolerance = {};
 
   _workbench = {};
 
@@ -51,43 +53,50 @@ RenderObject = (function() {
 
   _assetData = {};
 
-  RenderObject.prototype.initialize = function() {
+  _ctx = {};
+
+  _callback = void 0;
+
+  RenderObject.prototype.initialize = function(_callback) {
+    this._callback = _callback;
     if ((void 0 !== this.assetClass) && (0 !== this.cellHeight) && (0 !== this.cellWidth)) {
+      this.workbench = document.createElement("canvas");
       this._asset = new Image();
       this.assetData = new Image();
       this._asset.onload = this.assetLoadComplete.bind(this);
-      this._asset.src = this.assetClass;
-      return this.workbench = document.createElement("canvas");
+      return this._asset.src = this.assetClass;
     } else {
       return console.log("Set a cellwidth , cellheight , and assetClass before calling initialize.");
     }
   };
 
   RenderObject.prototype.assetLoadComplete = function() {
+    this.ctx = this.workbench.getContext('2d');
     if (this.transparency) {
       this.assetData = this.asset;
     } else {
       this.removeColorConstantAndCache(this.asset, this.assetData);
     }
     this.x = 0;
-    return this.y = 0;
+    this.y = 0;
+    if (this._callback) return this._callback();
   };
 
   RenderObject.prototype.removeColorConstantAndCache = function(asset, targetData) {
-    var a, b, ctx, g, imageData, index, parsed, r, val, xpos, ypos, _ref, _ref2;
+    var a, b, bv, g, gv, imageData, index, parsed, r, rv, t, val, xpos, ypos, _ref, _ref2;
     if (this.colorConstant === void 0) {
       console.log("Error : You need to set a hex value for colorConstant , or set tranparency true if no color is to be sampled out.");
     }
     this.workbench.width = asset.width;
     this.workbench.height = asset.height;
-    ctx = this.workbench.getContext('2d');
-    ctx.drawImage(asset, 0, 0);
-    imageData = ctx.getImageData(0, 0, this.workbench.width, this.workbench.height);
+    this.ctx.drawImage(asset, 0, 0);
+    imageData = this.ctx.getImageData(0, 0, this.workbench.width, this.workbench.height);
     parsed = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(this.colorConstant);
-    r = parseInt(parsed[1], 16);
-    g = parseInt(parsed[2], 16);
-    b = parseInt(parsed[3], 16);
-    val = r + g + b;
+    rv = parseInt(parsed[1], 16);
+    gv = parseInt(parsed[2], 16);
+    bv = parseInt(parsed[3], 16);
+    val = rv + gv + bv;
+    t = this.rgbTolerance;
     for (xpos = 0, _ref = imageData.width - 1; 0 <= _ref ? xpos <= _ref : xpos >= _ref; 0 <= _ref ? xpos++ : xpos--) {
       for (ypos = 0, _ref2 = imageData.height - 1; 0 <= _ref2 ? ypos <= _ref2 : ypos >= _ref2; 0 <= _ref2 ? ypos++ : ypos--) {
         index = 4 * (ypos * imageData.width + xpos);
@@ -95,13 +104,19 @@ RenderObject = (function() {
         g = imageData.data[index + 1];
         b = imageData.data[index + 2];
         a = imageData.data[index + 3];
-        if (r + g + b === val) imageData.data[index + 3] = 0;
+        if (t !== void 0) {
+          if (r <= rv + t.r && g <= gv + t.g && b <= bv + t.b) {
+            imageData.data[index + 3] = 0;
+          }
+        } else if ((r + g + b) === val) {
+          imageData.data[index + 3] = 0;
+        }
       }
     }
-    ctx.putImageData(imageData, 0, 0);
+    this.ctx.putImageData(imageData, 0, 0);
     targetData.src = null;
     targetData.src = this.workbench.toDataURL();
-    return ctx.clearRect(0, 0, asset.width, asset.height);
+    return this.ctx.clearRect(0, 0, asset.width, asset.height);
   };
 
   RenderObject.prototype.dispose = function() {
@@ -114,13 +129,12 @@ RenderObject = (function() {
 })();
 
 RenderObject.prototype.__defineGetter__("bitmapData", function() {
-  var ctx, keyFrame;
+  var keyFrame;
   this.workbench.width = this._asset.width;
   this.workbench.height = this._asset.height;
-  ctx = workbench.getContext('2d');
   keyFrame = Math.floor(this._frame) * this._cellWidth;
-  ctx.drawImage(this._asset, keyFrame, 0);
-  return ctx.getImageData(0, 0, this.width, this.height);
+  this.ctx.drawImage(this._asset, keyFrame, 0);
+  return this.ctx.getImageData(0, 0, this.width, this.height);
 });
 
 RenderObject.prototype.__defineGetter__("x", function() {
@@ -243,6 +257,14 @@ RenderObject.prototype.__defineGetter__("colorConstant", function() {
   return this._colorConstant;
 });
 
+RenderObject.prototype.__defineSetter__("rgbTolerance", function(val) {
+  return this._rgbTolerance = val;
+});
+
+RenderObject.prototype.__defineGetter__("rgbTolerance", function() {
+  return this._rgbTolerance;
+});
+
 RenderObject.prototype.__defineGetter__("asset", function() {
   return this._asset;
 });
@@ -269,4 +291,12 @@ RenderObject.prototype.__defineGetter__("workbench", function() {
 
 RenderObject.prototype.__defineSetter__("workbench", function(val) {
   return this._workbench = val;
+});
+
+RenderObject.prototype.__defineGetter__("ctx", function() {
+  return this._ctx;
+});
+
+RenderObject.prototype.__defineSetter__("ctx", function(val) {
+  return this._ctx = val;
 });

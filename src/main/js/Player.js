@@ -85,7 +85,7 @@ Player = (function(_super) {
   _emitter = {};
 
   Player.prototype.initialize = function() {
-    Player.__super__.initialize.apply(this, arguments);
+    Player.__super__.initialize.call(this, this.updateInherentStates);
     this.y = _floor = Game.prototype.VIEWPORT_HEIGHT - (this.asset.height - this.cellHeight);
     this._frame = 0;
     this._minVelocity = 0;
@@ -141,8 +141,7 @@ Player = (function(_super) {
 })(RenderObject);
 
 Player.prototype.__defineGetter__("bitmapData", function() {
-  var ctx, keyFrame, row;
-  ctx = this.workbench.getContext('2d');
+  var keyFrame, row;
   keyFrame = Math.floor(this.frame * this.cellWidth);
   row = this.state.row * this.cellHeight;
   return {
@@ -194,7 +193,6 @@ Player.prototype.__defineSetter__("frame", function(val) {
   if (val >= this._state.duration) {
     if (!this._state.persistent) {
       this._state = this._previousState;
-      console.log("problem line");
       this.frameBuffer = this._state.frameBuffer;
       this._isBusy = false;
     }

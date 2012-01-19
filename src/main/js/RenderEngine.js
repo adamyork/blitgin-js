@@ -23,10 +23,11 @@ RenderEngine = (function() {
 
   _physicsEngine = {};
 
+  RenderEngine._ctx = {};
+
   RenderEngine.prototype.render = function(input) {
-    var action, ctxMain, enemy, mapObj, _i, _j, _k, _len, _len2, _len3, _ref, _ref2;
-    ctxMain = this.scrn.getContext('2d');
-    ctxMain.clearRect(0, 0, Game.prototype.VIEWPORT_WIDTH, Game.prototype.VIEWPORT_HEIGHT);
+    var action, enemy, mapObj, _i, _j, _k, _len, _len2, _len3, _ref, _ref2;
+    this._ctx.clearRect(0, 0, Game.prototype.VIEWPORT_WIDTH, Game.prototype.VIEWPORT_HEIGHT);
     if (this.nis) {
       this.manageNIS(this.nis, input);
       return;
@@ -67,18 +68,17 @@ RenderEngine = (function() {
   };
 
   RenderEngine.prototype.paint = function(obj, point) {
-    var asset, ctxMain, d, _i, _len, _ref, _results;
-    ctxMain = this.scrn.getContext('2d');
+    var asset, d, _i, _len, _ref, _results;
     d = obj.bitmapData;
     if (d.player) {
-      return ctxMain.drawImage(d.player, d.rect.x, d.rect.y, d.rect.width, d.rect.height, obj.point.x, obj.point.y, d.rect.width, d.rect.height);
+      return this._ctx.drawImage(d.player, d.rect.x, d.rect.y, d.rect.width, d.rect.height, obj.point.x, obj.point.y, d.rect.width, d.rect.height);
     } else {
       _ref = d.map;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         asset = _ref[_i];
         if (asset.data !== void 0) {
-          _results.push(ctxMain.drawImage(asset.data, asset.rect.x, asset.rect.y, asset.rect.width, asset.rect.height, obj.point.x, obj.point.y, asset.rect.width, asset.rect.height));
+          _results.push(this._ctx.drawImage(asset.data, asset.rect.x, asset.rect.y, asset.rect.width, asset.rect.height, obj.point.x, obj.point.y, asset.rect.width, asset.rect.height));
         } else {
           _results.push(void 0);
         }
@@ -88,6 +88,7 @@ RenderEngine = (function() {
   };
 
   RenderEngine.prototype.managePlayer = function(input) {
+    this.manageJump(input);
     this.physicsEngine.adjustPlayerVerically(this.player, this.map);
     if (input.direction !== 0) {
       this.physicsEngine.applyPlayerInput(this.player, input);
@@ -96,6 +97,16 @@ RenderEngine = (function() {
       this.player.frame = 0;
     }
     return this.physicsEngine.adjustPlayerHorizontally(this.player, this.map);
+  };
+
+  RenderEngine.prototype.manageJump = function(input) {
+    if ((input.jump === 1) && (input.jumpLock === false)) {
+      input.jumpLock = true;
+      return this.player.state = this.player.direction === 1 ? this.player.jumpRight : this.player.jumpLeft;
+    } else if ((input.jump === 0) && input.jumpLock && (this.player.velocityY === 0)) {
+      this.player.state = this.player.direction === 1 ? this.player.moveRight : _player.moveRight;
+      return input.jumpLock = false;
+    }
   };
 
   RenderEngine.prototype.manageMap = function(input) {
@@ -123,7 +134,8 @@ RenderEngine.prototype.__defineGetter__("scrn", function() {
 });
 
 RenderEngine.prototype.__defineSetter__("scrn", function(val) {
-  return this._scrn = val;
+  this._scrn = val;
+  return this._ctx = this.scrn.getContext('2d');
 });
 
 RenderEngine.prototype.__defineGetter__("map", function() {
