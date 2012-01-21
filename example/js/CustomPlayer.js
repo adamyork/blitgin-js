@@ -1,6 +1,6 @@
 var CustomPlayer = ext(Player,function(){
 	this.assetClass = "img/bot.png";
-	//this.transparency = false;
+	this.transparency = true;
 	this.colorConstant = "#000000"
 	this.cellWidth = 64;
 	this.cellHeight = 128;
@@ -8,10 +8,11 @@ var CustomPlayer = ext(Player,function(){
 	this.collisionCoefficient = .5;
 	this.thresholdX = 12;
 	this.thresholdY = 35;
+	this.maxVelocityY = 52;
 	this.health = 100;
 	this.damage = 20;
 	this.showBounds = true;
-	this.rgbTolerance = {r:0,g:250,b:0}
+	this.rgbTolerance = {r:0,g:100,b:0}
 	//this.frameBuffer = .5;
 	//showCollisionRect = true;
 	//setCustomActionForKey(76, Shoot);

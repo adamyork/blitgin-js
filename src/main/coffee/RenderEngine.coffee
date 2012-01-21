@@ -65,8 +65,8 @@ class RenderEngine
     if @player.isBusy
       @player.frame++
     @physicsEngine.adjustPlayerHorizontally @player,@map
-    #@collisionEngine.checkVerticalMapCollision @player
-    # @collisionEngine.checkHorizontalMapCollision()
+    @collisionEngine.checkVerticalMapCollision @player
+    @collisionEngine.checkHorizontalMapCollision()
 
 # 
 # protected function managePlayerState(action:Action, input:InputVO = null):void

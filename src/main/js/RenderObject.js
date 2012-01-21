@@ -1,7 +1,7 @@
 var RenderObject;
 
 RenderObject = (function() {
-  var _asset, _assetClass, _assetData, _callback, _cellHeight, _cellWidth, _colorConstant, _ctx, _direction, _duration, _easeCoefficient, _frame, _frameBuffer, _height, _index, _lifeSpan, _rgbTolerance, _transparency, _velocityX, _velocityY, _width, _workbench, _x, _y;
+  var _asset, _assetClass, _assetData, _callback, _cellHeight, _cellWidth, _collisionPixels, _colorConstant, _ctx, _direction, _duration, _easeCoefficient, _frame, _frameBuffer, _height, _index, _lifeSpan, _rgbTolerance, _transparency, _velocityX, _velocityY, _width, _workbench, _x, _y;
 
   function RenderObject(name) {
     this.name = name;
@@ -57,6 +57,8 @@ RenderObject = (function() {
 
   _callback = void 0;
 
+  _collisionPixels = [];
+
   RenderObject.prototype.initialize = function(_callback) {
     this._callback = _callback;
     if ((void 0 !== this.assetClass) && (0 !== this.cellHeight) && (0 !== this.cellWidth)) {
@@ -82,7 +84,7 @@ RenderObject = (function() {
     if (this._callback) return this._callback();
   };
 
-  RenderObject.prototype.removeColorConstantAndCache = function(asset, targetData) {
+  RenderObject.prototype.removeColorConstantAndCache = function(asset, targetData, cachePixels) {
     var a, b, bv, g, gv, imageData, index, parsed, r, rv, t, val, xpos, ypos, _ref, _ref2;
     if (this.colorConstant === void 0) {
       console.log("Error : You need to set a hex value for colorConstant , or set tranparency true if no color is to be sampled out.");
@@ -113,6 +115,7 @@ RenderObject = (function() {
         }
       }
     }
+    if (cachePixels) this.collisionPixels = imageData;
     this.ctx.putImageData(imageData, 0, 0);
     targetData.src = null;
     targetData.src = this.workbench.toDataURL();
@@ -299,4 +302,12 @@ RenderObject.prototype.__defineGetter__("ctx", function() {
 
 RenderObject.prototype.__defineSetter__("ctx", function(val) {
   return this._ctx = val;
+});
+
+RenderObject.prototype.__defineGetter__("collisionPixels", function() {
+  return this._collisionPixels;
+});
+
+RenderObject.prototype.__defineSetter__("collisionPixels", function(val) {
+  return this._collisionPixels = val;
 });

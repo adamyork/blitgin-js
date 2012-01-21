@@ -119,7 +119,7 @@ Map = (function(_super) {
     } else {
       if (_assetsLoaded === Map.prototype.TOTAL_STANDARD_ASSETS) {
         this.removeColorConstantAndCache(this.foregroundAsset, this.foregroundData);
-        this.removeColorConstantAndCache(this.collisionAsset, this.collisionData);
+        this.removeColorConstantAndCache(this.collisionAsset, this.collisionData, true);
         return this.finalize();
       }
     }
@@ -226,6 +226,12 @@ Map = (function(_super) {
     tmp.data = img;
     tmp.rect = rect;
     return tmp;
+  };
+
+  Map.prototype.collisionDataPixel = function(x, y) {
+    var index;
+    index = 4 * (y * this.collisionData.width + x);
+    return this.collisionPixels.data[index + 3];
   };
 
   return Map;

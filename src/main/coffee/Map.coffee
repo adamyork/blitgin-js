@@ -88,7 +88,7 @@ class Map extends RenderObject
     else
       if _assetsLoaded is Map::TOTAL_STANDARD_ASSETS
         @removeColorConstantAndCache @foregroundAsset,@foregroundData
-        @removeColorConstantAndCache @collisionAsset,@collisionData
+        @removeColorConstantAndCache @collisionAsset,@collisionData,true
         @finalize()
         
   finalize:->
@@ -185,6 +185,10 @@ class Map extends RenderObject
     tmp.data = img
     tmp.rect = rect
     tmp
+    
+  collisionDataPixel:(x,y)->
+    index = 4 * (y * @collisionData.width + x)
+    @collisionPixels.data[index+3]
     
 Map::__defineGetter__ "bitmapData",->
   if @_initializeComplete

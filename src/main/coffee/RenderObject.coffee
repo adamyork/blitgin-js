@@ -27,6 +27,7 @@ class RenderObject
   _assetData = {}
   _ctx = {}
   _callback = undefined
+  _collisionPixels = []
   
   initialize:(@_callback)->
     if (undefined != @assetClass) and (0 != @cellHeight) and (0 != @cellWidth)
@@ -49,7 +50,7 @@ class RenderObject
     if @_callback
       @_callback()
 
-  removeColorConstantAndCache:(asset,targetData)->
+  removeColorConstantAndCache:(asset,targetData,cachePixels)->
     if @colorConstant is undefined
       console.log "Error : You need to set a hex value for colorConstant , or set tranparency true if no color is to be sampled out."
     @workbench.width = asset.width
@@ -73,8 +74,9 @@ class RenderObject
           if r <= rv + t.r and g <= gv + t.g and b <= bv + t.b
             imageData.data[index + 3] = 0
         else if (r+g+b) is val
-          imageData.data[index + 3] = 0
-         
+          imageData.data[index + 3] = 0          
+    if cachePixels
+      @collisionPixels = imageData         
     @ctx.putImageData imageData,0,0
     targetData.src = null
     targetData.src = @workbench.toDataURL()
@@ -213,3 +215,9 @@ RenderObject::__defineGetter__ "ctx",->
 
 RenderObject::__defineSetter__ "ctx",(val)->
   @_ctx = val
+  
+RenderObject::__defineGetter__ "collisionPixels",->
+  @_collisionPixels
+
+RenderObject::__defineSetter__ "collisionPixels",(val)->
+  @_collisionPixels = val

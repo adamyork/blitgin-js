@@ -24,7 +24,7 @@ class Player extends RenderObject
   _minVelocity = 0
   _floor = 0
   _thresholdX = 0
-  _thresholdY = 0
+  _thresholdY = 35
   _health = 100
   _damage = 10  
   _uniqueID = ""  
@@ -49,7 +49,9 @@ class Player extends RenderObject
     if @maxVelocityX is undefined
       @maxVelocityX = 15
     if @maxVelocityY is undefined
-      @maxVelocityY = 26
+      @_maxVelocityY = 45
+    else
+      @_maxVelocityY = @maxVelocityY
     if @frameBuffer is undefined
       @frameBuffer = 0
     @velocityX = 0
@@ -104,6 +106,7 @@ Player::__defineGetter__ "x",->
 Player::__defineSetter__ "x",(val)->
   if (val >= 0) and (val <= (Game::VIEWPORT_WIDTH - @width))
     @_x = val
+    console.log "just set players x " + @_x
   else if val < 0
     @_x = 0
   else if(val > 0)
@@ -171,10 +174,9 @@ Player::__defineSetter__ "state",(val)->
     return  
   if (val.id is @_jumpRight.id) or (val.id is @_jumpLeft.id)
     @velocityY = @_maxVelocityY
-    console.log "vel y " + @velocityY
+    console.log "@_maxVelocityY " +@_maxVelocityY
   @_frame = 0
   @frameBuffer = val.frameBuffer
-  console.log "fb is " + @frameBuffer
   @_previousState = @_state
   @_state = val
     

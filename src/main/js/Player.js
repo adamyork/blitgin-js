@@ -52,7 +52,7 @@ Player = (function(_super) {
 
   _thresholdX = 0;
 
-  _thresholdY = 0;
+  _thresholdY = 35;
 
   _health = 100;
 
@@ -90,7 +90,11 @@ Player = (function(_super) {
     this._frame = 0;
     this._minVelocity = 0;
     if (this.maxVelocityX === void 0) this.maxVelocityX = 15;
-    if (this.maxVelocityY === void 0) this.maxVelocityY = 26;
+    if (this.maxVelocityY === void 0) {
+      this._maxVelocityY = 45;
+    } else {
+      this._maxVelocityY = this.maxVelocityY;
+    }
     if (this.frameBuffer === void 0) this.frameBuffer = 0;
     this.velocityX = 0;
     this.velocityY = 0;
@@ -156,7 +160,8 @@ Player.prototype.__defineGetter__("x", function() {
 
 Player.prototype.__defineSetter__("x", function(val) {
   if ((val >= 0) && (val <= (Game.prototype.VIEWPORT_WIDTH - this.width))) {
-    return this._x = val;
+    this._x = val;
+    return console.log("just set players x " + this._x);
   } else if (val < 0) {
     return this._x = 0;
   } else if (val > 0) {
@@ -244,11 +249,10 @@ Player.prototype.__defineSetter__("state", function(val) {
   if (this._isBusy || (this._state.id === val.id)) return;
   if ((val.id === this._jumpRight.id) || (val.id === this._jumpLeft.id)) {
     this.velocityY = this._maxVelocityY;
-    console.log("vel y " + this.velocityY);
+    console.log("@_maxVelocityY " + this._maxVelocityY);
   }
   this._frame = 0;
   this.frameBuffer = val.frameBuffer;
-  console.log("fb is " + this.frameBuffer);
   this._previousState = this._state;
   return this._state = val;
 });

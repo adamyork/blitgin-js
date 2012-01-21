@@ -97,7 +97,9 @@ RenderEngine = (function() {
       this.player.frame = 0;
     }
     if (this.player.isBusy) this.player.frame++;
-    return this.physicsEngine.adjustPlayerHorizontally(this.player, this.map);
+    this.physicsEngine.adjustPlayerHorizontally(this.player, this.map);
+    this.collisionEngine.checkVerticalMapCollision(this.player);
+    return this.collisionEngine.checkHorizontalMapCollision();
   };
 
   RenderEngine.prototype.manageJump = function(input) {

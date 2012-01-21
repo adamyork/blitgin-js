@@ -78,16 +78,16 @@ CollisionEngine = (function() {
     if (target.direction === 1) {
       for (i = _ref = horizontalMin + target.thresholdX, _ref2 = horizontalMax - target.thresholdX; _ref <= _ref2 ? i <= _ref2 : i >= _ref2; _ref <= _ref2 ? i++ : i--) {
         this.checkForCieling(Math.round(i));
-        point = this.map.collisionData.getPixel(Math.round(i), Math.round(destination));
+        point = this.map.collisionDataPixel(Math.round(i), Math.round(destination));
         if (point !== 0) {
-          checkForFloor(point, destination, i, target);
+          this.checkForFloor(point, destination, i, target);
           return;
         }
       }
     } else {
       for (i = _ref3 = horizontalMin - target.thresholdX, _ref4 = horizontalMax + target.thresholdX; _ref3 <= _ref4 ? i <= _ref4 : i >= _ref4; _ref3 <= _ref4 ? i++ : i--) {
         this.checkForCieling(Math.round(i));
-        point = this.map.collisionData.getPixel(Math.round(i), Math.round(destination));
+        point = this.map.collisionDataPixel(Math.round(i), Math.round(destination));
         if (point !== 0) {
           this.checkForFloor(point, destination, i, target);
           return;
@@ -98,22 +98,36 @@ CollisionEngine = (function() {
   };
 
   CollisionEngine.prototype.checkHorizontalMapCollision = function() {
-    var destination, i, point, verticalMax, verticalMin;
-    destination = this.physicsEngine.getHorizontalDesitination(this.player, this.map);
+    var destination, i, point, verticalMax, verticalMin, _ref;
+    destination = Math.round(this.physicsEngine.getHorizontalDesitination(this.player, this.map));
     verticalMin = this.physicsEngine.getVerticalMin(this.player, this.map);
     verticalMax = this.physicsEngine.getVerticalMax(this.player, this.map);
-    for (i = verticalMin; verticalMin <= verticalMax ? i <= verticalMax : i >= verticalMax; verticalMin <= verticalMax ? i++ : i--) {
-      point = this.map.collisionData.getPixel(destination, Math.round(i));
+    i = 0;
+    for (i = verticalMin, _ref = verticalMax - 1; verticalMin <= _ref ? i <= _ref : i >= _ref; verticalMin <= _ref ? i++ : i--) {
+      point = this.map.collisionDataPixel(Math.round(destination), Math.round(i));
       if (point !== 0) {
-        while (point !== 0) {
-          destination -= this.player.direction;
-          point = this.map.collisionData.getPixel(destination, Math.round(i));
-        }
+        this.checkForWall(point, Math.round(destination), Math.round(i));
+        console.log("destination after transform " + destination);
         if (this.player.direction === 1) destination -= this.player.width;
+        console.log("destination offset further " + destination);
         this.physicsEngine.manageHorizontalBounds(this.player, this.map, destination);
         return;
       }
     }
+  };
+
+  CollisionEngine.prototype.checkForWall = function(point, destination, position) {
+    var _results;
+    _results = [];
+    while (point !== 0) {
+      destination -= this.player.direction;
+      console.log("@player.direction " + this.player.direction);
+      point = this.map.collisionDataPixel(Math.round(destination), Math.round(position));
+      console.log("desintation " + destination);
+      console.log("position " + position);
+      _results.push(console.log("the point " + point));
+    }
+    return _results;
   };
 
   CollisionEngine.prototype.checkForFloor = function(point, destination, position, target) {
@@ -122,7 +136,7 @@ CollisionEngine = (function() {
     while (point !== 0) {
       count++;
       destination--;
-      point = this.map.collisionData.getPixel(Math.round(position), Math.round(destination));
+      point = this.map.collisionDataPixel(Math.round(position), Math.round(destination));
       if (count > (target.height * .75)) {
         point = 0;
         return;
@@ -133,11 +147,11 @@ CollisionEngine = (function() {
 
   CollisionEngine.prototype.checkForCieling = function(point) {
     var top;
-    top = this.map.collisionData.getPixel(point, this.player.y);
+    top = this.map.collisionDataPixel(point, this.player.y);
     if (top !== 0) {
       while (top !== 0) {
         this.physicsEngine.incrementPlayerVelocity(this.player);
-        top = _map.collisionData.getPixel(point, this.player.y);
+        top = this.map.collisionDataPixel(point, this.player.y);
       }
       return this.physicsEngine.resetPlayerVelocity(this.player);
     }
