@@ -34,9 +34,7 @@ class RenderEngine
       @manageMapObject mapObj
       @paint mapObj,mapObj.point
     #@map.manageElements Map::MANAGE_MAP_OBJECTS
-    #Render player on screen
     @paint @player,@player.point
-    #Render player composites onto player.
     if @player.composite isnt undefined
       @player.composite.frame++
       @paint @player.composite,@player.compositePoint

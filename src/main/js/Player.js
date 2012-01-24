@@ -3,7 +3,7 @@ var Player,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
 Player = (function(_super) {
-  var _actions, _applyGravityAndFriction, _collisionCoefficient, _collisionLeft, _collisionRight, _composite, _compositePoint, _damage, _emitter, _floor, _frame, _health, _isBusy, _isDead, _jumpLeft, _jumpRight, _mapBoundsMax, _mapBoundsMin, _mapX, _mapY, _maxVelocityX, _maxVelocityY, _minVelocity, _moveLeft, _moveRight, _previousState, _screenX, _screenY, _showBounds, _showCollisionRect, _state, _thresholdX, _thresholdY, _uniqueID;
+  var _actions, _applyGravityAndFriction, _collisionCoefficient, _collisionLeft, _collisionRight, _composite, _compositePoint, _damage, _emitter, _floor, _frame, _health, _isBusy, _isDead, _jumpLeft, _jumpRight, _mapBoundsMax, _mapBoundsMin, _mapX, _mapY, _maxVelocityX, _maxVelocityY, _minVelocity, _moveLeft, _moveRight, _previousState, _screenX, _screenY, _showCollisionRect, _state, _thresholdX, _thresholdY, _uniqueID;
 
   __extends(Player, _super);
 
@@ -15,8 +15,6 @@ Player = (function(_super) {
     this.height = 0;
     this.frame = 0;
   }
-
-  _showBounds = false;
 
   _showCollisionRect = false;
 
@@ -148,6 +146,12 @@ Player.prototype.__defineGetter__("bitmapData", function() {
   var keyFrame, row;
   keyFrame = Math.floor(this.frame * this.cellWidth);
   row = this.state.row * this.cellHeight;
+  if (this.showCollisionRect) {
+    this.ctx.drawImage(this.assetData, 0, 0);
+    this.ctx.fillStyle = "rgb(200,0,0)";
+    this.ctx.fillRect(keyFrame + this.thresholdX, row + this.thresholdY, this.width - (this.thresholdX * 2), this.height - (this.thresholdY * 2));
+    this.assetData.src = this.workbench.toDataURL();
+  }
   return {
     player: this.assetData,
     rect: new Rectangle(keyFrame, row, this.cellWidth, this.cellHeight)
@@ -160,8 +164,7 @@ Player.prototype.__defineGetter__("x", function() {
 
 Player.prototype.__defineSetter__("x", function(val) {
   if ((val >= 0) && (val <= (Game.prototype.VIEWPORT_WIDTH - this.width))) {
-    this._x = val;
-    return console.log("just set players x " + this._x);
+    return this._x = Math.round(val);
   } else if (val < 0) {
     return this._x = 0;
   } else if (val > 0) {
@@ -354,14 +357,6 @@ Player.prototype.__defineSetter__("applyGravityAndFriction", function(val) {
   return this._applyGravityAndFriction = val;
 });
 
-Player.prototype.__defineGetter__("showBounds", function() {
-  return this._showBounds;
-});
-
-Player.prototype.__defineSetter__("showBounds", function(val) {
-  return this._showBounds = val;
-});
-
 Player.prototype.__defineGetter__("showCollisionRect", function() {
   return this._showCollisionRect;
 });
@@ -413,7 +408,7 @@ Player.prototype.__defineSetter__("isBusy", function(val) {
 });
 
 Player.prototype.__defineGetter__("collisionRect", function() {
-  return this["new"](Rectangle(this.x + this.thresholdX, this.y + this.thresholdY, this.width - (this.thresholdX * 2), this.height - (this.thresholdY * 2)));
+  return new Rectangle(this.x + this.thresholdX, this.y + this.thresholdY, this.width - (this.thresholdX * 2), this.height - (this.thresholdY * 2));
 });
 
 Player.prototype.__defineGetter__("moveLeft", function() {

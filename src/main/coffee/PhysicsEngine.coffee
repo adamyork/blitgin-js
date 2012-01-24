@@ -7,7 +7,7 @@ class PhysicsEngine
   adjustPlayerVerically:(player,map)->
     player.y -= player.velocityY
     map.y -= player.velocityY
-    player.velocityY-=4
+    player.velocityY-= map.gravity
     player.y += map.gravity
     map.y += map.gravity
 
@@ -97,10 +97,8 @@ class PhysicsEngine
     (player.y + player.height + map.y)
 
   manageHorizontalBounds:(player,map,destination)->
-    player.x = (destination - map.x + ((player.thresholdX - 1) * player.direction))
+    player.x = destination - map.x
     player.velocityX = 0
-    console.log "dir kids " + player.direction
-    console.log "after manage h bounds " + (destination - map.x + (player.thresholdX * player.direction))
 
   setTargetFloor:(target,map,destination)->
     target.floor = (destination - target.height - map.y)

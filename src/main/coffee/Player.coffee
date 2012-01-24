@@ -4,9 +4,8 @@ class Player extends RenderObject
     @y = 0
     @width = 0
     @height = 0
-    @frame = 0
-    
-  _showBounds = false
+    @frame = 0   
+
   _showCollisionRect = false
   _isBusy = false
   _isDead = false
@@ -91,13 +90,11 @@ class Player extends RenderObject
 Player::__defineGetter__ "bitmapData",->
   keyFrame = Math.floor @frame * @cellWidth
   row = @state.row * @cellHeight
-  #This stuff needs to be re-thought. while helpful for development
-  #seems rather expensive.
-  # if(_showBounds )
-      # tmpData.copyPixels(asset.bitmapData, new Rectangle(keyFrame, row, width, height), new Point(0, 0))
-  # if(_showCollisionRect)
-      # var collisions:BitmapData = new BitmapData(collisionRect.width, collisionRect.height, false, 0xFFFF00)
-      # tmpData.copyPixels(collisions, collisions.rect, new Point(thresholdX, thresholdY))    
+  if @showCollisionRect
+    @ctx.drawImage @assetData,0,0
+    @ctx.fillStyle = "rgb(200,0,0)"
+    @ctx.fillRect keyFrame+@thresholdX,row+@thresholdY,@width-(@thresholdX*2),@height-(@thresholdY*2)
+    @assetData.src = @workbench.toDataURL()     
   {player:@assetData,rect:new Rectangle keyFrame,row,@cellWidth,@cellHeight}
 
 Player::__defineGetter__ "x",->
@@ -105,8 +102,7 @@ Player::__defineGetter__ "x",->
 
 Player::__defineSetter__ "x",(val)->
   if (val >= 0) and (val <= (Game::VIEWPORT_WIDTH - @width))
-    @_x = val
-    console.log "just set players x " + @_x
+    @_x = Math.round(val)
   else if val < 0
     @_x = 0
   else if(val > 0)
@@ -253,12 +249,6 @@ Player::__defineGetter__ "applyGravityAndFriction",->
 
 Player::__defineSetter__ "applyGravityAndFriction",(val)->
   @_applyGravityAndFriction = val
-
-Player::__defineGetter__ "showBounds",->
-  @_showBounds
-
-Player::__defineSetter__ "showBounds",(val)->
-  @_showBounds = val
     
 Player::__defineGetter__ "showCollisionRect",->
   @_showCollisionRect
@@ -298,7 +288,7 @@ Player::__defineSetter__ "isBusy",(val)->
   @_isBusy = val
 
 Player::__defineGetter__ "collisionRect",->
-  @new Rectangle (@x+@thresholdX),(@y+@thresholdY),(@width-(@thresholdX*2)),(@height-(@thresholdY*2))
+  new Rectangle (@x+@thresholdX),(@y+@thresholdY),(@width-(@thresholdX*2)),(@height-(@thresholdY*2))
 
 Player::__defineGetter__ "moveLeft",->
   @_moveLeft

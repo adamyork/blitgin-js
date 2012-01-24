@@ -4,6 +4,7 @@ class RenderObject
     @y = 0
     
   _transparency = false
+  _showBounds = false
   _colorConstant = "#000000"
   _rgbTolerance = {}
   _workbench = {}
@@ -41,7 +42,7 @@ class RenderObject
       
   assetLoadComplete:->
     @ctx = @workbench.getContext '2d'
-    if @transparency
+    if @transparency or (not @transparency and @showBounds)
       @assetData = @asset
     else
       @removeColorConstantAndCache @asset,@assetData
@@ -188,6 +189,12 @@ RenderObject::__defineSetter__ "rgbTolerance",(val)->
 
 RenderObject::__defineGetter__ "rgbTolerance",->
   @_rgbTolerance
+  
+RenderObject::__defineGetter__ "showBounds",->
+  @_showBounds
+
+RenderObject::__defineSetter__ "showBounds",(val)->
+  @_showBounds = val
 
 RenderObject::__defineGetter__ "asset",->
   @_asset

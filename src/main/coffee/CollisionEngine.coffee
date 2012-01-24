@@ -57,18 +57,18 @@ class CollisionEngine
     point = 0
 
     if target.direction is 1      
-      for i in [horizontalMin + target.thresholdX .. horizontalMax - target.thresholdX]
+      for i in [horizontalMin + target.thresholdX .. (horizontalMax - target.thresholdX)-1]
         @checkForCieling Math.round(i)
         point = @map.collisionDataPixel Math.round(i),Math.round(destination)
         if point isnt 0
-          @checkForFloor(point, destination, i, target)
+          @checkForFloor Math.round(point),Math.round(destination),Math.round(i),target
           return
     else
-      for i in [horizontalMin - target.thresholdX .. horizontalMax + target.thresholdX]
+      for i in [horizontalMin - target.thresholdX .. (horizontalMax + target.thresholdX)-1]
         @checkForCieling Math.round(i)
         point = @map.collisionDataPixel Math.round(i),Math.round(destination)
         if point isnt 0
-          @checkForFloor point,destination,i,target
+          @checkForFloor Math.round(point),Math.round(destination),Math.round(i),target
           return
     @physicsEngine.manageVerticalBounds target,@map
 
@@ -77,28 +77,20 @@ class CollisionEngine
     verticalMin = @physicsEngine.getVerticalMin @player,@map
     verticalMax = @physicsEngine.getVerticalMax @player,@map
     i = 0
-    # console.log @map.collisionDataPixel Math.round(292.89),255
-    # console.log "secodn " + @map.collisionDataPixel Math.round(292.89),256
     for i in [verticalMin .. verticalMax-1]
       point = @map.collisionDataPixel Math.round(destination),Math.round(i)
       if point isnt 0
         @checkForWall point,Math.round(destination),Math.round(i)
-        console.log "destination after transform " + destination
         if @player.direction is 1
           destination -= @player.width
-        console.log "destination offset further " + destination
         @physicsEngine.manageHorizontalBounds @player,@map,destination
         return
         
   checkForWall:(point,destination,position)->
     while point isnt 0
       destination -= @player.direction
-      console.log "@player.direction " + @player.direction
       point = @map.collisionDataPixel Math.round(destination),Math.round(position)
-      console.log "desintation " + destination
-      console.log "position " + position
-      console.log "the point " + point
-
+      
   checkForFloor:(point,destination,position,target)->
     count = 0
     while point isnt 0

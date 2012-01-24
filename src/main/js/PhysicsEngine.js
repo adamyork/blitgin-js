@@ -14,7 +14,7 @@ PhysicsEngine = (function() {
   PhysicsEngine.prototype.adjustPlayerVerically = function(player, map) {
     player.y -= player.velocityY;
     map.y -= player.velocityY;
-    player.velocityY -= 4;
+    player.velocityY -= map.gravity;
     player.y += map.gravity;
     return map.y += map.gravity;
   };
@@ -126,10 +126,8 @@ PhysicsEngine = (function() {
   };
 
   PhysicsEngine.prototype.manageHorizontalBounds = function(player, map, destination) {
-    player.x = destination - map.x + ((player.thresholdX - 1) * player.direction);
-    player.velocityX = 0;
-    console.log("dir kids " + player.direction);
-    return console.log("after manage h bounds " + (destination - map.x + (player.thresholdX * player.direction)));
+    player.x = destination - map.x;
+    return player.velocityX = 0;
   };
 
   PhysicsEngine.prototype.setTargetFloor = function(target, map, destination) {

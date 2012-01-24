@@ -1,7 +1,7 @@
 var RenderObject;
 
 RenderObject = (function() {
-  var _asset, _assetClass, _assetData, _callback, _cellHeight, _cellWidth, _collisionPixels, _colorConstant, _ctx, _direction, _duration, _easeCoefficient, _frame, _frameBuffer, _height, _index, _lifeSpan, _rgbTolerance, _transparency, _velocityX, _velocityY, _width, _workbench, _x, _y;
+  var _asset, _assetClass, _assetData, _callback, _cellHeight, _cellWidth, _collisionPixels, _colorConstant, _ctx, _direction, _duration, _easeCoefficient, _frame, _frameBuffer, _height, _index, _lifeSpan, _rgbTolerance, _showBounds, _transparency, _velocityX, _velocityY, _width, _workbench, _x, _y;
 
   function RenderObject(name) {
     this.name = name;
@@ -10,6 +10,8 @@ RenderObject = (function() {
   }
 
   _transparency = false;
+
+  _showBounds = false;
 
   _colorConstant = "#000000";
 
@@ -74,7 +76,7 @@ RenderObject = (function() {
 
   RenderObject.prototype.assetLoadComplete = function() {
     this.ctx = this.workbench.getContext('2d');
-    if (this.transparency) {
+    if (this.transparency || (!this.transparency && this.showBounds)) {
       this.assetData = this.asset;
     } else {
       this.removeColorConstantAndCache(this.asset, this.assetData);
@@ -266,6 +268,14 @@ RenderObject.prototype.__defineSetter__("rgbTolerance", function(val) {
 
 RenderObject.prototype.__defineGetter__("rgbTolerance", function() {
   return this._rgbTolerance;
+});
+
+RenderObject.prototype.__defineGetter__("showBounds", function() {
+  return this._showBounds;
+});
+
+RenderObject.prototype.__defineSetter__("showBounds", function(val) {
+  return this._showBounds = val;
 });
 
 RenderObject.prototype.__defineGetter__("asset", function() {

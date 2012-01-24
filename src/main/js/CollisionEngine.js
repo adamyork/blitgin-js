@@ -76,20 +76,20 @@ CollisionEngine = (function() {
     i = 0;
     point = 0;
     if (target.direction === 1) {
-      for (i = _ref = horizontalMin + target.thresholdX, _ref2 = horizontalMax - target.thresholdX; _ref <= _ref2 ? i <= _ref2 : i >= _ref2; _ref <= _ref2 ? i++ : i--) {
+      for (i = _ref = horizontalMin + target.thresholdX, _ref2 = (horizontalMax - target.thresholdX) - 1; _ref <= _ref2 ? i <= _ref2 : i >= _ref2; _ref <= _ref2 ? i++ : i--) {
         this.checkForCieling(Math.round(i));
         point = this.map.collisionDataPixel(Math.round(i), Math.round(destination));
         if (point !== 0) {
-          this.checkForFloor(point, destination, i, target);
+          this.checkForFloor(Math.round(point), Math.round(destination), Math.round(i), target);
           return;
         }
       }
     } else {
-      for (i = _ref3 = horizontalMin - target.thresholdX, _ref4 = horizontalMax + target.thresholdX; _ref3 <= _ref4 ? i <= _ref4 : i >= _ref4; _ref3 <= _ref4 ? i++ : i--) {
+      for (i = _ref3 = horizontalMin - target.thresholdX, _ref4 = (horizontalMax + target.thresholdX) - 1; _ref3 <= _ref4 ? i <= _ref4 : i >= _ref4; _ref3 <= _ref4 ? i++ : i--) {
         this.checkForCieling(Math.round(i));
         point = this.map.collisionDataPixel(Math.round(i), Math.round(destination));
         if (point !== 0) {
-          this.checkForFloor(point, destination, i, target);
+          this.checkForFloor(Math.round(point), Math.round(destination), Math.round(i), target);
           return;
         }
       }
@@ -107,9 +107,7 @@ CollisionEngine = (function() {
       point = this.map.collisionDataPixel(Math.round(destination), Math.round(i));
       if (point !== 0) {
         this.checkForWall(point, Math.round(destination), Math.round(i));
-        console.log("destination after transform " + destination);
         if (this.player.direction === 1) destination -= this.player.width;
-        console.log("destination offset further " + destination);
         this.physicsEngine.manageHorizontalBounds(this.player, this.map, destination);
         return;
       }
@@ -121,11 +119,7 @@ CollisionEngine = (function() {
     _results = [];
     while (point !== 0) {
       destination -= this.player.direction;
-      console.log("@player.direction " + this.player.direction);
-      point = this.map.collisionDataPixel(Math.round(destination), Math.round(position));
-      console.log("desintation " + destination);
-      console.log("position " + position);
-      _results.push(console.log("the point " + point));
+      _results.push(point = this.map.collisionDataPixel(Math.round(destination), Math.round(position)));
     }
     return _results;
   };
