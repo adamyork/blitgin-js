@@ -14,3 +14,5 @@ class SoundEngine
       index = _activeSounds.indexOf snd, 0 
       arr = _activeSounds.splice index, 1
       arr = undefined
+
+SoundEngine::name = "SoundEngine"

@@ -251,6 +251,8 @@ class RenderEngine
     @soundEngine = undefined
     @collisionEngine = undefined
 
+RenderEngine::name = "RenderEngine"
+
 RenderEngine::__defineGetter__ "scrn",->
   @_scrn
   

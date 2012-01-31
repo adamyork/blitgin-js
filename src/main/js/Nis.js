@@ -46,6 +46,8 @@ Nis = (function() {
 
 })();
 
+Nis.prototype.name = "Nis";
+
 Nis.prototype.__defineGetter__("conditionsMet", function(val) {
   var Boolean;
   ({

@@ -164,6 +164,8 @@ class PhysicsEngine
     nis.frame++
     (nis.frame >= nis.nisGoal.duration)
 
+PhysicsEngine::name = "PhysicsEngine"
+
 PhysicsEngine::__defineGetter__ "gravity",->
   @_gravity
 

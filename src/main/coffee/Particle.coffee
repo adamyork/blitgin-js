@@ -8,6 +8,8 @@ class Particle extends RenderObject
     super
     duration = Math.ceil (@asset.width/@cellWidth)
 
+Particle::name = "Particle"
+
 Particle::__defineGetter__ "index",->
   @_index
 

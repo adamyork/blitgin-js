@@ -65,10 +65,10 @@ RenderObject = (function() {
     this._callback = _callback;
     if ((void 0 !== this.assetClass) && (0 !== this.cellHeight) && (0 !== this.cellWidth)) {
       this.workbench = document.createElement("canvas");
-      this._asset = new Image();
+      this.asset = new Image();
       this.assetData = new Image();
-      this._asset.onload = this.assetLoadComplete.bind(this);
-      return this._asset.src = this.assetClass;
+      this.asset.onload = this.assetLoadComplete.bind(this);
+      return this.asset.src = this.assetClass;
     } else {
       return console.log("Set a cellwidth , cellheight , and assetClass before calling initialize.");
     }
@@ -132,6 +132,8 @@ RenderObject = (function() {
   return RenderObject;
 
 })();
+
+RenderObject.prototype.name = "RenderObject";
 
 RenderObject.prototype.__defineGetter__("bitmapData", function() {
   var keyFrame;
@@ -280,6 +282,10 @@ RenderObject.prototype.__defineSetter__("showBounds", function(val) {
 
 RenderObject.prototype.__defineGetter__("asset", function() {
   return this._asset;
+});
+
+RenderObject.prototype.__defineSetter__("asset", function(val) {
+  return this._asset = val;
 });
 
 RenderObject.prototype.__defineGetter__("assetClass", function() {

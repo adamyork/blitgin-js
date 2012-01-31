@@ -3,7 +3,9 @@ class Point
     
   _x = 0
   _y = 0
-  
+
+Point::name = "Point"
+
 Point::__defineGetter__ "x", ->
     return @_x;
 

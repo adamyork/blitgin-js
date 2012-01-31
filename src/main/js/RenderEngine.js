@@ -132,6 +132,8 @@ RenderEngine = (function() {
 
 })();
 
+RenderEngine.prototype.name = "RenderEngine";
+
 RenderEngine.prototype.__defineGetter__("scrn", function() {
   return this._scrn;
 });

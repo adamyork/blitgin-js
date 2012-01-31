@@ -142,6 +142,8 @@ Player = (function(_super) {
 
 })(RenderObject);
 
+Player.prototype.name = "Player";
+
 Player.prototype.__defineGetter__("bitmapData", function() {
   var keyFrame, row;
   keyFrame = Math.floor(this.frame * this.cellWidth);

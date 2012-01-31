@@ -5,6 +5,8 @@ class NisCondition
   _playerCondition = {}
   _enemies = []
 
+NisCondition::name = "NisCondition"
+
 NisCondition::__defineGetter__ "mapCondition",->
   @_mapCondition
 

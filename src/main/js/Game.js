@@ -217,6 +217,8 @@ Game = (function() {
 
 })();
 
+Game.prototype.name = "Game";
+
 Game.prototype.__defineGetter__("instance", function() {
   return this._instance;
 });

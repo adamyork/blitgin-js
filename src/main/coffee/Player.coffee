@@ -87,6 +87,8 @@ class Player extends RenderObject
   setCustomActionForKey:(keyCode,action)->
     @actions[keyCode] = action
 
+Player::name = "Player"
+
 Player::__defineGetter__ "bitmapData",->
   keyFrame = Math.floor @frame * @cellWidth
   row = @state.row * @cellHeight

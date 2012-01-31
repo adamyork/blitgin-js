@@ -16,6 +16,8 @@ Point = (function() {
 
 })();
 
+Point.prototype.name = "Point";
+
 Point.prototype.__defineGetter__("x", function() {
   return this._x;
 });

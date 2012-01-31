@@ -13,3 +13,5 @@ GameError = (function() {
   return GameError;
 
 })();
+
+GameError.prototype.name = "GameError";

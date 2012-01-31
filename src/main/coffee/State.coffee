@@ -7,6 +7,8 @@ class State
   _frameBuffer = 0
   _id = ""
 
+State::name = "State"
+
 State::__defineGetter__ "duration",->
   @_duration
 

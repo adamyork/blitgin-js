@@ -1,33 +1,44 @@
 var Bootstrap;
 
 Bootstrap = (function() {
-  var _classes, _collection;
+  var callBack, createAccessors, hasCustomAccessors, _classes, _collection, _ref;
 
   function Bootstrap(name) {
-    var ref;
     this.name = name;
-    ref = this;
-    ref.getters = {};
-    ref.setters = {};
-    if (!Object.__defineGetter__) {
-      Object.prototype.__defineGetter__ = function(prop, func) {
-        ref.getters[this.name] = {};
-        ref.getters[this.name]["name"] = this.name;
-        return ref.getters[this.name][prop] = func;
-      };
-    }
-    if (!Object.__defineSetter__) {
-      Object.prototype.__defineSetter__ = function(prop, func) {
-        ref.setters[this.name] = {};
-        ref.getters[this.name]["name"] = this.name;
-        return ref.setters[this.name][prop] = func;
-      };
-    }
+    this.checkAccessors();
   }
 
   _classes = ["Point", "Rectangle", "Keyboard", "Game", "GameError", "Group", "RenderObject", "Action", "RenderEngine", "State", "PhysicsEngine", "CollisionEngine", "SoundEngine", "Input", "Player", "Map", "MapObject", "MapObjectGroup", "Nis", "NisCondition", "NisGoal", "Particle", "PhysicsEngine", "CollisionEngine", "SoundEngine", "Emitter", "Enemy", "EnemyGroup"];
 
   _collection = [];
+
+  _ref = Bootstrap;
+
+  _ref.getters = {};
+
+  _ref.setters = {};
+
+  hasCustomAccessors = false;
+
+  callBack = {};
+
+  Bootstrap.prototype.checkAccessors = function() {
+    if (!Object.__defineGetter__) {
+      hasCustomAccessors = true;
+      Object.prototype.__defineGetter__ = function(prop, func) {
+        if (!_ref.getters[this.name]) _ref.getters[this.name] = {};
+        _ref.getters[this.name]["name"] = this.name;
+        return _ref.getters[this.name][prop] = func;
+      };
+    }
+    if (!Object.__defineSetter__) {
+      return Object.prototype.__defineSetter__ = function(prop, func) {
+        if (!_ref.setters[this.name]) _ref.setters[this.name] = {};
+        _ref.setters[this.name]["name"] = this.name;
+        return _ref.setters[this.name][prop] = func;
+      };
+    }
+  };
 
   Bootstrap.prototype.start = function(callback, basePath) {
     var clazz, _i, _len;
@@ -43,7 +54,80 @@ Bootstrap = (function() {
   };
 
   Bootstrap.prototype.load = function(callback) {
-    return $LAB.script(_collection).wait(callback);
+    callBack = callback;
+    return $LAB.script(_collection).wait(function() {
+      return Bootstrap.prototype.checkForWeave();
+    });
+  };
+
+  Bootstrap.prototype.checkForWeave = function() {
+    var clazz, tmp, _i, _len;
+    if (hasCustomAccessors) {
+      for (_i = 0, _len = _classes.length; _i < _len; _i++) {
+        clazz = _classes[_i];
+        tmp = {};
+        tmp.name = clazz;
+        Bootstrap.prototype.weave(tmp);
+      }
+      return callBack();
+    } else {
+      return callBack();
+    }
+  };
+
+  Bootstrap.prototype.weave = function(target) {
+    var obj, prop, _results;
+    for (obj in _ref.getters) {
+      if (obj !== "__defineGetter__" && obj !== "__defineSetter__" && _ref.getters[obj].name === target.name) {
+        for (prop in _ref.getters[obj]) {
+          if (prop !== "__defineGetter__" && prop !== "__defineSetter__" && prop !== "name") {
+            if (_ref.setters[target.name][prop]) {
+              console.log("get main name : " + target.name + "prop " + prop);
+              createAccessors(target, prop, _ref.getters[target.name][prop], _ref.setters[target.name][prop]);
+            } else {
+              console.log("get else name : " + target.name + "prop " + prop);
+              createAccessors(target, prop, _ref.getters[target.name][prop], function(val) {});
+            }
+          }
+        }
+      }
+    }
+    _results = [];
+    for (obj in _ref.setters) {
+      if (obj !== "__defineGetter__" && obj !== "__defineSetter__" && _ref.setters[obj].name === target.name) {
+        _results.push((function() {
+          var _results2;
+          _results2 = [];
+          for (prop in _ref.setters[obj]) {
+            if (prop !== "__defineGetter__" && prop !== "__defineSetter__" && prop !== "name") {
+              if (_ref.getters[target.name][prop]) {
+                console.log("set main name : " + target.name + "prop " + prop);
+                _results2.push(createAccessors(target, prop, _ref.getters[target.name][prop], _ref.setters[target.name][prop]));
+              } else {
+                console.log("set else name : " + target.name + "prop " + prop);
+                _results2.push(createAccessors(target, prop, (function() {}), _ref.setters[target.name][prop]));
+              }
+            } else {
+              _results2.push(void 0);
+            }
+          }
+          return _results2;
+        })());
+      } else {
+        _results.push(void 0);
+      }
+    }
+    return _results;
+  };
+
+  createAccessors = function(obj, prop, getter, setter) {
+    var tar;
+    tar = eval(obj);
+    return Object.defineProperty(tar, prop, {
+      configurable: true,
+      get: getter,
+      set: setter
+    });
   };
 
   return Bootstrap;

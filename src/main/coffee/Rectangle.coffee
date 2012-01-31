@@ -5,7 +5,9 @@ class Rectangle
   _y = 0
   _width = 0
   _height = 0
-  
+
+Rectangle::name = "Rectangle"
+
 Rectangle::__defineGetter__ "x",->
   @_x
 

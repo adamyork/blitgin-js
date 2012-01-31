@@ -25,6 +25,8 @@ State = (function() {
 
 })();
 
+State.prototype.name = "State";
+
 State.prototype.__defineGetter__("duration", function() {
   return this._duration;
 });

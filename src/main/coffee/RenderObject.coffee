@@ -33,10 +33,10 @@ class RenderObject
   initialize:(@_callback)->
     if (undefined != @assetClass) and (0 != @cellHeight) and (0 != @cellWidth)
       @workbench = document.createElement "canvas"
-      @_asset = new Image()
+      @asset = new Image()
       @assetData = new Image()
-      @_asset.onload = @assetLoadComplete.bind this
-      @_asset.src = @assetClass
+      @asset.onload = @assetLoadComplete.bind this
+      @asset.src = @assetClass
     else
       console.log "Set a cellwidth , cellheight , and assetClass before calling initialize."
       
@@ -86,6 +86,8 @@ class RenderObject
   dispose:->
     _assetClass = undefined
     _asset = undefined
+
+RenderObject::name = "RenderObject"
 
 RenderObject::__defineGetter__ "bitmapData",->
   @workbench.width = @_asset.width
@@ -198,6 +200,9 @@ RenderObject::__defineSetter__ "showBounds",(val)->
 
 RenderObject::__defineGetter__ "asset",->
   @_asset
+
+RenderObject::__defineSetter__ "asset",(val)->
+  @_asset = val
 
 RenderObject::__defineGetter__ "assetClass",->
   @_assetClass

@@ -23,6 +23,8 @@ Composite = (function(_super) {
 
 })(RenderObject);
 
+Composite.prototype.name = "Composite";
+
 Composite.prototype.__defineGetter__("frame", function() {
   return this._frame;
 });

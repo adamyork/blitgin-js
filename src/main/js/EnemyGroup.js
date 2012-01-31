@@ -15,3 +15,5 @@ EnemyGroup = (function(_super) {
   return EnemyGroup;
 
 })(Group);
+
+EnemyGroup.prototype.name = "EnemyGroup";

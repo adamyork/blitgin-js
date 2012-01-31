@@ -17,6 +17,8 @@ NisCondition = (function() {
 
 })();
 
+NisCondition.prototype.name = "NisCondition";
+
 NisCondition.prototype.__defineGetter__("mapCondition", function() {
   return this._mapCondition;
 });

@@ -189,7 +189,9 @@ class Map extends RenderObject
   collisionDataPixel:(x,y)->
     index = 4 * (y * @collisionData.width + x)
     @collisionPixels.data[index+3]
-    
+
+Map::name = "Map"
+  
 Map::__defineGetter__ "bitmapData",->
   if @_initializeComplete
     @ctx.clearRect 0,0,@workbench.width,@workbench.height

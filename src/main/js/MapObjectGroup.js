@@ -15,3 +15,5 @@ MapObjectGroup = (function(_super) {
   return MapObjectGroup;
 
 })(Group);
+
+MapObjectGroup.prototype.name = "MapObjectGroup";

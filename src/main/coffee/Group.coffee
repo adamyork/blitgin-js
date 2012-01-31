@@ -3,22 +3,24 @@ class Group
   
   _type = ""
   _positions = []
-  _independence = 0
+  _independence = 0  
+  
+Group::name = "Group"
 
-Game::__defineGetter__ "type", ->
+Group::__defineGetter__ "type", ->
   @_type
 
-Game::__defineSetter__ "type", (val) ->
+Group::__defineSetter__ "type", (val) ->
   @_type = val
   
-Game::__defineGetter__ "positions", ->
+Group::__defineGetter__ "positions", ->
   @_positions
 
-Game::__defineSetter__ "positions", (val) ->
+Group::__defineSetter__ "positions", (val) ->
   @_positions = val
   
-Game::__defineGetter__ "independence", ->
+Group::__defineGetter__ "independence", ->
   @_independence
 
-Game::__defineSetter__ "independence", (val) ->
+Group::__defineSetter__ "independence", (val) ->
   @_independence = val

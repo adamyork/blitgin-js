@@ -16,6 +16,8 @@ Enemy = (function(_super) {
 
 })(Player);
 
+Enemy.prototype.name = "Enemy";
+
 Enemy.prototype.__defineGetter__("x", function() {
   return this._screenX;
 });

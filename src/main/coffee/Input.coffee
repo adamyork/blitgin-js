@@ -8,6 +8,8 @@ class Input
   _customKey = 0
   _disabled = false
 
+Input::name = "Input"
+
 Input::__defineGetter__ "direction",->
   @_direction
 

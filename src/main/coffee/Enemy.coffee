@@ -4,6 +4,8 @@ class Enemy extends Player
   behavior:(args)->
     #function is to be overridden by the implementer.
 
+Enemy::name = "Enemy"
+
 Enemy::__defineGetter__ "x",->
   @_screenX
 

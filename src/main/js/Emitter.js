@@ -46,11 +46,13 @@ Emitter = (function() {
   }
 });
 
+Emitter.prototype.name = "Emitter";
+
 Emitter.prototype.__defineGetter__("frame", function() {
   return this._frame;
 });
 
-Emitter.prototype.__defineGetter__("frame", function(val) {
+Emitter.prototype.__defineSetter__("frame", function(val) {
   var particle, _i, _len, _ref, _results;
   _ref = this._particles;
   _results = [];

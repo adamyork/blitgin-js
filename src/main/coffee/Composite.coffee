@@ -6,7 +6,9 @@ class Composite extends RenderObject
   initialize:->
     super
     duration = Math.ceil (@asset.width/@cellWidth)
-    
+
+Composite::name = "Composite"
+
 Composite::__defineGetter__ "frame",->
   @_frame
 

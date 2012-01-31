@@ -19,6 +19,8 @@ NisGoal = (function() {
 
 })();
 
+NisGoal.prototype.name = "NisGoal";
+
 NisGoal.prototype.__defineSetter__("duration", function(val) {
   return this._duration = val;
 });

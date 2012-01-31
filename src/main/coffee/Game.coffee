@@ -166,7 +166,9 @@ class Game
 
   unsubscribe:(subscriber)->
     _subscribers[_subscribers.indexOf(subscriber).._subscribers.indexOf(subscriber)]
-    
+
+Game::name = "Game"
+  
 Game::__defineGetter__ "instance",->
   @_instance
 

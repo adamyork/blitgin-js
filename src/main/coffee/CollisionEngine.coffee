@@ -110,6 +110,8 @@ class CollisionEngine
         top = @map.collisionDataPixel point,@player.y
       @physicsEngine.resetPlayerVelocity @player
 
+CollisionEngine::name = "CollisionEngine"
+
 CollisionEngine::__defineGetter__ "map",->
   @_map
   

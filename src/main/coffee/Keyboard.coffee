@@ -1,6 +1,8 @@
 class Keyboard
   constructor:(@name)->
 
+Keyboard::name = "Keyboard"
+
 Keyboard::KEY_UP = "keyup"    
 Keyboard::KEY_DOWN = "keydown"    
 Keyboard::LEFT = 65    

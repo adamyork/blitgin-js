@@ -238,6 +238,8 @@ Map = (function(_super) {
 
 })(RenderObject);
 
+Map.prototype.name = "Map";
+
 Map.prototype.__defineGetter__("bitmapData", function() {
   var bg, cd, fg, mid, vh, vw, yPos;
   if (this._initializeComplete) {

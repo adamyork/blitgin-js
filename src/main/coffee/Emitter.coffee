@@ -18,10 +18,12 @@ createParticles:->
 removeParticle:(particle)->
   _particles[particle.index ... particle.index+1]
 
+Emitter::name = "Emitter"
+
 Emitter::__defineGetter__ "frame",->
   @_frame
 
-Emitter::__defineGetter__ "frame",(val)->
+Emitter::__defineSetter__ "frame",(val)->
   for particle in @_particles
     particle.frame++
     particle.velocityX += particle.easeCoefficient

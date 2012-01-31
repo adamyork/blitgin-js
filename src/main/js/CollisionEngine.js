@@ -155,6 +155,8 @@ CollisionEngine = (function() {
 
 })();
 
+CollisionEngine.prototype.name = "CollisionEngine";
+
 CollisionEngine.prototype.__defineGetter__("map", function() {
   return this._map;
 });

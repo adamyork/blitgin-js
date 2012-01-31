@@ -71,6 +71,8 @@ Action = (function(_super) {
 
 })(RenderObject);
 
+Action.prototype.name = "Action";
+
 Action.prototype.__defineGetter__("width", function() {
   return this._width;
 });

@@ -28,6 +28,8 @@ class Action extends RenderObject
   _composite = {}
   _emitter = {}
   
+Action::name = "Action"
+  
 Action::__defineGetter__ "width",->
   @_width
   

@@ -23,6 +23,8 @@ Input = (function() {
 
 })();
 
+Input.prototype.name = "Input";
+
 Input.prototype.__defineGetter__("direction", function() {
   return this._direction;
 });

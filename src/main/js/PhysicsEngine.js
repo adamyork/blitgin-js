@@ -216,6 +216,8 @@ PhysicsEngine = (function() {
 
 })();
 
+PhysicsEngine.prototype.name = "PhysicsEngine";
+
 PhysicsEngine.prototype.__defineGetter__("gravity", function() {
   return this._gravity;
 });

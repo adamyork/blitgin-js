@@ -1,28 +1,36 @@
 class Bootstrap  
   constructor:(@name)->
-  
-    ref = this
-    ref.getters = {}
-    ref.setters = {}
-  
-    unless Object.__defineGetter__
-      Object::__defineGetter__ = (prop, func) ->
-        ref.getters[@name] = {}
-        ref.getters[@name]["name"] = @name
-        ref.getters[@name][prop] = func
-        
-    unless Object.__defineSetter__
-      Object::__defineSetter__ = (prop, func) ->
-        ref.setters[@name] = {}
-        ref.getters[@name]["name"] = @name
-        ref.setters[@name][prop] = func
-
+    @checkAccessors()
+    
   _classes = ["Point","Rectangle","Keyboard","Game","GameError","Group","RenderObject",
     "Action","RenderEngine","State","PhysicsEngine","CollisionEngine","SoundEngine","Input",
     "Player","Map","MapObject","MapObjectGroup","Nis","NisCondition","NisGoal","Particle",
     "PhysicsEngine","CollisionEngine","SoundEngine","Emitter","Enemy","EnemyGroup"]
   _collection = []
     
+  _ref = this
+  _ref.getters = {}
+  _ref.setters = {}
+  
+  hasCustomAccessors = false
+  callBack = {}
+            
+  checkAccessors:->
+    unless Object.__defineGetter__
+      hasCustomAccessors = true
+      Object::__defineGetter__ =(prop,func)->
+        if not _ref.getters[@name]
+          _ref.getters[@name] = {}
+        _ref.getters[@name]["name"] = @name
+        _ref.getters[@name][prop] = func
+        
+    unless Object.__defineSetter__
+      Object::__defineSetter__ =(prop,func)->
+        if not _ref.setters[@name]
+          _ref.setters[@name] = {}
+        _ref.setters[@name]["name"] = @name
+        _ref.setters[@name][prop] = func
+
   start:(callback,basePath)->
    _collection[_i] = @prepare clazz,basePath for clazz in _classes
    @load callback
@@ -31,4 +39,43 @@ class Bootstrap
     basePath + clazz + ".js"
   
   load:(callback)->
-    $LAB.script(_collection).wait(callback)
+    callBack = callback
+    $LAB.script(_collection).wait(->
+      Bootstrap::checkForWeave()
+    )
+  
+  checkForWeave:->
+    if hasCustomAccessors
+      for clazz in _classes
+        tmp = {}
+        tmp.name = clazz
+        Bootstrap::weave tmp
+      callBack()
+    else
+      callBack()
+        
+  weave:(target)->
+    for obj of _ref.getters
+      if obj isnt "__defineGetter__" and obj isnt "__defineSetter__" and _ref.getters[obj].name is target.name
+        for prop of _ref.getters[obj]
+          if prop isnt "__defineGetter__" and prop isnt "__defineSetter__" and prop isnt "name"
+            if _ref.setters[target.name][prop]
+              console.log "get main name : " + target.name + "prop " + prop
+              createAccessors target, prop,_ref.getters[target.name][prop],_ref.setters[target.name][prop]
+            else
+              console.log "get else name : " + target.name + "prop " + prop
+              createAccessors target,prop,_ref.getters[target.name][prop],(val)->
+    for obj of _ref.setters
+      if obj isnt "__defineGetter__" and obj isnt "__defineSetter__" and _ref.setters[obj].name is target.name
+        for prop of _ref.setters[obj]
+          if prop isnt "__defineGetter__" and prop isnt "__defineSetter__" and prop isnt "name"
+            if _ref.getters[target.name][prop]
+              console.log "set main name : " + target.name + "prop " + prop
+              createAccessors target,prop,_ref.getters[target.name][prop],_ref.setters[target.name][prop]
+            else
+              console.log "set else name : " + target.name + "prop " + prop
+              createAccessors target,prop,(->),_ref.setters[target.name][prop]
+
+  createAccessors = (obj,prop,getter,setter)->
+    tar = eval(obj)
+    Object.defineProperty tar,prop,{configurable:true,get:getter,set:setter}

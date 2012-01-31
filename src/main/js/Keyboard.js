@@ -10,6 +10,8 @@ Keyboard = (function() {
 
 })();
 
+Keyboard.prototype.name = "Keyboard";
+
 Keyboard.prototype.KEY_UP = "keyup";
 
 Keyboard.prototype.KEY_DOWN = "keydown";

@@ -4,6 +4,8 @@ class MapObject extends Player
   behavior:()->
     #function is to be overridden by the implementer.
 
+MapObject::name = "MapObject"
+
 MapObject::__defineGetter__ "x",->
   @screenX
 

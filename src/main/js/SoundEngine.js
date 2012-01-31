@@ -26,3 +26,5 @@ SoundEngine = (function() {
   return SoundEngine;
 
 })();
+
+SoundEngine.prototype.name = "SoundEngine";

@@ -3,3 +3,5 @@ class GameError
     
   warnNotUsed: (clazz,func) ->
     logger.warn("WARNING :: "+func+"  is not used by "+clazz+". Stack is ")
+    
+GameError::name = "GameError"

@@ -22,6 +22,8 @@ Rectangle = (function() {
 
 })();
 
+Rectangle.prototype.name = "Rectangle";
+
 Rectangle.prototype.__defineGetter__("x", function() {
   return this._x;
 });

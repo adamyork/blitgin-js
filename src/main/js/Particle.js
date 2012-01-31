@@ -27,6 +27,8 @@ Particle = (function(_super) {
 
 })(RenderObject);
 
+Particle.prototype.name = "Particle";
+
 Particle.prototype.__defineGetter__("index", function() {
   return this._index;
 });

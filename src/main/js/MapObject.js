@@ -16,6 +16,8 @@ MapObject = (function(_super) {
 
 })(Player);
 
+MapObject.prototype.name = "MapObject";
+
 MapObject.prototype.__defineGetter__("x", function() {
   return this.screenX;
 });

@@ -10,7 +10,7 @@ function ext(superClass,subClass) {
 }
 
 function initGame() {
-	$LAB.setGlobalDefaults({Debug:true});
+	$LAB.setGlobalDefaults({AlwaysPreserveOrder:true,Debug:true});
 	$LAB.script("../src/main/js/Bootstrap.js").wait(function(){
 		bs = new Bootstrap("bs");
 		bs.start(loadClasses,"../src/main/js/");

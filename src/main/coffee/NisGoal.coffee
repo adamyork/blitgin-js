@@ -6,6 +6,8 @@ class NisGoal
   _mapGoals = {}
   _enemyGoals = {}
 
+NisGoal::name = "NisGoal"
+
 NisGoal::__defineSetter__ "duration",(val)->
   @_duration = val
 
