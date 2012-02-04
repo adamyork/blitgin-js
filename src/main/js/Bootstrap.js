@@ -82,10 +82,8 @@ Bootstrap = (function() {
         for (prop in _ref.getters[obj]) {
           if (prop !== "__defineGetter__" && prop !== "__defineSetter__" && prop !== "name") {
             if (_ref.setters[target.name][prop]) {
-              console.log("get main name : " + target.name + "prop " + prop);
               createAccessors(target, prop, _ref.getters[target.name][prop], _ref.setters[target.name][prop]);
             } else {
-              console.log("get else name : " + target.name + "prop " + prop);
               createAccessors(target, prop, _ref.getters[target.name][prop], function(val) {});
             }
           }
@@ -101,10 +99,8 @@ Bootstrap = (function() {
           for (prop in _ref.setters[obj]) {
             if (prop !== "__defineGetter__" && prop !== "__defineSetter__" && prop !== "name") {
               if (_ref.getters[target.name][prop]) {
-                console.log("set main name : " + target.name + "prop " + prop);
                 _results2.push(createAccessors(target, prop, _ref.getters[target.name][prop], _ref.setters[target.name][prop]));
               } else {
-                console.log("set else name : " + target.name + "prop " + prop);
                 _results2.push(createAccessors(target, prop, (function() {}), _ref.setters[target.name][prop]));
               }
             } else {
@@ -122,8 +118,8 @@ Bootstrap = (function() {
 
   createAccessors = function(obj, prop, getter, setter) {
     var tar;
-    tar = eval(obj);
-    return Object.defineProperty(tar, prop, {
+    tar = eval(obj.name);
+    return Object.defineProperty(tar.prototype, prop, {
       configurable: true,
       get: getter,
       set: setter

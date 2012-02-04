@@ -34,7 +34,10 @@ class Game
   render: ->
     if @_pause
         return
-    _animationFrameRequest _renderEngine.render(_input)
+    if _animationFrameRequest
+      _animationFrameRequest _renderEngine.render(_input)
+    else
+      _renderEngine.render(_input)
     
   setAnimationFrameRequest:->
     w = window

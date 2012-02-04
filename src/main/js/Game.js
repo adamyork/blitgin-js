@@ -64,7 +64,11 @@ Game = (function() {
 
   Game.prototype.render = function() {
     if (this._pause) return;
-    return _animationFrameRequest(_renderEngine.render(_input));
+    if (_animationFrameRequest) {
+      return _animationFrameRequest(_renderEngine.render(_input));
+    } else {
+      return _renderEngine.render(_input);
+    }
   };
 
   Game.prototype.setAnimationFrameRequest = function() {
