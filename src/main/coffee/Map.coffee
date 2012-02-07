@@ -62,7 +62,7 @@ class Map extends RenderObject
       
       @midgroundAsset = new Image()
       @midgroundAsset.onload = @imageLoadComplete.bind this
-      @midgroundAsset.src = @backgroundAssetClass
+      @midgroundAsset.src = @midgroundAssetClass
       @midgroundData = new Image()
 
     @foregroundAsset = new Image()
@@ -83,7 +83,7 @@ class Map extends RenderObject
         @removeColorConstantAndCache @backgroundAsset,@backgroundData
         @removeColorConstantAndCache @midgroundAsset,@midgroundData
         @removeColorConstantAndCache @foregroundAsset,@foregroundData
-        @removeColorConstantAndCache @collisionAsset,@collisionData
+        @removeColorConstantAndCache @collisionAsset,@collisionData,true
         @finalize()
     else
       if _assetsLoaded is Map::TOTAL_STANDARD_ASSETS
@@ -184,6 +184,7 @@ class Map extends RenderObject
     tmp = {}
     tmp.data = img
     tmp.rect = rect
+    tmp.name = name
     tmp
     
   collisionDataPixel:(x,y)->
@@ -203,12 +204,12 @@ Map::__defineGetter__ "bitmapData",->
     fg = {}
     cd = {}
     if(@paralaxing)
-      bg = @buildDataVO @backgroundData,new Rectangle @_x*.25,yPos,vw,vh
-      mid = @buildDataVO @midgroundData,new Rectangle @_x*.5,yPos,vw,vh
+      bg = @buildDataVO @backgroundData,new Rectangle(Math.round(@_x*.25),yPos,vw,vh)
+      mid = @buildDataVO @midgroundData,new Rectangle(Math.round(@_x*.5),yPos,vw,vh)
     else
-      fg = @buildDataVO @foregroundData,new Rectangle @_x,yPos,vw,vh
+      fg = @buildDataVO @foregroundData,new Rectangle(@_x,yPos,vw,vh)
     if(@showCollisionMap)
-      cd = @buildDataVO @collisionData,new Rectangle @_x,yPos,vw,vh
+      cd = @buildDataVO @collisionData,new Rectangle(@_x,yPos,vw,vh)
     {map:[bg,mid,fg,cd]}
   else
     console.log 'You cannot start the game yet. Map assets are not loaded.'
@@ -244,7 +245,6 @@ Map::__defineSetter__ "backgroundAssetClass",(val)->
 
 Map::__defineGetter__ "midgroundAssetClass",->
   @_midgroundAssetClass
-
 
 Map::__defineSetter__ "midgroundAssetClass",(val)->
   @_midgroundAssetClass = val
@@ -361,7 +361,7 @@ Map::__defineGetter__ "friction",->
   @_friction
     
 Map::__defineGetter__ "rect",->
-  new Rectangle(0, 0, Game::VIEWPORT_WIDTH, Game::VIEWPORT_HEIGHT);
+  new Rectangle 0,0,Game::VIEWPORT_WIDTH,Game::VIEWPORT_HEIGHT
 
 Map::__defineGetter__ "point",->
   new Point(0, 0);

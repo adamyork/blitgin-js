@@ -77,6 +77,7 @@ class RenderObject
         else if (r+g+b) is val
           imageData.data[index + 3] = 0          
     if cachePixels
+      console.log 'pixels cached'
       @collisionPixels = imageData         
     @ctx.putImageData imageData,0,0
     targetData.src = null

@@ -93,7 +93,7 @@ Map = (function(_super) {
       this.backgroundData = new Image();
       this.midgroundAsset = new Image();
       this.midgroundAsset.onload = this.imageLoadComplete.bind(this);
-      this.midgroundAsset.src = this.backgroundAssetClass;
+      this.midgroundAsset.src = this.midgroundAssetClass;
       this.midgroundData = new Image();
     }
     this.foregroundAsset = new Image();
@@ -113,7 +113,7 @@ Map = (function(_super) {
         this.removeColorConstantAndCache(this.backgroundAsset, this.backgroundData);
         this.removeColorConstantAndCache(this.midgroundAsset, this.midgroundData);
         this.removeColorConstantAndCache(this.foregroundAsset, this.foregroundData);
-        this.removeColorConstantAndCache(this.collisionAsset, this.collisionData);
+        this.removeColorConstantAndCache(this.collisionAsset, this.collisionData, true);
         return this.finalize();
       }
     } else {
@@ -225,6 +225,7 @@ Map = (function(_super) {
     tmp = {};
     tmp.data = img;
     tmp.rect = rect;
+    tmp.name = name;
     return tmp;
   };
 
@@ -252,8 +253,8 @@ Map.prototype.__defineGetter__("bitmapData", function() {
     fg = {};
     cd = {};
     if (this.paralaxing) {
-      bg = this.buildDataVO(this.backgroundData, new Rectangle(this._x * .25, yPos, vw, vh));
-      mid = this.buildDataVO(this.midgroundData, new Rectangle(this._x * .5, yPos, vw, vh));
+      bg = this.buildDataVO(this.backgroundData, new Rectangle(Math.round(this._x * .25), yPos, vw, vh));
+      mid = this.buildDataVO(this.midgroundData, new Rectangle(Math.round(this._x * .5), yPos, vw, vh));
     } else {
       fg = this.buildDataVO(this.foregroundData, new Rectangle(this._x, yPos, vw, vh));
     }

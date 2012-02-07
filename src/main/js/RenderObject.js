@@ -117,7 +117,10 @@ RenderObject = (function() {
         }
       }
     }
-    if (cachePixels) this.collisionPixels = imageData;
+    if (cachePixels) {
+      console.log('pixels cached');
+      this.collisionPixels = imageData;
+    }
     this.ctx.putImageData(imageData, 0, 0);
     targetData.src = null;
     targetData.src = this.workbench.toDataURL();

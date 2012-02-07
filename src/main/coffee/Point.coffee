@@ -7,13 +7,13 @@ class Point
 Point::name = "Point"
 
 Point::__defineGetter__ "x", ->
-    return @_x;
+  return @_x;
 
 Point::__defineSetter__ "x", (val) ->
-    @_x = val
+  @_x = val
     
 Point::__defineGetter__ "y", ->
-    return @_y;
+  return @_y;
 
 Point::__defineSetter__ "y", (val) ->
-    @_y = val
+  @_y = val
