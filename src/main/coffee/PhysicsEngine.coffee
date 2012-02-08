@@ -6,7 +6,6 @@ class PhysicsEngine
 
   adjustPlayerVerically:(player,map)->
     player.y -= player.velocityY
-    map.y -= player.velocityY
     player.velocityY-= map.gravity
     player.y += map.gravity
     map.y += map.gravity

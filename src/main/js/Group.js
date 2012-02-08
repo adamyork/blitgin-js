@@ -3,8 +3,10 @@ var Group;
 Group = (function() {
   var _independence, _positions, _type;
 
-  function Group(name) {
-    this.name = name;
+  function Group(type, positions, independence) {
+    this.type = type;
+    this.positions = positions;
+    this.independence = independence;
   }
 
   _type = "";

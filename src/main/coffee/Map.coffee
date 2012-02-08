@@ -104,13 +104,13 @@ class Map extends RenderObject
     activeTargets = if (type == Map::MANAGE_ENEMIES) then _activeEnemies else _activeMapObjects
   
     for group in targetArray
-      for i in group.positions
-        key = @generateKey group, i
+      for position in group.positions
+        key = @generateKey group, _j
         target = activeTargets[key]
 
         obj = {}
-        posX = if target then target.mapX else group.positions[i].x
-        posY = if target then target.mapY else group.positions[i].y
+        posX = if target then target.mapX else group.positions[_j].x
+        posY = if target then target.mapY else group.positions[_j].y
         vw = Game::VIEWPORT_WIDTH
         vh = Game::VIEWPORT_HEIGHT
 
@@ -120,17 +120,17 @@ class Map extends RenderObject
         indep = group.independence
 
         if(target == undefined)
-          if(@sEnemyOnScreen posX, posY, vw, vh, indep)
+          if(@isEnemyOnScreen posX, posY, vw, vh, indep)
             enemy = group.type
             obj = new enemy()
             obj.mapX = posX
             obj.mapY = posY
-            obj.screenX = posX - x
-            obj.screenY = obj.mapY - y - gravity
+            obj.screenX = posX - @x
+            obj.screenY = obj.mapY - @y - @gravity
             obj.uniqueID = key
             activeTargets[obj.uniqueID] = obj
         else if(target)
-          if(!@isEnemyOnScreen posX, posY, vw, vh, indep || target.isDead)
+          if(!@isEnemyOnScreen posX,posY,vw,vh,indep || target.isDead)
             delete activeTargets[target.uniqueID]
           if(target.isDead)
               inactiveTargets[target.uniqueID] = true
@@ -139,8 +139,8 @@ class Map extends RenderObject
     return group.type + "" + group.positions[i].x + "" + group.positions[i].y + "" + i
 
   isEnemyOnScreen:(posX,posY,vw,vh,indep)->
-    hBounds = (((posX - indep) - x) - vw) <= 0 && (((posX + indep) - x) - vw) >= -(vw)
-    vBounds = (((posY + indep) - y) - vh) <= 0 && (((posY - indep) - y) - vh) >= -(vh)
+    hBounds = (((posX - indep) - @x) - vw) <= 0 && (((posX + indep) - @x) - vw) >= -(vw)
+    vBounds = (((posY + indep) - @y) - vh) <= 0 && (((posY - indep) - @y) - vh) >= -(vh)
     return (hBounds && vBounds)
 
   checkForNIS:(player)->
@@ -229,7 +229,7 @@ Map::__defineGetter__ "y",->
   @_y
 
 Map::__defineSetter__ "y",(val)->
-  if (val >= @collisionData.height - Game::VIEWPORT_WIDTH)
+  if (val >= @collisionData.height - Game::VIEWPORT_HEIGHT)
     @_y = @collisionData.height - Game::VIEWPORT_HEIGHT
     return
   if (val < 0)

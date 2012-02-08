@@ -6,10 +6,10 @@ EnemyGroup = (function(_super) {
 
   __extends(EnemyGroup, _super);
 
-  function EnemyGroup(type, map, indep) {
+  function EnemyGroup(type, positions, independence) {
     this.type = type;
-    this.map = map;
-    this.indep = indep;
+    this.positions = positions;
+    this.independence = independence;
   }
 
   return EnemyGroup;

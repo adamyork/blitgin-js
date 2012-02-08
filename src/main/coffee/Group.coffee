@@ -1,5 +1,5 @@
 class Group
-  constructor:(@name)->
+  constructor:(@type,@positions,@independence)->
   
   _type = ""
   _positions = []

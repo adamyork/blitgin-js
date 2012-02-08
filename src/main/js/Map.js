@@ -134,7 +134,7 @@ Map = (function(_super) {
   };
 
   Map.prototype.manageElements = function(type) {
-    var activeTargets, enemy, group, i, inactiveTargets, indep, key, obj, posX, posY, target, targetArray, vh, vw, _i, _j, _len, _len2, _ref;
+    var activeTargets, enemy, group, inactiveTargets, indep, key, obj, posX, posY, position, target, targetArray, vh, vw, _i, _j, _len, _len2, _ref;
     targetArray = type === Map.prototype.MANAGE_ENEMIES ? this.enemies : this.mapObjects;
     inactiveTargets = type === Map.prototype.MANAGE_ENEMIES ? _inactiveEnemies : _inactiveMapObjects;
     activeTargets = type === Map.prototype.MANAGE_ENEMIES ? _activeEnemies : _activeMapObjects;
@@ -142,24 +142,24 @@ Map = (function(_super) {
       group = targetArray[_i];
       _ref = group.positions;
       for (_j = 0, _len2 = _ref.length; _j < _len2; _j++) {
-        i = _ref[_j];
-        key = this.generateKey(group, i);
+        position = _ref[_j];
+        key = this.generateKey(group, _j);
         target = activeTargets[key];
         obj = {};
-        posX = target ? target.mapX : group.positions[i].x;
-        posY = target ? target.mapY : group.positions[i].y;
+        posX = target ? target.mapX : group.positions[_j].x;
+        posY = target ? target.mapY : group.positions[_j].y;
         vw = Game.prototype.VIEWPORT_WIDTH;
         vh = Game.prototype.VIEWPORT_HEIGHT;
         if (inactiveTargets[posX + posY]) return;
         indep = group.independence;
         if (target === void 0) {
-          if (this.sEnemyOnScreen(posX, posY, vw, vh, indep)) {
+          if (this.isEnemyOnScreen(posX, posY, vw, vh, indep)) {
             enemy = group.type;
             obj = new enemy();
             obj.mapX = posX;
             obj.mapY = posY;
-            obj.screenX = posX - x;
-            obj.screenY = obj.mapY - y - gravity;
+            obj.screenX = posX - this.x;
+            obj.screenY = obj.mapY - this.y - this.gravity;
             obj.uniqueID = key;
             activeTargets[obj.uniqueID] = obj;
           }
@@ -179,8 +179,8 @@ Map = (function(_super) {
 
   Map.prototype.isEnemyOnScreen = function(posX, posY, vw, vh, indep) {
     var hBounds, vBounds;
-    hBounds = (((posX - indep) - x) - vw) <= 0 && (((posX + indep) - x) - vw) >= -vw;
-    vBounds = (((posY + indep) - y) - vh) <= 0 && (((posY - indep) - y) - vh) >= -vh;
+    hBounds = (((posX - indep) - this.x) - vw) <= 0 && (((posX + indep) - this.x) - vw) >= -vw;
+    vBounds = (((posY + indep) - this.y) - vh) <= 0 && (((posY - indep) - this.y) - vh) >= -vh;
     return hBounds && vBounds;
   };
 
@@ -288,7 +288,7 @@ Map.prototype.__defineGetter__("y", function() {
 });
 
 Map.prototype.__defineSetter__("y", function(val) {
-  if (val >= this.collisionData.height - Game.prototype.VIEWPORT_WIDTH) {
+  if (val >= this.collisionData.height - Game.prototype.VIEWPORT_HEIGHT) {
     this._y = this.collisionData.height - Game.prototype.VIEWPORT_HEIGHT;
     return;
   }

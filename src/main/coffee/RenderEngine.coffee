@@ -106,14 +106,12 @@ class RenderEngine
     @soundEngine.checkPlayback @map
     @physicsEngine.adjustMapVerically @map, @player
     #@manageNIS @map.checkForNIS(@player),input
-# 
-# protected function manageEnemy(enemy:Enemy):void
-# {
-    # enemy.frame++;
-    # _physicsEngine.adjustEnemy(enemy, _player, _map);
-    # _collisionEngine.checkVerticalMapCollision(enemy);
-    # _collisionEngine.manageCollisions(enemy, _player);
-# }
+
+  manageEnemy:(enemy)->
+    enemy.frame++
+    @physicsEngine.adjustEnemy enemy,@player,@map
+    #@collisionEngine.checkVerticalMapCollision enemy
+    #@collisionEngine.manageCollisions enemy,player
 # 
 # protected function manageNewActions(input:InputVO):void
 # {

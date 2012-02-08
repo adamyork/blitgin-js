@@ -20,6 +20,7 @@ function initGame() {
 function loadClasses() {
 	$LAB
 	.script("js/CustomPlayer.js")
+	.script("js/CustomEnemy.js").wait()
 	.script("js/CustomMap.js").wait(function(){
 		createGame();
 	});

@@ -13,7 +13,6 @@ PhysicsEngine = (function() {
 
   PhysicsEngine.prototype.adjustPlayerVerically = function(player, map) {
     player.y -= player.velocityY;
-    map.y -= player.velocityY;
     player.velocityY -= map.gravity;
     player.y += map.gravity;
     return map.y += map.gravity;

@@ -117,6 +117,11 @@ RenderEngine = (function() {
     return this.physicsEngine.adjustMapVerically(this.map, this.player);
   };
 
+  RenderEngine.prototype.manageEnemy = function(enemy) {
+    enemy.frame++;
+    return this.physicsEngine.adjustEnemy(enemy, this.player, this.map);
+  };
+
   RenderEngine.prototype.dispose = function() {
     _actionObjects = void 0;
     this.scrn = void 0;
