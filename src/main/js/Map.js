@@ -31,13 +31,13 @@ Map = (function(_super) {
 
   _nis = [];
 
-  _activeEnemies = [];
+  _activeEnemies = {};
 
-  _inactiveEnemies = [];
+  _inactiveEnemies = {};
 
-  _activeMapObjects = [];
+  _activeMapObjects = {};
 
-  _inactiveMapObjects = [];
+  _inactiveMapObjects = {};
 
   _backgroundAssetClass = {};
 
@@ -134,20 +134,22 @@ Map = (function(_super) {
   };
 
   Map.prototype.manageElements = function(type) {
-    var activeTargets, enemy, group, inactiveTargets, indep, key, obj, posX, posY, position, target, targetArray, vh, vw, _i, _j, _len, _len2, _ref;
+    var activeTargets, enemy, group, inactiveTargets, indep, j, key, obj, posX, posY, position, target, targetArray, vh, vw, _i, _len, _len2, _ref;
+    inactiveTargets = {};
+    activeTargets = {};
     targetArray = type === Map.prototype.MANAGE_ENEMIES ? this.enemies : this.mapObjects;
     inactiveTargets = type === Map.prototype.MANAGE_ENEMIES ? _inactiveEnemies : _inactiveMapObjects;
-    activeTargets = type === Map.prototype.MANAGE_ENEMIES ? _activeEnemies : _activeMapObjects;
+    activeTargets = type === Map.prototype.MANAGE_ENEMIES ? this._activeEnemies : this._activeMapObjects;
     for (_i = 0, _len = targetArray.length; _i < _len; _i++) {
       group = targetArray[_i];
       _ref = group.positions;
-      for (_j = 0, _len2 = _ref.length; _j < _len2; _j++) {
-        position = _ref[_j];
-        key = this.generateKey(group, _j);
+      for (j = 0, _len2 = _ref.length; j < _len2; j++) {
+        position = _ref[j];
+        key = this.generateKey(group, j);
         target = activeTargets[key];
         obj = {};
-        posX = target ? target.mapX : group.positions[_j].x;
-        posY = target ? target.mapY : group.positions[_j].y;
+        posX = target ? target.mapX : group.positions[j].x;
+        posY = target ? target.mapY : group.positions[j].y;
         vw = Game.prototype.VIEWPORT_WIDTH;
         vh = Game.prototype.VIEWPORT_HEIGHT;
         if (inactiveTargets[posX + posY]) return;
@@ -162,6 +164,7 @@ Map = (function(_super) {
             obj.screenY = obj.mapY - this.y - this.gravity;
             obj.uniqueID = key;
             activeTargets[obj.uniqueID] = obj;
+            console.log("hello");
           }
         } else if (target) {
           if (!this.isEnemyOnScreen(posX, posY, vw, vh, indep || target.isDead)) {
@@ -174,7 +177,7 @@ Map = (function(_super) {
   };
 
   Map.prototype.generateKey = function(group, i) {
-    return group.type + "" + group.positions[i].x + "" + group.positions[i].y + "" + i;
+    return group.type.prototype.name + "" + group.positions[i].x + "" + group.positions[i].y + "" + i;
   };
 
   Map.prototype.isEnemyOnScreen = function(posX, posY, vw, vh, indep) {

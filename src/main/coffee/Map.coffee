@@ -14,10 +14,10 @@ class Map extends RenderObject
   _mapObjects = []
   _nis = []
   
-  _activeEnemies = []
-  _inactiveEnemies = []
-  _activeMapObjects = []
-  _inactiveMapObjects = []
+  _activeEnemies = {}
+  _inactiveEnemies = {}
+  _activeMapObjects = {}
+  _inactiveMapObjects = {}
   
   _backgroundAssetClass = {}
   _midgroundAssetClass = {}
@@ -99,18 +99,20 @@ class Map extends RenderObject
     @activeMapObjects = []
 
   manageElements:(type)->
+    inactiveTargets = {}
+    activeTargets = {}
     targetArray = if (type == Map::MANAGE_ENEMIES) then @enemies else @mapObjects;
     inactiveTargets = if (type == Map::MANAGE_ENEMIES) then _inactiveEnemies else _inactiveMapObjects
-    activeTargets = if (type == Map::MANAGE_ENEMIES) then _activeEnemies else _activeMapObjects
+    activeTargets = if (type == Map::MANAGE_ENEMIES) then @_activeEnemies else @_activeMapObjects
   
     for group in targetArray
-      for position in group.positions
-        key = @generateKey group, _j
+      for position,j in group.positions
+        key = @generateKey group,j
         target = activeTargets[key]
 
         obj = {}
-        posX = if target then target.mapX else group.positions[_j].x
-        posY = if target then target.mapY else group.positions[_j].y
+        posX = if target then target.mapX else group.positions[j].x
+        posY = if target then target.mapY else group.positions[j].y
         vw = Game::VIEWPORT_WIDTH
         vh = Game::VIEWPORT_HEIGHT
 
@@ -120,7 +122,7 @@ class Map extends RenderObject
         indep = group.independence
 
         if(target == undefined)
-          if(@isEnemyOnScreen posX, posY, vw, vh, indep)
+          if(@isEnemyOnScreen posX,posY,vw,vh,indep)
             enemy = group.type
             obj = new enemy()
             obj.mapX = posX
@@ -129,6 +131,7 @@ class Map extends RenderObject
             obj.screenY = obj.mapY - @y - @gravity
             obj.uniqueID = key
             activeTargets[obj.uniqueID] = obj
+            console.log "hello"
         else if(target)
           if(!@isEnemyOnScreen posX,posY,vw,vh,indep || target.isDead)
             delete activeTargets[target.uniqueID]
@@ -136,7 +139,7 @@ class Map extends RenderObject
               inactiveTargets[target.uniqueID] = true
 
   generateKey:(group,i)->
-    return group.type + "" + group.positions[i].x + "" + group.positions[i].y + "" + i
+    return group.type::name + "" + group.positions[i].x + "" + group.positions[i].y + "" + i
 
   isEnemyOnScreen:(posX,posY,vw,vh,indep)->
     hBounds = (((posX - indep) - @x) - vw) <= 0 && (((posX + indep) - @x) - vw) >= -(vw)

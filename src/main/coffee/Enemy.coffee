@@ -24,7 +24,17 @@ Enemy::__defineGetter__ "collisionRect",->
 Enemy::__defineGetter__ "point",->
   new Point @screenX,@screenY
 
+Enemy::__defineGetter__ "frame",->
+  @_frame
+
 Enemy::__defineSetter__ "frame",(val)->
-  @_frame = val
-  if not isBusy
+  if not @isBusy
     @behavior()
+  if val >= @state.duration
+    if not @state.persistent
+      @state = @previousState
+      @frameBuffer = @state.frameBuffer
+      @isBusy = false
+    @_frame = 0
+    return
+  @_frame = if (@_frame is 0 or val is 0) then val else val - @frameBuffer

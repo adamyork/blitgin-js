@@ -20,16 +20,16 @@ class RenderEngine
     @manageMap input
     @paint @map, @map.point
     @map.manageElements Map::MANAGE_ENEMIES
-    for enemy in @map.activeEnemies
-      @manageEnemy enemy
-      @paint enemy,enemy.point
+    for enemy of @map.activeEnemies
+      @manageEnemy @map.activeEnemies[enemy]
+      @paint @map.activeEnemies[enemy],enemy.point
     #@manageNewActions input
-    for action in _actionObjects
+    for action of _actionObjects
       if @actionIsIdle action
         continue
       @manageAction action
       @paint action,action.point
-    for mapObj in @map.activeMapObjects
+    for mapObj of @map.activeMapObjects
       mapObj.frame++
       @manageMapObject mapObj
       @paint mapObj,mapObj.point
@@ -110,7 +110,7 @@ class RenderEngine
   manageEnemy:(enemy)->
     enemy.frame++
     @physicsEngine.adjustEnemy enemy,@player,@map
-    #@collisionEngine.checkVerticalMapCollision enemy
+    @collisionEngine.checkVerticalMapCollision enemy
     #@collisionEngine.manageCollisions enemy,player
 # 
 # protected function manageNewActions(input:InputVO):void

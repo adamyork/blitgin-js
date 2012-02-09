@@ -87,6 +87,7 @@ Player = (function(_super) {
     this.y = _floor = Game.prototype.VIEWPORT_HEIGHT - (this.asset.height - this.cellHeight);
     this._frame = 0;
     this._minVelocity = 0;
+    this._isBusy = false;
     if (this.maxVelocityX === void 0) this.maxVelocityX = 15;
     if (this.maxVelocityY === void 0) {
       this._maxVelocityY = 45;
@@ -146,18 +147,25 @@ Player.prototype.name = "Player";
 
 Player.prototype.__defineGetter__("bitmapData", function() {
   var keyFrame, row;
-  keyFrame = Math.floor(this.frame * this.cellWidth);
-  row = this.state.row * this.cellHeight;
-  if (this.showCollisionRect) {
-    this.ctx.drawImage(this.assetData, 0, 0);
-    this.ctx.fillStyle = "rgb(200,0,0)";
-    this.ctx.fillRect(keyFrame + this.thresholdX, row + this.thresholdY, this.width - (this.thresholdX * 2), this.height - (this.thresholdY * 2));
-    this.assetData.src = this.workbench.toDataURL();
+  if (this.ctx !== void 0) {
+    keyFrame = Math.floor(this.frame * this.cellWidth);
+    row = this.state.row * this.cellHeight;
+    if (this.showCollisionRect) {
+      this.ctx.drawImage(this.assetData, 0, 0);
+      this.ctx.fillStyle = "rgb(200,0,0)";
+      this.ctx.fillRect(keyFrame + this.thresholdX, row + this.thresholdY, this.width - (this.thresholdX * 2), this.height - (this.thresholdY * 2));
+      this.assetData.src = this.workbench.toDataURL();
+    }
+    return {
+      player: this.assetData,
+      rect: new Rectangle(keyFrame, row, this.cellWidth, this.cellHeight)
+    };
+  } else {
+    return {
+      player: {},
+      rect: new Rectangle(keyFrame, row, this.cellWidth, this.cellHeight)
+    };
   }
-  return {
-    player: this.assetData,
-    rect: new Rectangle(keyFrame, row, this.cellWidth, this.cellHeight)
-  };
 });
 
 Player.prototype.__defineGetter__("x", function() {

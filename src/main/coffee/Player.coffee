@@ -45,6 +45,7 @@ class Player extends RenderObject
     @y = _floor = ((Game::VIEWPORT_HEIGHT) - (@asset.height - @cellHeight))
     @_frame = 0
     @_minVelocity = 0
+    @_isBusy = false
     if @maxVelocityX is undefined
       @maxVelocityX = 15
     if @maxVelocityY is undefined
@@ -90,14 +91,17 @@ class Player extends RenderObject
 Player::name = "Player"
 
 Player::__defineGetter__ "bitmapData",->
-  keyFrame = Math.floor @frame * @cellWidth
-  row = @state.row * @cellHeight
-  if @showCollisionRect
-    @ctx.drawImage @assetData,0,0
-    @ctx.fillStyle = "rgb(200,0,0)"
-    @ctx.fillRect keyFrame+@thresholdX,row+@thresholdY,@width-(@thresholdX*2),@height-(@thresholdY*2)
-    @assetData.src = @workbench.toDataURL()     
-  {player:@assetData,rect:new Rectangle keyFrame,row,@cellWidth,@cellHeight}
+  if @ctx isnt undefined
+    keyFrame = Math.floor @frame * @cellWidth
+    row = @state.row * @cellHeight
+    if @showCollisionRect
+      @ctx.drawImage @assetData,0,0
+      @ctx.fillStyle = "rgb(200,0,0)"
+      @ctx.fillRect keyFrame+@thresholdX,row+@thresholdY,@width-(@thresholdX*2),@height-(@thresholdY*2)
+      @assetData.src = @workbench.toDataURL()     
+    {player:@assetData,rect:new Rectangle keyFrame,row,@cellWidth,@cellHeight}
+   else
+    {player:{},rect:new Rectangle keyFrame,row,@cellWidth,@cellHeight}
 
 Player::__defineGetter__ "x",->
   @_x

@@ -1,7 +1,9 @@
 var CustomEnemy = ext(Enemy,function(){	
+	this.name = "CustomEnemy"
+	this.colorConstant = "#000000"
 	this.maxDistance = 20;
     this.distanceFromOrigin = 0;
-	this.applyGravityAndFriction = false;
+	this.applyGravityAndFriction = true;
 	this.assetClass = "img/circle-man.png";
 	this.cellWidth = 64;
 	this.cellHeight = 64;
@@ -12,7 +14,7 @@ var CustomEnemy = ext(Enemy,function(){
 	this.health = 100;
 	this.damage = 10;
 	this.showBounds = true;
-	this.showCollisionRect = true;
+	this.showCollisionRect = false;
 	this.screenX = 0;
 	this.screenY = 0;
 	this.initialize();
@@ -20,7 +22,7 @@ var CustomEnemy = ext(Enemy,function(){
 
 CustomEnemy.prototype.behavior = function(args) {
 	this.screenX += this.direction * 1;
-	this.distanceFromOrigin += direction * 1;
+	this.distanceFromOrigin += this.direction * 1;
 	this.velocityX += this.easeCoefficient;
 	if(this.distanceFromOrigin >= this.maxDistance || this.distanceFromOrigin <= -(this.maxDistance)) {
 	    this.state = (this.state.id == this.moveRight.id) ? this.moveLeft : this.moveRight;

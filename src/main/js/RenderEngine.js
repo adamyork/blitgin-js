@@ -26,7 +26,7 @@ RenderEngine = (function() {
   RenderEngine._ctx = {};
 
   RenderEngine.prototype.render = function(input) {
-    var action, enemy, mapObj, _i, _j, _k, _len, _len2, _len3, _ref, _ref2;
+    var action, enemy, mapObj;
     this._ctx.clearRect(0, 0, Game.prototype.VIEWPORT_WIDTH, Game.prototype.VIEWPORT_HEIGHT);
     if (this.nis) {
       this.manageNIS(this.nis, input);
@@ -36,21 +36,16 @@ RenderEngine = (function() {
     this.manageMap(input);
     this.paint(this.map, this.map.point);
     this.map.manageElements(Map.prototype.MANAGE_ENEMIES);
-    _ref = this.map.activeEnemies;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      enemy = _ref[_i];
-      this.manageEnemy(enemy);
-      this.paint(enemy, enemy.point);
+    for (enemy in this.map.activeEnemies) {
+      this.manageEnemy(this.map.activeEnemies[enemy]);
+      this.paint(this.map.activeEnemies[enemy], enemy.point);
     }
-    for (_j = 0, _len2 = _actionObjects.length; _j < _len2; _j++) {
-      action = _actionObjects[_j];
+    for (action in _actionObjects) {
       if (this.actionIsIdle(action)) continue;
       this.manageAction(action);
       this.paint(action, action.point);
     }
-    _ref2 = this.map.activeMapObjects;
-    for (_k = 0, _len3 = _ref2.length; _k < _len3; _k++) {
-      mapObj = _ref2[_k];
+    for (mapObj in this.map.activeMapObjects) {
       mapObj.frame++;
       this.manageMapObject(mapObj);
       this.paint(mapObj, mapObj.point);
@@ -119,7 +114,8 @@ RenderEngine = (function() {
 
   RenderEngine.prototype.manageEnemy = function(enemy) {
     enemy.frame++;
-    return this.physicsEngine.adjustEnemy(enemy, this.player, this.map);
+    this.physicsEngine.adjustEnemy(enemy, this.player, this.map);
+    return this.collisionEngine.checkVerticalMapCollision(enemy);
   };
 
   RenderEngine.prototype.dispose = function() {

@@ -42,7 +42,20 @@ Enemy.prototype.__defineGetter__("point", function() {
   return new Point(this.screenX, this.screenY);
 });
 
+Enemy.prototype.__defineGetter__("frame", function() {
+  return this._frame;
+});
+
 Enemy.prototype.__defineSetter__("frame", function(val) {
-  this._frame = val;
-  if (!isBusy) return this.behavior();
+  if (!this.isBusy) this.behavior();
+  if (val >= this.state.duration) {
+    if (!this.state.persistent) {
+      this.state = this.previousState;
+      this.frameBuffer = this.state.frameBuffer;
+      this.isBusy = false;
+    }
+    this._frame = 0;
+    return;
+  }
+  return this._frame = this._frame === 0 || val === 0 ? val : val - this.frameBuffer;
 });
