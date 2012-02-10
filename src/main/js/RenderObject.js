@@ -87,7 +87,7 @@ RenderObject = (function() {
   };
 
   RenderObject.prototype.removeColorConstantAndCache = function(asset, targetData, cachePixels) {
-    var a, b, bv, g, gv, imageData, index, parsed, r, rv, t, val, xpos, ypos, _ref, _ref2;
+    var imageData, ref, worker;
     if (this.colorConstant === void 0) {
       console.log("Error : You need to set a hex value for colorConstant , or set tranparency true if no color is to be sampled out.");
     }
@@ -95,36 +95,28 @@ RenderObject = (function() {
     this.workbench.height = asset.height;
     this.ctx.drawImage(asset, 0, 0);
     imageData = this.ctx.getImageData(0, 0, this.workbench.width, this.workbench.height);
-    parsed = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(this.colorConstant);
-    rv = parseInt(parsed[1], 16);
-    gv = parseInt(parsed[2], 16);
-    bv = parseInt(parsed[3], 16);
-    val = rv + gv + bv;
-    t = this.rgbTolerance;
-    for (xpos = 0, _ref = imageData.width - 1; 0 <= _ref ? xpos <= _ref : xpos >= _ref; 0 <= _ref ? xpos++ : xpos--) {
-      for (ypos = 0, _ref2 = imageData.height - 1; 0 <= _ref2 ? ypos <= _ref2 : ypos >= _ref2; 0 <= _ref2 ? ypos++ : ypos--) {
-        index = 4 * (ypos * imageData.width + xpos);
-        r = imageData.data[index];
-        g = imageData.data[index + 1];
-        b = imageData.data[index + 2];
-        a = imageData.data[index + 3];
-        if (t !== void 0) {
-          if (r <= rv + t.r && g <= gv + t.g && b <= bv + t.b) {
-            imageData.data[index + 3] = 0;
-          }
-        } else if ((r + g + b) === val) {
-          imageData.data[index + 3] = 0;
-        }
+    worker = new Worker('../src/main/js/RemoveColorTask.js');
+    ref = this;
+    worker.onmessage = function(e) {
+      if (cachePixels) {
+        console.log('pixels cached');
+        ref.collisionPixels = e.data;
       }
-    }
-    if (cachePixels) {
-      console.log('pixels cached');
-      this.collisionPixels = imageData;
-    }
-    this.ctx.putImageData(imageData, 0, 0);
-    targetData.src = null;
-    targetData.src = this.workbench.toDataURL();
-    return this.ctx.clearRect(0, 0, asset.width, asset.height);
+      ref.ctx.putImageData(e.data, 0, 0);
+      targetData.src = null;
+      targetData.src = ref.workbench.toDataURL();
+      ref.ctx.clearRect(0, 0, asset.width, asset.height);
+      console.log("sample complete");
+      return worker.terminate();
+    };
+    worker.onerror = function(e) {
+      return console.log("error in worker");
+    };
+    return worker.postMessage({
+      "imageData": imageData,
+      "colorConstant": this.colorConstant,
+      "rgbTolerance": this.rgbTolerance
+    });
   };
 
   RenderObject.prototype.dispose = function() {

@@ -58,32 +58,22 @@ class RenderObject
     @workbench.height = asset.height
     @ctx.drawImage asset,0,0
     imageData = @ctx.getImageData 0, 0, @workbench.width, @workbench.height
-    parsed = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(@colorConstant)
-    rv = parseInt parsed[1],16
-    gv = parseInt parsed[2],16
-    bv = parseInt parsed[3],16
-    val = rv + gv + bv
-    t = @rgbTolerance
-    for xpos in [0 .. imageData.width-1]
-      for ypos in [0 .. imageData.height-1]
-        index = 4 * (ypos * imageData.width + xpos)
-        r = imageData.data[index]
-        g = imageData.data[index + 1]
-        b = imageData.data[index + 2]
-        a = imageData.data[index + 3]
-        if t isnt undefined
-          if r <= rv + t.r and g <= gv + t.g and b <= bv + t.b
-            imageData.data[index + 3] = 0
-        else if (r+g+b) is val
-          imageData.data[index + 3] = 0          
-    if cachePixels
-      console.log 'pixels cached'
-      @collisionPixels = imageData         
-    @ctx.putImageData imageData,0,0
-    targetData.src = null
-    targetData.src = @workbench.toDataURL()
-    @ctx.clearRect 0,0,asset.width,asset.height
-    
+    worker = new Worker '../src/main/js/RemoveColorTask.js'
+    ref = @
+    worker.onmessage=(e)->
+      if cachePixels
+        console.log 'pixels cached'
+        ref.collisionPixels = e.data
+      ref.ctx.putImageData e.data,0,0
+      targetData.src = null
+      targetData.src = ref.workbench.toDataURL()
+      ref.ctx.clearRect 0,0,asset.width,asset.height
+      console.log "sample complete"
+      worker.terminate()
+    worker.onerror=(e)->
+      console.log "error in worker"
+    worker.postMessage {"imageData":imageData,"colorConstant":@colorConstant,"rgbTolerance":@rgbTolerance}
+              
   dispose:->
     _assetClass = undefined
     _asset = undefined
