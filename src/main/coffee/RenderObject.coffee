@@ -46,8 +46,10 @@ class RenderObject
       @assetData = @asset
     else
       @removeColorConstantAndCache @asset,@assetData
-    @x = 0
-    @y = 0
+    if @x is undefined
+      @x = 0
+    if @y is undefined
+      @y = 0
     if @_callback
       @_callback()
 

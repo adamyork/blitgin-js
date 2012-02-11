@@ -115,7 +115,8 @@ RenderEngine = (function() {
   RenderEngine.prototype.manageEnemy = function(enemy) {
     enemy.frame++;
     this.physicsEngine.adjustEnemy(enemy, this.player, this.map);
-    return this.collisionEngine.checkVerticalMapCollision(enemy);
+    this.collisionEngine.checkVerticalMapCollision(enemy);
+    return this.collisionEngine.manageCollisions(enemy, this.player);
   };
 
   RenderEngine.prototype.dispose = function() {

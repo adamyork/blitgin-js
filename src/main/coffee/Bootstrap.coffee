@@ -1,5 +1,6 @@
 class Bootstrap  
   constructor:(@name)->
+    @checkBind()
     @checkAccessors()
     
   _classes = ["Point","Rectangle","Keyboard","Game","GameError","Group","RenderObject",
@@ -14,7 +15,15 @@ class Bootstrap
   
   hasCustomAccessors = false
   callBack = {}
-            
+  
+  checkBind:->
+    unless Function.bind
+      Function::bind = (bind) ->
+        self = this
+        ->
+          args = Array::slice.call(arguments)
+          self.apply bind or null,args
+  
   checkAccessors:->
     unless Object.__defineGetter__
       hasCustomAccessors = true

@@ -131,7 +131,6 @@ class Map extends RenderObject
             obj.screenY = obj.mapY - @y - @gravity
             obj.uniqueID = key
             activeTargets[obj.uniqueID] = obj
-            console.log "hello"
         else if(target)
           if(!@isEnemyOnScreen posX,posY,vw,vh,indep || target.isDead)
             delete activeTargets[target.uniqueID]

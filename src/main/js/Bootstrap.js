@@ -5,6 +5,7 @@ Bootstrap = (function() {
 
   function Bootstrap(name) {
     this.name = name;
+    this.checkBind();
     this.checkAccessors();
   }
 
@@ -21,6 +22,20 @@ Bootstrap = (function() {
   hasCustomAccessors = false;
 
   callBack = {};
+
+  Bootstrap.prototype.checkBind = function() {
+    if (!Function.bind) {
+      return Function.prototype.bind = function(bind) {
+        var self;
+        self = this;
+        return function() {
+          var args;
+          args = Array.prototype.slice.call(arguments);
+          return self.apply(bind || null, args);
+        };
+      };
+    }
+  };
 
   Bootstrap.prototype.checkAccessors = function() {
     if (!Object.__defineGetter__) {

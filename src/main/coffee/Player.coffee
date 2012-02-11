@@ -56,8 +56,8 @@ class Player extends RenderObject
       @frameBuffer = 0
     @velocityX = 0
     @velocityY = 0
-    @mapBoundsMin = Game::VIEWPORT_WIDTH * .15
-    @mapBoundsMax = (Game::VIEWPORT_WIDTH * .85) - @width
+    @mapBoundsMin = Math.round(Game::VIEWPORT_WIDTH * .15)
+    @mapBoundsMax = Math.round((Game::VIEWPORT_WIDTH * .85) - @width)
     @updateInherentStates()
 
   updateInherentStates:(action)->
@@ -176,7 +176,6 @@ Player::__defineSetter__ "state",(val)->
     return  
   if (val.id is @_jumpRight.id) or (val.id is @_jumpLeft.id)
     @velocityY = @_maxVelocityY
-    console.log "@_maxVelocityY " +@_maxVelocityY
   @_frame = 0
   @frameBuffer = val.frameBuffer
   @_previousState = @_state

@@ -85,8 +85,7 @@ class PhysicsEngine
     if(target.y < 0 and map.platform is false)
       target.y = 0
 
-  getHorizontalDesitination:(player,map)->
-    #console.log "player.hOrigin " + player.hOrigin + "map.x " + map.x + "player.thresholdX " + player.thresholdX + "player.direction " + player.direction
+  getHorizontalDesitination:(player,map)->    
     (player.hOrigin + map.x - (player.thresholdX * player.direction))
 
   getVerticalMin:(player,map)->

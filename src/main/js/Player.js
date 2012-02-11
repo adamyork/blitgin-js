@@ -97,8 +97,8 @@ Player = (function(_super) {
     if (this.frameBuffer === void 0) this.frameBuffer = 0;
     this.velocityX = 0;
     this.velocityY = 0;
-    this.mapBoundsMin = Game.prototype.VIEWPORT_WIDTH * .15;
-    this.mapBoundsMax = (Game.prototype.VIEWPORT_WIDTH * .85) - this.width;
+    this.mapBoundsMin = Math.round(Game.prototype.VIEWPORT_WIDTH * .15);
+    this.mapBoundsMax = Math.round((Game.prototype.VIEWPORT_WIDTH * .85) - this.width);
     return this.updateInherentStates();
   };
 
@@ -262,7 +262,6 @@ Player.prototype.__defineSetter__("state", function(val) {
   if (this._isBusy || (this._state.id === val.id)) return;
   if ((val.id === this._jumpRight.id) || (val.id === this._jumpLeft.id)) {
     this.velocityY = this._maxVelocityY;
-    console.log("@_maxVelocityY " + this._maxVelocityY);
   }
   this._frame = 0;
   this.frameBuffer = val.frameBuffer;

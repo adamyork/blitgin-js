@@ -24,6 +24,17 @@ Rectangle = (function() {
 
 Rectangle.prototype.name = "Rectangle";
 
+Rectangle.prototype.intersects = function(rect) {
+  var lateral, vertical;
+  lateral = (this.left < rect.left && rect.left < this.right) || (this.left < rect.right && rect.right < this.right);
+  vertical = (this.top < rect.top && rect.top < this.bottom) || (this.top < rect.bottom && rect.bottom < this.bottom);
+  return lateral || vertical;
+};
+
+Rectangle.prototype.intersection = function(rect) {
+  return Rectangle(Math.max(rect.left, this.left), Math.max(rect.top, this.top), Math.min(rect.right, this.right), Math.min(rect.bottom, this.bottom));
+};
+
 Rectangle.prototype.__defineGetter__("x", function() {
   return this._x;
 });
@@ -54,4 +65,20 @@ Rectangle.prototype.__defineGetter__("height", function() {
 
 Rectangle.prototype.__defineSetter__("height", function(val) {
   return this._height = val;
+});
+
+Rectangle.prototype.__defineGetter__("left", function() {
+  return this._x;
+});
+
+Rectangle.prototype.__defineGetter__("top", function() {
+  return this._y;
+});
+
+Rectangle.prototype.__defineGetter__("right", function() {
+  return this._x + this._width;
+});
+
+Rectangle.prototype.__defineGetter__("bottom", function() {
+  return this._y + this._height;
 });

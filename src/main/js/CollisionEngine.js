@@ -34,35 +34,11 @@ CollisionEngine = (function() {
   CollisionEngine.prototype.checkForCollision = function(focus, target) {
     var intersection;
     if (target.collisionRect.intersects(focus.collisionRect)) {
-      if (_physicsEngine.isTargetMovingVertically(target)) {
+      if (this.physicsEngine.isTargetMovingVertically(target)) {
         intersection = target.collisionRect.intersection(focus.collisionRect);
         this.physicsEngine.handleVerticalCollision(target, focus, intersection);
       }
-      if (target.direction === 1 && !(type(focus === MapObject))) {
-        if (typeof target === Action) {
-          focus.state = focus.collisionLeft;
-          focus.isBusy = true;
-        } else {
-          target.state = target.collisionRight;
-          focus.state = focus.collisionLeft;
-          target.isBusy = true;
-          focus.isBusy = true;
-        }
-        this.physicsEngine.handleHorizontalCollision(target, focus, this.map);
-      } else if (target.direction === -1 && !(typeof focus === MapObject)) {
-        if (typeof target === Action) {
-          focus.state = focus.collisionRight;
-          focus.isBusy = true;
-        } else {
-          target.state = target.collisionLeft;
-          focus.state = focus.collisionRight;
-          target.isBusy = true;
-          focus.isBusy = true;
-        }
-        this.physicsEngine.handleHorizontalCollision(target, focus, this.map);
-      }
-      focus.health -= target.damage;
-      return target.health -= focus.damage;
+      return console.log("Collision !!!");
     }
   };
 

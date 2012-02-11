@@ -164,7 +164,6 @@ Map = (function(_super) {
             obj.screenY = obj.mapY - this.y - this.gravity;
             obj.uniqueID = key;
             activeTargets[obj.uniqueID] = obj;
-            console.log("hello");
           }
         } else if (target) {
           if (!this.isEnemyOnScreen(posX, posY, vw, vh, indep || target.isDead)) {

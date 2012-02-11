@@ -111,7 +111,7 @@ class RenderEngine
     enemy.frame++
     @physicsEngine.adjustEnemy enemy,@player,@map
     @collisionEngine.checkVerticalMapCollision enemy
-    #@collisionEngine.manageCollisions enemy,player
+    @collisionEngine.manageCollisions enemy,@player
 # 
 # protected function manageNewActions(input:InputVO):void
 # {

@@ -81,8 +81,8 @@ RenderObject = (function() {
     } else {
       this.removeColorConstantAndCache(this.asset, this.assetData);
     }
-    this.x = 0;
-    this.y = 0;
+    if (this.x === void 0) this.x = 0;
+    if (this.y === void 0) this.y = 0;
     if (this._callback) return this._callback();
   };
 

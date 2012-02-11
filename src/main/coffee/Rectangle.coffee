@@ -8,6 +8,14 @@ class Rectangle
 
 Rectangle::name = "Rectangle"
 
+Rectangle::intersects=(rect)->
+  lateral = (@left < rect.left and rect.left < @right) or (@left < rect.right and rect.right < @right )
+  vertical = (@top < rect.top and rect.top < @bottom) or (@top < rect.bottom and rect.bottom < @bottom)
+  (lateral or vertical)
+  
+Rectangle::intersection=(rect)->
+  Rectangle(Math.max(rect.left,@left),Math.max(rect.top,@top),Math.min(rect.right,@right),Math.min(rect.bottom,@bottom))
+
 Rectangle::__defineGetter__ "x",->
   @_x
 
@@ -31,3 +39,15 @@ Rectangle::__defineGetter__ "height",->
 
 Rectangle::__defineSetter__ "height",(val)->
   @_height = val
+  
+Rectangle::__defineGetter__ "left",->
+  @_x
+  
+Rectangle::__defineGetter__ "top",->
+  @_y
+
+Rectangle::__defineGetter__ "right",->
+  @_x+@_width
+
+Rectangle::__defineGetter__ "bottom",->
+  @_y+@_height
