@@ -32,7 +32,7 @@ Rectangle.prototype.intersects = function(rect) {
 };
 
 Rectangle.prototype.intersection = function(rect) {
-  return Rectangle(Math.max(rect.left, this.left), Math.max(rect.top, this.top), Math.min(rect.right, this.right), Math.min(rect.bottom, this.bottom));
+  return new Rectangle(Math.max(rect.left, this.left), Math.max(rect.top, this.top), Math.min(rect.right, this.right), Math.min(rect.bottom, this.bottom));
 };
 
 Rectangle.prototype.__defineGetter__("x", function() {

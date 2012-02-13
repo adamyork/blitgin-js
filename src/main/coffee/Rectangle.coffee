@@ -14,7 +14,7 @@ Rectangle::intersects=(rect)->
   (lateral or vertical)
   
 Rectangle::intersection=(rect)->
-  Rectangle(Math.max(rect.left,@left),Math.max(rect.top,@top),Math.min(rect.right,@right),Math.min(rect.bottom,@bottom))
+  new Rectangle(Math.max(rect.left,@left),Math.max(rect.top,@top),Math.min(rect.right,@right),Math.min(rect.bottom,@bottom))
 
 Rectangle::__defineGetter__ "x",->
   @_x

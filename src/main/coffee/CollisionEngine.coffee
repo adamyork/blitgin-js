@@ -22,29 +22,30 @@ class CollisionEngine
       if @physicsEngine.isTargetMovingVertically(target)
         intersection = target.collisionRect.intersection(focus.collisionRect)
         @physicsEngine.handleVerticalCollision(target, focus, intersection)
-      console.log "Collision !!!"
-      # if(target.direction == 1 and not (type focus is MapObject))
-        # if typeof target is Action
-            # focus.state = focus.collisionLeft
-            # focus.isBusy = true
-        # else
-            # target.state = target.collisionRight
-            # focus.state = focus.collisionLeft
-            # target.isBusy = true
-            # focus.isBusy = true
-        # @physicsEngine.handleHorizontalCollision target,focus,@map
-      # else if(target.direction == -1 and not (typeof focus is MapObject))
-        # if typeof target is Action
-            # focus.state = focus.collisionRight
-            # focus.isBusy = true
-        # else
-            # target.state = target.collisionLeft
-            # focus.state = focus.collisionRight
-            # target.isBusy = true
-            # focus.isBusy = true
-        # @physicsEngine.handleHorizontalCollision target,focus,@map
-      # focus.health -= target.damage
-      # target.health -= focus.damage
+      focusBase = focus.__proto__.name
+      targetBase = target.__proto__.name
+      if(target.direction == 1 and focusBase isnt CollisionEngine::TYPE_OF_MAPOBJECT)
+        if targetBase is CollisionEngine::TYPE_OF_ACTION
+            focus.state = focus.collisionLeft
+            focus.isBusy = true
+        else
+            target.state = target.collisionRight
+            focus.state = focus.collisionLeft
+            target.isBusy = true
+            focus.isBusy = true
+        @physicsEngine.handleHorizontalCollision target,focus,@map
+      else if(target.direction == -1 and focusBase isnt CollisionEngine::TYPE_OF_MAPOBJECT)
+        if targetBase is CollisionEngine::TYPE_OF_ACTION
+            focus.state = focus.collisionRight
+            focus.isBusy = true
+        else
+            target.state = target.collisionLeft
+            focus.state = focus.collisionRight
+            target.isBusy = true
+            focus.isBusy = true
+        @physicsEngine.handleHorizontalCollision target,focus,@map
+      focus.health -= target.damage
+      target.health -= focus.damage
 
   checkVerticalMapCollision:(target)->
     outOfBounds = @physicsEngine.isTargetOutOfBounds target,@map
@@ -130,3 +131,6 @@ CollisionEngine::__defineGetter__ "physicsEngine",->
 
 CollisionEngine::__defineSetter__ "physicsEngine",(val)->
   @_physicsEngine = val
+
+CollisionEngine::TYPE_OF_MAPOBJECT = "MapObject"
+CollisionEngine::TYPE_OF_ACTION = "Action"

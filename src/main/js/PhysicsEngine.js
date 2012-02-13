@@ -63,7 +63,7 @@ PhysicsEngine = (function() {
 
   PhysicsEngine.prototype.handleHorizontalCollision = function(target, focus, map) {
     if (target.direction === 1) {
-      if (target === Action) {
+      if (target.__proto__.name === CollisionEngine.prototype.TYPE_OF_ACTION) {
         focus.x += focus.width * focus.collisionCoefficient;
         focus.velocityX = 0;
       } else {
@@ -73,7 +73,7 @@ PhysicsEngine = (function() {
         target.velocityX = 0;
       }
     } else if (target.direction === -1) {
-      if (typeof target === Action) {
+      if (target.__proto__.name === CollisionEngine.prototype.TYPE_OF_ACTION) {
         focus.x -= focus.width * focus.collisionCoefficient;
         focus.velocityX = 0;
       } else {

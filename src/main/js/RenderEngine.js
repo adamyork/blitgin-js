@@ -100,8 +100,10 @@ RenderEngine = (function() {
   RenderEngine.prototype.manageJump = function(input) {
     if ((input.jump === 1) && (input.jumpLock === false)) {
       input.jumpLock = true;
+      console.log("setting state 1 ren engine");
       return this.player.state = this.player.direction === 1 ? this.player.jumpRight : this.player.jumpLeft;
     } else if ((input.jump === 0) && input.jumpLock && (this.player.velocityY === 0)) {
+      console.log("setting state 2 ren engine");
       this.player.state = this.player.direction === 1 ? this.player.moveRight : this.player.moveLeft;
       return input.jumpLock = false;
     }

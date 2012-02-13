@@ -32,13 +32,39 @@ CollisionEngine = (function() {
   };
 
   CollisionEngine.prototype.checkForCollision = function(focus, target) {
-    var intersection;
+    var focusBase, intersection, targetBase;
     if (target.collisionRect.intersects(focus.collisionRect)) {
       if (this.physicsEngine.isTargetMovingVertically(target)) {
         intersection = target.collisionRect.intersection(focus.collisionRect);
         this.physicsEngine.handleVerticalCollision(target, focus, intersection);
       }
-      return console.log("Collision !!!");
+      focusBase = focus.__proto__.name;
+      targetBase = target.__proto__.name;
+      if (target.direction === 1 && focusBase !== CollisionEngine.prototype.TYPE_OF_MAPOBJECT) {
+        if (targetBase === CollisionEngine.prototype.TYPE_OF_ACTION) {
+          focus.state = focus.collisionLeft;
+          focus.isBusy = true;
+        } else {
+          target.state = target.collisionRight;
+          focus.state = focus.collisionLeft;
+          target.isBusy = true;
+          focus.isBusy = true;
+        }
+        this.physicsEngine.handleHorizontalCollision(target, focus, this.map);
+      } else if (target.direction === -1 && focusBase !== CollisionEngine.prototype.TYPE_OF_MAPOBJECT) {
+        if (targetBase === CollisionEngine.prototype.TYPE_OF_ACTION) {
+          focus.state = focus.collisionRight;
+          focus.isBusy = true;
+        } else {
+          target.state = target.collisionLeft;
+          focus.state = focus.collisionRight;
+          target.isBusy = true;
+          focus.isBusy = true;
+        }
+        this.physicsEngine.handleHorizontalCollision(target, focus, this.map);
+      }
+      focus.health -= target.damage;
+      return target.health -= focus.damage;
     }
   };
 
@@ -156,3 +182,7 @@ CollisionEngine.prototype.__defineGetter__("physicsEngine", function() {
 CollisionEngine.prototype.__defineSetter__("physicsEngine", function(val) {
   return this._physicsEngine = val;
 });
+
+CollisionEngine.prototype.TYPE_OF_MAPOBJECT = "MapObject";
+
+CollisionEngine.prototype.TYPE_OF_ACTION = "Action";

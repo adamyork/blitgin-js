@@ -25,7 +25,7 @@ CustomEnemy.prototype.behavior = function(args) {
 	this.distanceFromOrigin += this.direction * 1;
 	this.velocityX += this.easeCoefficient;
 	if(this.distanceFromOrigin >= this.maxDistance || this.distanceFromOrigin <= -(this.maxDistance)) {
-	    this.state = (this.state.id == this.moveRight.id) ? this.moveLeft : this.moveRight;
+	    this.state = (this.state.id == this.moveRight.id) ? this.moveLeft : this.moveRight;	    
 	    this.velocityX = 0;
 	    this.direction = this.direction * -1;
 	}

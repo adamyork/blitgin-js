@@ -46,16 +46,16 @@ class PhysicsEngine
 
   handleHorizontalCollision:(target,focus,map)->
     if target.direction is 1
-      if(target is Action)
-          focus.x += focus.width * focus.collisionCoefficient;
-          focus.velocityX = 0;
+      if target.__proto__.name is CollisionEngine::TYPE_OF_ACTION
+          focus.x += focus.width * focus.collisionCoefficient
+          focus.velocityX = 0
       else
           focus.screenX += focus.width + target.width
           target.x -= target.width * target.collisionCoefficient
           map.x -= target.width * target.collisionCoefficient
           target.velocityX = 0
     else if target.direction is -1
-      if(typeof target is Action)
+      if target.__proto__.name is CollisionEngine::TYPE_OF_ACTION
           focus.x -= focus.width * focus.collisionCoefficient
           focus.velocityX = 0
       else

@@ -97,8 +97,10 @@ class RenderEngine
   manageJump:(input)->
     if (input.jump is 1) and (input.jumpLock is false)
       input.jumpLock = true
+      console.log "setting state 1 ren engine"
       @player.state = if (@player.direction is 1) then @player.jumpRight else @player.jumpLeft
     else if (input.jump is 0) and (input.jumpLock) and (@player.velocityY is 0)
+      console.log "setting state 2 ren engine"
       @player.state = if (@player.direction is 1) then @player.moveRight else @player.moveLeft
       input.jumpLock = false
 

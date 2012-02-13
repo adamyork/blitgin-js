@@ -50,7 +50,7 @@ Enemy.prototype.__defineSetter__("frame", function(val) {
   if (!this.isBusy) this.behavior();
   if (val >= this.state.duration) {
     if (!this.state.persistent) {
-      this.state = this.previousState;
+      this.state = this._previousState;
       this.frameBuffer = this.state.frameBuffer;
       this.isBusy = false;
     }

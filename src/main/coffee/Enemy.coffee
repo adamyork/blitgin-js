@@ -32,7 +32,7 @@ Enemy::__defineSetter__ "frame",(val)->
     @behavior()
   if val >= @state.duration
     if not @state.persistent
-      @state = @previousState
+      @state = @_previousState
       @frameBuffer = @state.frameBuffer
       @isBusy = false
     @_frame = 0
