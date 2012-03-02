@@ -46,6 +46,7 @@ class Player extends RenderObject
     @_frame = 0
     @_minVelocity = 0
     @_isBusy = false
+    @_isDead = false
     if @maxVelocityX is undefined
       @maxVelocityX = 15
     if @maxVelocityY is undefined

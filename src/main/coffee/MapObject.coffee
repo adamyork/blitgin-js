@@ -23,8 +23,11 @@ MapObject::__defineGetter__ "collisionRect",->
                          
 MapObject::__defineGetter__ "point",->
   new Point @screenX,@screenY
+  
+MapObject::__defineGetter__ "frame",->
+  @_frame
 
 MapObject::__defineSetter__ "frame",(val)->
-  @_frame = value
+  @_frame = val
   if not @isBusy
     @behavior()

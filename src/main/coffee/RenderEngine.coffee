@@ -30,10 +30,11 @@ class RenderEngine
       @manageAction action
       @paint action,action.point
     for mapObj of @map.activeMapObjects
-      mapObj.frame++
-      @manageMapObject mapObj
-      @paint mapObj,mapObj.point
-    #@map.manageElements Map::MANAGE_MAP_OBJECTS
+      mObj = @map.activeMapObjects[mapObj]
+      mObj.frame++
+      @manageMapObject mObj
+      @paint mObj,mObj.point
+    @map.manageElements Map::MANAGE_MAP_OBJECTS
     @paint @player,@player.point
     if @player.composite isnt undefined
       @player.composite.frame++
@@ -145,12 +146,10 @@ class RenderEngine
     # _collisionEngine.manageCollisions(action);
 # }
 # 
-# protected function manageMapObject(mapObj:MapObject):void
-# {
-    # _physicsEngine.adjustMapObject(mapObj, _player, _map);
-    # _collisionEngine.checkVerticalMapCollision(mapObj);
-    # _collisionEngine.manageCollisions(mapObj, _player);
-# }
+  manageMapObject:(mapObj)->
+    @physicsEngine.adjustMapObject mapObj,@player,@map
+    @collisionEngine.checkVerticalMapCollision mapObj
+    @collisionEngine.manageCollisions mapObj,@player
 # 
 # protected function actionExists(action:Action):Boolean
 # {

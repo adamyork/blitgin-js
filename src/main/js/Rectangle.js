@@ -28,7 +28,7 @@ Rectangle.prototype.intersects = function(rect) {
   var lateral, vertical;
   lateral = (this.left < rect.left && rect.left < this.right) || (this.left < rect.right && rect.right < this.right);
   vertical = (this.top < rect.top && rect.top < this.bottom) || (this.top < rect.bottom && rect.bottom < this.bottom);
-  return lateral || vertical;
+  return lateral && vertical;
 };
 
 Rectangle.prototype.intersection = function(rect) {

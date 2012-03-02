@@ -6,9 +6,9 @@ MapObjectGroup = (function(_super) {
 
   __extends(MapObjectGroup, _super);
 
-  function MapObjectGroup(type, position, independence) {
+  function MapObjectGroup(type, positions, independence) {
     this.type = type;
-    this.position = position;
+    this.positions = positions;
     this.independence = independence;
   }
 

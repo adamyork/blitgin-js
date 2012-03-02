@@ -42,7 +42,11 @@ MapObject.prototype.__defineGetter__("point", function() {
   return new Point(this.screenX, this.screenY);
 });
 
+MapObject.prototype.__defineGetter__("frame", function() {
+  return this._frame;
+});
+
 MapObject.prototype.__defineSetter__("frame", function(val) {
-  this._frame = value;
+  this._frame = val;
   if (!this.isBusy) return this.behavior();
 });

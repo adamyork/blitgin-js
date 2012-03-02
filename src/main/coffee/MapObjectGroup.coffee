@@ -1,4 +1,4 @@
 class MapObjectGroup extends Group
-  constructor:(@type,@position,@independence)->
+  constructor:(@type,@positions,@independence)->
     
 MapObjectGroup::name = "MapObjectGroup"

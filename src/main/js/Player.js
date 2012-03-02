@@ -88,6 +88,7 @@ Player = (function(_super) {
     this._frame = 0;
     this._minVelocity = 0;
     this._isBusy = false;
+    this._isDead = false;
     if (this.maxVelocityX === void 0) this.maxVelocityX = 15;
     if (this.maxVelocityY === void 0) {
       this._maxVelocityY = 45;

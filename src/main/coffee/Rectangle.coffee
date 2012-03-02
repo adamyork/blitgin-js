@@ -11,7 +11,7 @@ Rectangle::name = "Rectangle"
 Rectangle::intersects=(rect)->
   lateral = (@left < rect.left and rect.left < @right) or (@left < rect.right and rect.right < @right )
   vertical = (@top < rect.top and rect.top < @bottom) or (@top < rect.bottom and rect.bottom < @bottom)
-  (lateral or vertical)
+  (lateral and vertical)
   
 Rectangle::intersection=(rect)->
   new Rectangle(Math.max(rect.left,@left),Math.max(rect.top,@top),Math.min(rect.right,@right),Math.min(rect.bottom,@bottom))
