@@ -134,7 +134,7 @@ Map = (function(_super) {
   };
 
   Map.prototype.manageElements = function(type) {
-    var activeTargets, enemy, group, inactiveTargets, indep, j, key, obj, posX, posY, position, target, targetArray, vh, vw, _i, _len, _len2, _ref;
+    var activeTargets, enemy, enemyOffScreen, group, inactiveTargets, indep, j, key, obj, posX, posY, position, target, targetArray, vh, vw, _i, _len, _len2, _ref;
     inactiveTargets = {};
     activeTargets = {};
     targetArray = type === Map.prototype.MANAGE_ENEMIES ? this.enemies : this.mapObjects;
@@ -152,7 +152,7 @@ Map = (function(_super) {
         posY = target ? target.mapY : group.positions[j].y;
         vw = Game.prototype.VIEWPORT_WIDTH;
         vh = Game.prototype.VIEWPORT_HEIGHT;
-        if (inactiveTargets[posX + posY]) return;
+        if (inactiveTargets[key]) return;
         indep = group.independence;
         if (target === void 0) {
           if (this.isEnemyOnScreen(posX, posY, vw, vh, indep)) {
@@ -166,7 +166,8 @@ Map = (function(_super) {
             activeTargets[obj.uniqueID] = obj;
           }
         } else if (target) {
-          if (!this.isEnemyOnScreen(posX, posY, vw, vh, indep || target.isDead)) {
+          enemyOffScreen = !(this.isEnemyOnScreen(posX, posY, vw, vh, indep));
+          if (enemyOffScreen || target.isDead) {
             delete activeTargets[target.uniqueID];
           }
           if (target.isDead) inactiveTargets[target.uniqueID] = true;

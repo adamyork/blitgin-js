@@ -5,6 +5,7 @@ Bootstrap = (function() {
 
   function Bootstrap(name) {
     this.name = name;
+    this.checkExt();
     this.checkBind();
     this.checkAccessors();
   }
@@ -22,6 +23,19 @@ Bootstrap = (function() {
   hasCustomAccessors = false;
 
   callBack = {};
+
+  Bootstrap.prototype.checkExt = function() {
+    if (window.ext === void 0) {
+      return window.ext = function(superClass, subClass) {
+        var tmp;
+        tmp = function() {};
+        tmp.prototype = superClass.prototype;
+        subClass.prototype = new tmp();
+        subClass.prototype.constructor = subClass;
+        return subClass;
+      };
+    }
+  };
 
   Bootstrap.prototype.checkBind = function() {
     if (!Function.bind) {

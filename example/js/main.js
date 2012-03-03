@@ -1,23 +1,15 @@
 var game;
 var bs;
 
-function ext(superClass,subClass) {
-    function tmp() {}
-    tmp.prototype = superClass.prototype;
-    subClass.prototype = new tmp();
-    subClass.prototype.constructor = subClass;
-    return subClass;
-}
-
-function initGame() {
+function loadDependencies() {
     $LAB.setGlobalDefaults({AlwaysPreserveOrder:true,Debug:true});
     $LAB.script("../src/main/js/Bootstrap.js").wait(function(){
         bs = new Bootstrap("bs");
-        bs.start(loadClasses,"../src/main/js/");
+        bs.start(loadCustomClasses,"../src/main/js/");
     });
 }
 
-function loadClasses() {
+function loadCustomClasses() {
     $LAB
     .script("js/CustomPlayer.js")
     .script("js/CustomEnemy.js").wait()

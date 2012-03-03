@@ -1,5 +1,6 @@
 class Bootstrap  
   constructor:(@name)->
+    @checkExt()
     @checkBind()
     @checkAccessors()
     
@@ -15,6 +16,15 @@ class Bootstrap
   
   hasCustomAccessors = false
   callBack = {}
+  
+  checkExt:->
+    if window.ext is undefined
+      window.ext=(superClass,subClass)->
+        tmp=()->
+        tmp:: = superClass::
+        subClass:: = new tmp()
+        subClass::constructor = subClass
+        subClass
   
   checkBind:->
     unless Function.bind

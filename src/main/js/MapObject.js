@@ -48,5 +48,15 @@ MapObject.prototype.__defineGetter__("frame", function() {
 
 MapObject.prototype.__defineSetter__("frame", function(val) {
   this._frame = val;
-  if (!this.isBusy) return this.behavior();
+  if (!this.isBusy) this.behavior();
+  if (val >= this.state.duration) {
+    if (!this.state.persistent) {
+      this.state = this._previousState;
+      this.frameBuffer = this.state.frameBuffer;
+      this.isBusy = false;
+    }
+    this._frame = 0;
+    return;
+  }
+  return this._frame = this._frame === 0 || val === 0 ? val : val - this.frameBuffer;
 });

@@ -99,7 +99,7 @@ Player::__defineGetter__ "bitmapData",->
       @ctx.drawImage @assetData,0,0
       @ctx.fillStyle = "rgb(200,0,0)"
       @ctx.fillRect keyFrame+@thresholdX,row+@thresholdY,@width-(@thresholdX*2),@height-(@thresholdY*2)
-      @assetData.src = @workbench.toDataURL()     
+      @assetData.src = @workbench.toDataURL()
     {player:@assetData,rect:new Rectangle keyFrame,row,@cellWidth,@cellHeight}
    else
     {player:{},rect:new Rectangle keyFrame,row,@cellWidth,@cellHeight}

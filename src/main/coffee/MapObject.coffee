@@ -31,3 +31,11 @@ MapObject::__defineSetter__ "frame",(val)->
   @_frame = val
   if not @isBusy
     @behavior()
+  if val >= @state.duration
+    if not @state.persistent
+      @state = @_previousState
+      @frameBuffer = @state.frameBuffer
+      @isBusy = false
+    @_frame = 0
+    return
+  @_frame = if (@_frame is 0 or val is 0) then val else val - @frameBuffer

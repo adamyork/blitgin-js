@@ -116,12 +116,12 @@ class Map extends RenderObject
         vw = Game::VIEWPORT_WIDTH
         vh = Game::VIEWPORT_HEIGHT
 
-        if(inactiveTargets[(posX + posY)])
+        if inactiveTargets[key]
           return
 
         indep = group.independence
 
-        if(target == undefined)
+        if target is undefined
           if(@isEnemyOnScreen posX,posY,vw,vh,indep)
             enemy = group.type
             obj = new enemy()
@@ -131,8 +131,9 @@ class Map extends RenderObject
             obj.screenY = obj.mapY - @y - @gravity
             obj.uniqueID = key
             activeTargets[obj.uniqueID] = obj
-        else if(target)
-          if(!@isEnemyOnScreen posX,posY,vw,vh,indep || target.isDead)
+        else if target
+          enemyOffScreen = !(@isEnemyOnScreen posX,posY,vw,vh,indep)
+          if enemyOffScreen or target.isDead
             delete activeTargets[target.uniqueID]
           if(target.isDead)
               inactiveTargets[target.uniqueID] = true
