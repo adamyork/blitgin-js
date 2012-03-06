@@ -23,7 +23,7 @@ class RenderEngine
     for enemy of @map.activeEnemies
       @manageEnemy @map.activeEnemies[enemy]
       @paint @map.activeEnemies[enemy],enemy.point
-    #@manageNewActions input
+    @manageNewActions input
     for action of _actionObjects
       if @actionIsIdle action
         continue
@@ -67,41 +67,11 @@ class RenderEngine
     @collisionEngine.checkVerticalMapCollision @player
     @collisionEngine.checkHorizontalMapCollision()
 
-# 
-# protected function managePlayerState(action:Action, input:InputVO = null):void
-# {
-    # if(input)
-    # {
-        # manageJump(input);
-    # }
-# 
-    # if(_player.state != action.state && !action.isAnimating && !action.hasAnimated &&
-        # !_player.isBusy)
-    # {
-        # _player.state = action.state;
-        # _player.isBusy = true;
-        # action.isAnimating = true;
-        # _player.frame++;
-    # }
-    # else if(_player.state != action.state && action.isAnimating)
-    # {
-        # action.isAnimating = false;
-        # action.hasAnimated = true;
-        # _player.isBusy = false;
-    # }
-    # else if(action.isAnimating && (_player.frame < action.state.duration))
-    # {
-        # _player.frame++;
-    # }
-# }
-# 
   manageJump:(input)->
     if (input.jump is 1) and (input.jumpLock is false)
       input.jumpLock = true
-      console.log "setting state 1 ren engine"
       @player.state = if (@player.direction is 1) then @player.jumpRight else @player.jumpLeft
     else if (input.jump is 0) and (input.jumpLock) and (@player.velocityY is 0)
-      console.log "setting state 2 ren engine"
       @player.state = if (@player.direction is 1) then @player.moveRight else @player.moveLeft
       input.jumpLock = false
 
@@ -115,104 +85,81 @@ class RenderEngine
     @physicsEngine.adjustEnemy enemy,@player,@map
     @collisionEngine.checkVerticalMapCollision enemy
     @collisionEngine.manageCollisions enemy,@player
-# 
-# protected function manageNewActions(input:InputVO):void
-# {
-    # if(input.customKey != 0)
-    # {
-        # var clazz:Class = _player.getCustomActionForKey(input.customKey);
-        # var action:Action = new clazz() as Action;
-        # input.customKey = 0;
-# 
-        # if(!actionExists(action))
-        # {
-            # action.x += _player.x;
-            # action.y += _player.y;
-            # action.owner = Action.PLAYER;
-            # action.direction = _player.direction;
-            # _player.composite = action.composite;
-            # _player.emitter = action.emitter;
-            # _actionObjects.push(action);
-            # _soundEngine.checkPlayback(action);
-        # }
-    # }
-# }
-# 
-# protected function manageAction(action:Action):void
-# {
-    # action.frame++;
-    # _physicsEngine.adjustAction(action, _map);
-    # managePlayerState(action);
-    # _collisionEngine.manageCollisions(action);
-# }
-# 
+    
+  manageNewActions:(input)->
+    if input.customKey isnt 0
+      clazz = @player.getCustomActionForKey input.customKey
+      action = new clazz()
+      input.customKey = 0
+      if not @actionExists(action)
+        action.x += @player.x
+        action.y += @player.y
+        action.owner = Action::PLAYER
+        action.direction = @player.direction
+        @player.composite = @action.composite
+        @player.emitter = action.emitter
+        @actionObjects.push action
+        @soundEngine.checkPlayback action
+
+  manageAction:(action)->
+    action.frame++
+    @physicsEngine.adjustAction action,@map
+    @managePlayerState action
+    @collisionEngine.manageCollisions action
+
+  managePlayerState:(action,input)->
+    if input
+      @manageJump input
+    if @player.state isnt action.state and action.isAnimating is false and action.hasAnimated is false and @player.isBusy is false
+      @player.state = action.state
+      @player.isBusy = true
+      action.isAnimating = true
+      @player.frame++
+    else if @player.state isnt action.state and action.isAnimating
+      action.isAnimating = false
+      action.hasAnimated = true
+      @player.isBusy = false
+    else if action.isAnimating and @player.frame < action.state.duration
+      @player.frame++
+
   manageMapObject:(mapObj)->
     @physicsEngine.adjustMapObject mapObj,@player,@map
     @collisionEngine.checkVerticalMapCollision mapObj
     @collisionEngine.manageCollisions mapObj,@player
-# 
-# protected function actionExists(action:Action):Boolean
-# {
-    # for each(var existing:Action in _actionObjects)
-    # {
-        # if(existing.id == action.id)
-        # {
-            # action = null;
-            # return true;
-        # }
-    # }
-    # return false;
-# }
-# 
-# protected function actionIsIdle(action:Action):Boolean
-# {
-    # var idle:Boolean = false;
-    # if(action.isComplete)
-    # {
-        # removeAction(action);
-        # idle = true;
-    # }
-# 
-    # if(action.nonObjectProducing && !action.isAnimating)
-    # {
-        # action.isAnimating = true;
-        # _player.updateInherentStates(action);
-        # idle = true
-    # }
-    # else if(action.nonObjectProducing && action.isAnimating)
-    # {
-        # action.frame++;
-        # idle = true;
-    # }
-    # return idle;
-# }
-# 
-# protected function removeAction(action:Action):void
-# {
-    # if(action.nonObjectProducing)
-    # {
-        # _player.updateInherentStates(null);
-    # }
-# 
-    # var index:Number = _actionObjects.indexOf(action, 0);
-    # var arr:Array = _actionObjects.splice(index, 1);
-    # arr = null;
-# 
-    # if(action.composite && _player.composite == action.composite)
-    # {
-        # _player.composite = null;
-    # }
-# 
-    # if(action.emitter && _player.emitter == action.emitter)
-    # {
-        # _player.emitter = null;
-    # }
-# 
-    # if(action.sound)
-    # {
-        # _soundEngine.removeSound(action.sound);
-    # }
-# }
+
+  actionExists:(action)->
+    for existing in @actionObjects
+      if existing.id is action.id
+        action = undefined
+        return true
+    false
+
+  actionIsIdle:(action)->
+    idle = false
+    if action.isComplete
+      @removeAction @action
+      idle = true
+    if action.nonObjectProducing and action.isAnimating is false
+      action.isAnimating = true
+      @player.updateInherentStates action
+      idle = true
+    else if action.nonObjectProducing and action.isAnimating
+      action.frame++
+      idle = true
+    idle
+
+  removeAction:(action)->
+    if action.nonObjectProducing
+      @player.updateInherentStates()
+    index = @actionObjects.indexOf action,0
+    arr = @actionObjects.splice index,1
+    arr = undefined
+    if action.composite and @player.composite is action.composite
+      @player.composite = undefined
+    if action.emitter and @player.emitter is action.emitter
+      @player.emitter = undefined
+    if(action.sound)
+      @soundEngine.removeSound action.sound
 # 
 # protected function manageNIS(nis:Nis, input:InputVO):void
 # {

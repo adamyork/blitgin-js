@@ -131,8 +131,8 @@ class Game
       _input.vDirection = if @checkKey(@downKeys, key) then 1 else _input.direction
       _input.jump = if @checkKey(@jumpKeys, key) then 1 else _input.jump
     
-    if @checkKey _customKeys, key
-      _input.customKey = _customKeys[_customKey]
+    if @checkKey @customKeys, key
+      _input.customKey = @customKeys[_customKey]
 
   checkKey: (arr, keyCode) ->
     if !arr

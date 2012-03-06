@@ -179,7 +179,7 @@ Action::__defineGetter__ "soundLoops",->
 
 Action::__defineSetter__ "soundLoops",(val)->
   @_soundLoops = val
-
+#TODO bitmapdata should be inhereted from the base.
 Action::__defineGetter__ "bitmapData",->
   @_bitmapData
 

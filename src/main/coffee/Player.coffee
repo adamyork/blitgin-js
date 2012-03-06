@@ -84,9 +84,13 @@ class Player extends RenderObject
     if (state) then state else inherent
     
   getCustomActionForKey:(keyCode)->
+    if @actions is undefined
+      @actions = []
     @actions[keyCode]
 
   setCustomActionForKey:(keyCode,action)->
+    if @actions is undefined
+      @actions = []
     @actions[keyCode] = action
 
 Player::name = "Player"

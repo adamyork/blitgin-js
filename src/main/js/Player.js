@@ -133,10 +133,12 @@ Player = (function(_super) {
   };
 
   Player.prototype.getCustomActionForKey = function(keyCode) {
+    if (this.actions === void 0) this.actions = [];
     return this.actions[keyCode];
   };
 
   Player.prototype.setCustomActionForKey = function(keyCode, action) {
+    if (this.actions === void 0) this.actions = [];
     return this.actions[keyCode] = action;
   };
 

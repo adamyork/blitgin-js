@@ -40,6 +40,7 @@ RenderEngine = (function() {
       this.manageEnemy(this.map.activeEnemies[enemy]);
       this.paint(this.map.activeEnemies[enemy], enemy.point);
     }
+    this.manageNewActions(input);
     for (action in _actionObjects) {
       if (this.actionIsIdle(action)) continue;
       this.manageAction(action);
@@ -102,10 +103,8 @@ RenderEngine = (function() {
   RenderEngine.prototype.manageJump = function(input) {
     if ((input.jump === 1) && (input.jumpLock === false)) {
       input.jumpLock = true;
-      console.log("setting state 1 ren engine");
       return this.player.state = this.player.direction === 1 ? this.player.jumpRight : this.player.jumpLeft;
     } else if ((input.jump === 0) && input.jumpLock && (this.player.velocityY === 0)) {
-      console.log("setting state 2 ren engine");
       this.player.state = this.player.direction === 1 ? this.player.moveRight : this.player.moveLeft;
       return input.jumpLock = false;
     }
@@ -123,10 +122,98 @@ RenderEngine = (function() {
     return this.collisionEngine.manageCollisions(enemy, this.player);
   };
 
+  RenderEngine.prototype.manageNewActions = function(input) {
+    var action, clazz;
+    if (input.customKey !== 0) {
+      clazz = this.player.getCustomActionForKey(input.customKey);
+      action = new clazz();
+      input.customKey = 0;
+      if (!this.actionExists(action)) {
+        action.x += this.player.x;
+        action.y += this.player.y;
+        action.owner = Action.prototype.PLAYER;
+        action.direction = this.player.direction;
+        this.player.composite = this.action.composite;
+        this.player.emitter = action.emitter;
+        this.actionObjects.push(action);
+        return this.soundEngine.checkPlayback(action);
+      }
+    }
+  };
+
+  RenderEngine.prototype.manageAction = function(action) {
+    action.frame++;
+    this.physicsEngine.adjustAction(action, this.map);
+    this.managePlayerState(action);
+    return this.collisionEngine.manageCollisions(action);
+  };
+
+  RenderEngine.prototype.managePlayerState = function(action, input) {
+    if (input) this.manageJump(input);
+    if (this.player.state !== action.state && action.isAnimating === false && action.hasAnimated === false && this.player.isBusy === false) {
+      this.player.state = action.state;
+      this.player.isBusy = true;
+      action.isAnimating = true;
+      return this.player.frame++;
+    } else if (this.player.state !== action.state && action.isAnimating) {
+      action.isAnimating = false;
+      action.hasAnimated = true;
+      return this.player.isBusy = false;
+    } else if (action.isAnimating && this.player.frame < action.state.duration) {
+      return this.player.frame++;
+    }
+  };
+
   RenderEngine.prototype.manageMapObject = function(mapObj) {
     this.physicsEngine.adjustMapObject(mapObj, this.player, this.map);
     this.collisionEngine.checkVerticalMapCollision(mapObj);
     return this.collisionEngine.manageCollisions(mapObj, this.player);
+  };
+
+  RenderEngine.prototype.actionExists = function(action) {
+    var existing, _i, _len, _ref;
+    _ref = this.actionObjects;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      existing = _ref[_i];
+      if (existing.id === action.id) {
+        action = void 0;
+        return true;
+      }
+    }
+    return false;
+  };
+
+  RenderEngine.prototype.actionIsIdle = function(action) {
+    var idle;
+    idle = false;
+    if (action.isComplete) {
+      this.removeAction(this.action);
+      idle = true;
+    }
+    if (action.nonObjectProducing && action.isAnimating === false) {
+      action.isAnimating = true;
+      this.player.updateInherentStates(action);
+      idle = true;
+    } else if (action.nonObjectProducing && action.isAnimating) {
+      action.frame++;
+      idle = true;
+    }
+    return idle;
+  };
+
+  RenderEngine.prototype.removeAction = function(action) {
+    var arr, index;
+    if (action.nonObjectProducing) this.player.updateInherentStates();
+    index = this.actionObjects.indexOf(action, 0);
+    arr = this.actionObjects.splice(index, 1);
+    arr = void 0;
+    if (action.composite && this.player.composite === action.composite) {
+      this.player.composite = void 0;
+    }
+    if (action.emitter && this.player.emitter === action.emitter) {
+      this.player.emitter = void 0;
+    }
+    if (action.sound) return this.soundEngine.removeSound(action.sound);
   };
 
   RenderEngine.prototype.dispose = function() {

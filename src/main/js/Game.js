@@ -167,8 +167,8 @@ Game = (function() {
       _input.vDirection = this.checkKey(this.downKeys, key) ? 1 : _input.direction;
       _input.jump = this.checkKey(this.jumpKeys, key) ? 1 : _input.jump;
     }
-    if (this.checkKey(_customKeys, key)) {
-      return _input.customKey = _customKeys[_customKey];
+    if (this.checkKey(this.customKeys, key)) {
+      return _input.customKey = this.customKeys[_customKey];
     }
   };
 
