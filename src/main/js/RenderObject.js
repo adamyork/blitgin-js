@@ -132,11 +132,21 @@ RenderObject.prototype.name = "RenderObject";
 
 RenderObject.prototype.__defineGetter__("bitmapData", function() {
   var keyFrame;
+  keyFrame = Math.floor(this._frame) * this.cellWidth;
+  if (this.ctx === void 0) {
+    return {
+      player: {
+        notready: true
+      },
+      rect: new Rectangle(keyFrame, 0, this.cellWidth, this.cellHeight)
+    };
+  }
   this.workbench.width = this._asset.width;
   this.workbench.height = this._asset.height;
-  keyFrame = Math.floor(this._frame) * this._cellWidth;
-  this.ctx.drawImage(this._asset, keyFrame, 0);
-  return this.ctx.getImageData(0, 0, this.width, this.height);
+  return {
+    player: this.assetData,
+    rect: new Rectangle(keyFrame, 0, this.cellWidth, this.cellHeight)
+  };
 });
 
 RenderObject.prototype.__defineGetter__("x", function() {
@@ -243,7 +253,7 @@ RenderObject.prototype.__defineGetter__("point", function() {
   return new Point(this._x, this._y);
 });
 
-RenderObject.prototype.__defineSetter__("tranparency", function(val) {
+RenderObject.prototype.__defineSetter__("transparency", function(val) {
   return this._transparency = val;
 });
 
@@ -308,7 +318,11 @@ RenderObject.prototype.__defineSetter__("workbench", function(val) {
 });
 
 RenderObject.prototype.__defineGetter__("ctx", function() {
-  return this._ctx;
+  if (this._ctx === void 0) {
+    return;
+  } else {
+    return this._ctx;
+  }
 });
 
 RenderObject.prototype.__defineSetter__("ctx", function(val) {

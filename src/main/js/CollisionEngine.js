@@ -14,17 +14,16 @@ CollisionEngine = (function() {
   _physicsEngine = {};
 
   CollisionEngine.prototype.manageCollisions = function(focus, target) {
-    var obj, tmpCollection, _i, _len;
-    if (typeof focus === Action) {
+    var obj, tmpCollection;
+    if (focus.name === Action.name) {
       tmpCollection = [];
-      if (focus.owner === Action.PLAYER) {
+      if (focus.owner === Action.prototype.PLAYER) {
         tmpCollection = this.map.activeEnemies;
       } else {
         tmpCollection[0] = this.player;
       }
-      for (_i = 0, _len = tmpCollection.length; _i < _len; _i++) {
-        obj = tmpCollection[_i];
-        this.checkForCollision(obj, focus);
+      for (obj in tmpCollection) {
+        this.checkForCollision(tmpCollection[obj], focus);
       }
       return;
     }

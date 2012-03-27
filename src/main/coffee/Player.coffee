@@ -106,7 +106,7 @@ Player::__defineGetter__ "bitmapData",->
       @assetData.src = @workbench.toDataURL()
     {player:@assetData,rect:new Rectangle keyFrame,row,@cellWidth,@cellHeight}
    else
-    {player:{},rect:new Rectangle keyFrame,row,@cellWidth,@cellHeight}
+    {player:{notready:true},rect:new Rectangle keyFrame,row,@cellWidth,@cellHeight}
 
 Player::__defineGetter__ "x",->
   @_x

@@ -42,10 +42,13 @@ Action::__defineGetter__ "height",->
 Action::__defineSetter__ "height",(val)->
   @_height = val
 
+Action::__defineGetter__ "velocityX",->
+  @_velocityX
+
 Action::__defineSetter__ "velocityX",(val)->
-  if val <= @maxVelocityX    
+  if val <= @maxVelocityX
     @_velocityX = val
-    
+
 Action::__defineGetter__ "maxVelocityX",->
   @_maxVelocityX
 
@@ -179,20 +182,14 @@ Action::__defineGetter__ "soundLoops",->
 
 Action::__defineSetter__ "soundLoops",(val)->
   @_soundLoops = val
-#TODO bitmapdata should be inhereted from the base.
-Action::__defineGetter__ "bitmapData",->
-  @_bitmapData
-
-Action::__defineSetter__ "bitmapData",(val)->
-  @_bitmapData = val
   
 Action::__defineGetter__ "frame",->
   @_frame
 
 Action::__defineSetter__ "frame",(val)->
-  if val >= @lifeSpan    
-    @isComplete = true    
-  _frame = val
+  if val >= @lifeSpan
+    @isComplete = true
+  @_frame = val
 
 Action::ENEMY = "enemy"
 Action::PLAYER = "player"

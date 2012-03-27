@@ -6,14 +6,14 @@ class CollisionEngine
   _physicsEngine = {}
 
   manageCollisions:(focus,target)->
-    if typeof focus is Action
+    if focus.name is Action.name
       tmpCollection = []
-      if(focus.owner is Action.PLAYER)
+      if(focus.owner is Action::PLAYER)
         tmpCollection = @map.activeEnemies
       else
         tmpCollection[0] = @player  
-      for obj in tmpCollection
-        @checkForCollision obj, focus
+      for obj of tmpCollection
+        @checkForCollision tmpCollection[obj],focus
       return
     @checkForCollision focus,target
 

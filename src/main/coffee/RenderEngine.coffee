@@ -1,7 +1,7 @@
 class RenderEngine
   constructor:(@name)->
-        
-  _actionObjects = []
+    @actionObjects = []
+
   _scrn = {}
   _map = {}
   _player = {}
@@ -24,11 +24,12 @@ class RenderEngine
       @manageEnemy @map.activeEnemies[enemy]
       @paint @map.activeEnemies[enemy],enemy.point
     @manageNewActions input
-    for action of _actionObjects
-      if @actionIsIdle action
+    for action of @actionObjects
+      aObj = @actionObjects[action]
+      if @actionIsIdle aObj
         continue
-      @manageAction action
-      @paint action,action.point
+      @manageAction aObj
+      @paint aObj,aObj.point
     for mapObj of @map.activeMapObjects
       mObj = @map.activeMapObjects[mapObj]
       mObj.frame++
@@ -46,8 +47,10 @@ class RenderEngine
 
   paint:(obj,point)->
     d = obj.bitmapData
-    if d.player
+    if d.player and d.player.notready is undefined
       @_ctx.drawImage d.player,d.rect.x,d.rect.y,d.rect.width,d.rect.height,obj.point.x,obj.point.y,d.rect.width,d.rect.height
+    else if d.player and d.player.notready
+      return
     else
       for asset in d.map
         if asset.data isnt undefined
@@ -94,9 +97,10 @@ class RenderEngine
       if not @actionExists(action)
         action.x += @player.x
         action.y += @player.y
+        action.frame = 0
         action.owner = Action::PLAYER
         action.direction = @player.direction
-        @player.composite = @action.composite
+        @player.composite = action.composite
         @player.emitter = action.emitter
         @actionObjects.push action
         @soundEngine.checkPlayback action
@@ -188,7 +192,7 @@ class RenderEngine
 # }
 
   dispose:->
-    _actionObjects = undefined
+    @actionObjects = undefined
     @scrn = undefined
     @map.dispose()
     @map = undefined

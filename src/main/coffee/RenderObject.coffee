@@ -83,11 +83,12 @@ class RenderObject
 RenderObject::name = "RenderObject"
 
 RenderObject::__defineGetter__ "bitmapData",->
+  keyFrame = Math.floor(@_frame) * @cellWidth
+  if @ctx is undefined
+    return {player:{notready:true},rect:new Rectangle keyFrame,0,@cellWidth,@cellHeight}
   @workbench.width = @_asset.width
   @workbench.height = @_asset.height
-  keyFrame = Math.floor(@_frame) * @_cellWidth
-  @ctx.drawImage @_asset,keyFrame,0
-  @ctx.getImageData 0,0,@width,@height
+  {player:@assetData,rect:new Rectangle keyFrame,0,@cellWidth,@cellHeight}
     
 RenderObject::__defineGetter__ "x",->
   @_x
@@ -167,7 +168,7 @@ RenderObject::__defineGetter__ "rect",->
 RenderObject::__defineGetter__ "point",->
   new Point @_x, @_y
 
-RenderObject::__defineSetter__ "tranparency",(val)->
+RenderObject::__defineSetter__ "transparency",(val)->
   @_transparency = val
 
 RenderObject::__defineGetter__ "transparency",->
@@ -216,7 +217,10 @@ RenderObject::__defineSetter__ "workbench",(val)->
   @_workbench = val
 
 RenderObject::__defineGetter__ "ctx",->
-  @_ctx
+  if @_ctx is undefined
+    undefined
+  else
+    @_ctx
 
 RenderObject::__defineSetter__ "ctx",(val)->
   @_ctx = val

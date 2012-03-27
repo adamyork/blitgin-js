@@ -89,6 +89,10 @@ Action.prototype.__defineSetter__("height", function(val) {
   return this._height = val;
 });
 
+Action.prototype.__defineGetter__("velocityX", function() {
+  return this._velocityX;
+});
+
 Action.prototype.__defineSetter__("velocityX", function(val) {
   if (val <= this.maxVelocityX) return this._velocityX = val;
 });
@@ -270,22 +274,13 @@ Action.prototype.__defineSetter__("soundLoops", function(val) {
   return this._soundLoops = val;
 });
 
-Action.prototype.__defineGetter__("bitmapData", function() {
-  return this._bitmapData;
-});
-
-Action.prototype.__defineSetter__("bitmapData", function(val) {
-  return this._bitmapData = val;
-});
-
 Action.prototype.__defineGetter__("frame", function() {
   return this._frame;
 });
 
 Action.prototype.__defineSetter__("frame", function(val) {
-  var _frame;
   if (val >= this.lifeSpan) this.isComplete = true;
-  return _frame = val;
+  return this._frame = val;
 });
 
 Action.prototype.ENEMY = "enemy";

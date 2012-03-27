@@ -1,13 +1,12 @@
 var RenderEngine;
 
 RenderEngine = (function() {
-  var _actionObjects, _collisionEngine, _map, _nis, _physicsEngine, _player, _scrn, _soundEngine;
+  var _collisionEngine, _map, _nis, _physicsEngine, _player, _scrn, _soundEngine;
 
   function RenderEngine(name) {
     this.name = name;
+    this.actionObjects = [];
   }
-
-  _actionObjects = [];
 
   _scrn = {};
 
@@ -26,7 +25,7 @@ RenderEngine = (function() {
   RenderEngine._ctx = {};
 
   RenderEngine.prototype.render = function(input) {
-    var action, enemy, mObj, mapObj;
+    var aObj, action, enemy, mObj, mapObj;
     this._ctx.clearRect(0, 0, Game.prototype.VIEWPORT_WIDTH, Game.prototype.VIEWPORT_HEIGHT);
     if (this.nis) {
       this.manageNIS(this.nis, input);
@@ -41,10 +40,11 @@ RenderEngine = (function() {
       this.paint(this.map.activeEnemies[enemy], enemy.point);
     }
     this.manageNewActions(input);
-    for (action in _actionObjects) {
-      if (this.actionIsIdle(action)) continue;
-      this.manageAction(action);
-      this.paint(action, action.point);
+    for (action in this.actionObjects) {
+      aObj = this.actionObjects[action];
+      if (this.actionIsIdle(aObj)) continue;
+      this.manageAction(aObj);
+      this.paint(aObj, aObj.point);
     }
     for (mapObj in this.map.activeMapObjects) {
       mObj = this.map.activeMapObjects[mapObj];
@@ -68,9 +68,9 @@ RenderEngine = (function() {
   RenderEngine.prototype.paint = function(obj, point) {
     var asset, d, _i, _len, _ref, _results;
     d = obj.bitmapData;
-    if (d.player) {
+    if (d.player && d.player.notready === void 0) {
       return this._ctx.drawImage(d.player, d.rect.x, d.rect.y, d.rect.width, d.rect.height, obj.point.x, obj.point.y, d.rect.width, d.rect.height);
-    } else {
+    } else if (d.player && d.player.notready) {} else {
       _ref = d.map;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -131,9 +131,10 @@ RenderEngine = (function() {
       if (!this.actionExists(action)) {
         action.x += this.player.x;
         action.y += this.player.y;
+        action.frame = 0;
         action.owner = Action.prototype.PLAYER;
         action.direction = this.player.direction;
-        this.player.composite = this.action.composite;
+        this.player.composite = action.composite;
         this.player.emitter = action.emitter;
         this.actionObjects.push(action);
         return this.soundEngine.checkPlayback(action);
@@ -217,7 +218,7 @@ RenderEngine = (function() {
   };
 
   RenderEngine.prototype.dispose = function() {
-    _actionObjects = void 0;
+    this.actionObjects = void 0;
     this.scrn = void 0;
     this.map.dispose();
     this.map = void 0;

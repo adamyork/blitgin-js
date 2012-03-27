@@ -165,7 +165,9 @@ Player.prototype.__defineGetter__("bitmapData", function() {
     };
   } else {
     return {
-      player: {},
+      player: {
+        notready: true
+      },
       rect: new Rectangle(keyFrame, row, this.cellWidth, this.cellHeight)
     };
   }
