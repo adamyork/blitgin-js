@@ -29,18 +29,6 @@ class Action extends RenderObject
   _emitter = {}
   
 Action::name = "Action"
-  
-Action::__defineGetter__ "width",->
-  @_width
-  
-Action::__defineSetter__ "width",(val)->
-  @_width = val
-
-Action::__defineGetter__ "height",->
-  @_height
-  
-Action::__defineSetter__ "height",(val)->
-  @_height = val
 
 Action::__defineGetter__ "velocityX",->
   @_velocityX
@@ -105,6 +93,9 @@ Action::__defineSetter__ "nonObjectProducing",(val)->
 Action::__defineGetter__ "isComplete",->
   @_isComplete
 
+Action::__defineSetter__ "isComplete",(val)->
+  @_isComplete = val
+  
 Action::__defineGetter__ "isAnimating",->
   @_isAnimating
 
@@ -190,6 +181,10 @@ Action::__defineSetter__ "frame",(val)->
   if val >= @lifeSpan
     @isComplete = true
   @_frame = val
+  if @objectKeyframeLength is (Math.round(@asset.width / @cellWidth)-1)
+    @objectKeyframeLength = 0
+    return
+  @objectKeyframeLength = val
 
 Action::ENEMY = "enemy"
 Action::PLAYER = "player"

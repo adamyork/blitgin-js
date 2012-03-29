@@ -134,6 +134,8 @@ RenderEngine = (function() {
         action.frame = 0;
         action.owner = Action.prototype.PLAYER;
         action.direction = this.player.direction;
+        action.hasAnimated = false;
+        action.isAnimating = false;
         this.player.composite = action.composite;
         this.player.emitter = action.emitter;
         this.actionObjects.push(action);
@@ -188,7 +190,7 @@ RenderEngine = (function() {
     var idle;
     idle = false;
     if (action.isComplete) {
-      this.removeAction(this.action);
+      this.removeAction(action);
       idle = true;
     }
     if (action.nonObjectProducing && action.isAnimating === false) {

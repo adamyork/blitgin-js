@@ -1,7 +1,7 @@
 var RenderObject;
 
 RenderObject = (function() {
-  var _asset, _assetClass, _assetData, _callback, _cellHeight, _cellWidth, _collisionPixels, _colorConstant, _ctx, _direction, _duration, _easeCoefficient, _frame, _frameBuffer, _height, _index, _lifeSpan, _rgbTolerance, _showBounds, _transparency, _velocityX, _velocityY, _width, _workbench, _x, _y;
+  var _asset, _assetClass, _assetData, _callback, _cellHeight, _cellWidth, _collisionPixels, _colorConstant, _ctx, _direction, _duration, _easeCoefficient, _frame, _frameBuffer, _height, _index, _lifeSpan, _objectKeyframeLength, _rgbTolerance, _showBounds, _transparency, _velocityX, _velocityY, _width, _workbench, _x, _y;
 
   function RenderObject(name) {
     this.name = name;
@@ -61,6 +61,8 @@ RenderObject = (function() {
 
   _collisionPixels = [];
 
+  _objectKeyframeLength = 0;
+
   RenderObject.prototype.initialize = function(_callback) {
     this._callback = _callback;
     if ((void 0 !== this.assetClass) && (0 !== this.cellHeight) && (0 !== this.cellWidth)) {
@@ -76,6 +78,7 @@ RenderObject = (function() {
 
   RenderObject.prototype.assetLoadComplete = function() {
     this.ctx = this.workbench.getContext('2d');
+    this.objectKeyframeLength = 0;
     if (this.transparency || (!this.transparency && this.showBounds)) {
       this.assetData = this.asset;
     } else {
@@ -132,7 +135,7 @@ RenderObject.prototype.name = "RenderObject";
 
 RenderObject.prototype.__defineGetter__("bitmapData", function() {
   var keyFrame;
-  keyFrame = Math.floor(this._frame) * this.cellWidth;
+  keyFrame = this.objectKeyframeLength * this.cellWidth;
   if (this.ctx === void 0) {
     return {
       player: {
@@ -141,8 +144,6 @@ RenderObject.prototype.__defineGetter__("bitmapData", function() {
       rect: new Rectangle(keyFrame, 0, this.cellWidth, this.cellHeight)
     };
   }
-  this.workbench.width = this._asset.width;
-  this.workbench.height = this._asset.height;
   return {
     player: this.assetData,
     rect: new Rectangle(keyFrame, 0, this.cellWidth, this.cellHeight)
@@ -335,4 +336,12 @@ RenderObject.prototype.__defineGetter__("collisionPixels", function() {
 
 RenderObject.prototype.__defineSetter__("collisionPixels", function(val) {
   return this._collisionPixels = val;
+});
+
+RenderObject.prototype.__defineGetter__("objectKeyframeLength", function() {
+  return this._objectKeyframeLength;
+});
+
+RenderObject.prototype.__defineSetter__("objectKeyframeLength", function(val) {
+  return this._objectKeyframeLength = val;
 });

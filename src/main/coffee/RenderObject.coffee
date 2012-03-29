@@ -29,6 +29,7 @@ class RenderObject
   _ctx = {}
   _callback = undefined
   _collisionPixels = []
+  _objectKeyframeLength = 0
   
   initialize:(@_callback)->
     if (undefined != @assetClass) and (0 != @cellHeight) and (0 != @cellWidth)
@@ -42,6 +43,7 @@ class RenderObject
       
   assetLoadComplete:->
     @ctx = @workbench.getContext '2d'
+    @objectKeyframeLength = 0
     if @transparency or (not @transparency and @showBounds)
       @assetData = @asset
     else
@@ -83,11 +85,9 @@ class RenderObject
 RenderObject::name = "RenderObject"
 
 RenderObject::__defineGetter__ "bitmapData",->
-  keyFrame = Math.floor(@_frame) * @cellWidth
+  keyFrame = @objectKeyframeLength * @cellWidth
   if @ctx is undefined
     return {player:{notready:true},rect:new Rectangle keyFrame,0,@cellWidth,@cellHeight}
-  @workbench.width = @_asset.width
-  @workbench.height = @_asset.height
   {player:@assetData,rect:new Rectangle keyFrame,0,@cellWidth,@cellHeight}
     
 RenderObject::__defineGetter__ "x",->
@@ -230,3 +230,9 @@ RenderObject::__defineGetter__ "collisionPixels",->
 
 RenderObject::__defineSetter__ "collisionPixels",(val)->
   @_collisionPixels = val
+
+RenderObject::__defineGetter__ "objectKeyframeLength",->
+  @_objectKeyframeLength
+
+RenderObject::__defineSetter__ "objectKeyframeLength",(val)->
+  @_objectKeyframeLength = val

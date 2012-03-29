@@ -1,9 +1,7 @@
 var CustomAction = ext(Action,function(){
     this.transparency = true;
     this.assetClass = "img/bullet.png";
-    this.width = 10;
-    this.height = 10;
-    this.cellWidth = 10;
+    this.cellWidth = 126;
     this.cellHeight = 10;
     this.lifeSpan = 20;
     this.damage = 10;
@@ -13,8 +11,8 @@ var CustomAction = ext(Action,function(){
     this.maxVelocityX = 26;
     this.velocityX = 20;
     this.easeCoefficient = 1;
-    this.stateRight = new State(10, 4, false, "shootRight", .7);
-    this.stateLeft = new State(10, 5, false, "shootLeft", .7);
+    this.stateRight = new State(10, 4, false, "shootRight",0);
+    this.stateLeft = new State(10, 5, false, "shootLeft",0);
     this.id = "shoot";
     this.initialize();
 })

@@ -73,22 +73,6 @@ Action = (function(_super) {
 
 Action.prototype.name = "Action";
 
-Action.prototype.__defineGetter__("width", function() {
-  return this._width;
-});
-
-Action.prototype.__defineSetter__("width", function(val) {
-  return this._width = val;
-});
-
-Action.prototype.__defineGetter__("height", function() {
-  return this._height;
-});
-
-Action.prototype.__defineSetter__("height", function(val) {
-  return this._height = val;
-});
-
 Action.prototype.__defineGetter__("velocityX", function() {
   return this._velocityX;
 });
@@ -168,6 +152,10 @@ Action.prototype.__defineSetter__("nonObjectProducing", function(val) {
 
 Action.prototype.__defineGetter__("isComplete", function() {
   return this._isComplete;
+});
+
+Action.prototype.__defineSetter__("isComplete", function(val) {
+  return this._isComplete = val;
 });
 
 Action.prototype.__defineGetter__("isAnimating", function() {
@@ -280,7 +268,12 @@ Action.prototype.__defineGetter__("frame", function() {
 
 Action.prototype.__defineSetter__("frame", function(val) {
   if (val >= this.lifeSpan) this.isComplete = true;
-  return this._frame = val;
+  this._frame = val;
+  if (this.objectKeyframeLength === (Math.round(this.asset.width / this.cellWidth) - 1)) {
+    this.objectKeyframeLength = 0;
+    return;
+  }
+  return this.objectKeyframeLength = val;
 });
 
 Action.prototype.ENEMY = "enemy";

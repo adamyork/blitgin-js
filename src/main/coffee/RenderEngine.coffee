@@ -100,6 +100,8 @@ class RenderEngine
         action.frame = 0
         action.owner = Action::PLAYER
         action.direction = @player.direction
+        action.hasAnimated = false
+        action.isAnimating = false
         @player.composite = action.composite
         @player.emitter = action.emitter
         @actionObjects.push action
@@ -141,7 +143,7 @@ class RenderEngine
   actionIsIdle:(action)->
     idle = false
     if action.isComplete
-      @removeAction @action
+      @removeAction action
       idle = true
     if action.nonObjectProducing and action.isAnimating is false
       action.isAnimating = true
