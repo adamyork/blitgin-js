@@ -4,15 +4,21 @@ class SoundEngine
   _activeSounds = []
 
   checkPlayback:(obj)->
-    if(obj is undefined or obj.sound is undefined or _activeSounds[obj.sound])
+    if obj is undefined or obj.sound is undefined or _activeSounds[obj.sound]
       return
-    _activeSounds[obj.sound] = obj.sound
-    #obj.sound.play(0, obj.soundLoops);
+    el = new Audio()
+    _activeSounds[obj.sound] = el
+    el.src = obj.sound
+    el.loopsRemaining = obj.soundLoops
+    el.addEventListener "ended", (->
+      if el.loopsRemaining and el.loopsRemaining isnt 0
+        el.loopsRemaining--
+        el.play()
+    ), false
+    el.play()
 
   removeSound:(snd)->
     if _activeSounds[snd]
-      index = _activeSounds.indexOf snd, 0 
-      arr = _activeSounds.splice index, 1
-      arr = undefined
+      delete _activeSounds[snd]
 
 SoundEngine::name = "SoundEngine"

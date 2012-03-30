@@ -164,7 +164,7 @@ class RenderEngine
       @player.composite = undefined
     if action.emitter and @player.emitter is action.emitter
       @player.emitter = undefined
-    if(action.sound)
+    if action.sound
       @soundEngine.removeSound action.sound
 # 
 # protected function manageNIS(nis:Nis, input:InputVO):void

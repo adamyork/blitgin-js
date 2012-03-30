@@ -12,6 +12,7 @@ function loadDependencies() {
 function loadCustomClasses() {
     $LAB
     .script("js/CustomAction.js").wait()
+    .script("js/CustomComplexAction.js").wait()
     .script("js/CustomPlayer.js").wait()
     .script("js/CustomEnemy.js").wait()
     .script("js/CustomMapObject.js").wait()

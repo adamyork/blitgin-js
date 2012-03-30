@@ -16,6 +16,6 @@ var CustomPlayer = ext(Player,function(){
     //this.showCollisionRect = true
     //this.frameBuffer = .5;
     this.setCustomActionForKey(76, CustomAction);
-    //setCustomActionForKey(66, Buff);
+    this.setCustomActionForKey(66, CustomComplexAction);
     this.initialize();
 })

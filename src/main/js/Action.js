@@ -67,6 +67,14 @@ Action = (function(_super) {
 
   _emitter = {};
 
+  Action.prototype.loadedMetadata = function() {
+    return console.log("LOADED METADADA");
+  };
+
+  Action.prototype.audioAvailable = function() {
+    return console.log("audioAvailable");
+  };
+
   return Action;
 
 })(RenderObject);
@@ -269,6 +277,10 @@ Action.prototype.__defineGetter__("frame", function() {
 Action.prototype.__defineSetter__("frame", function(val) {
   if (val >= this.lifeSpan) this.isComplete = true;
   this._frame = val;
+  if (this.asset === void 0) {
+    this.objectKeyframeLength = 0;
+    return;
+  }
   if (this.objectKeyframeLength === (Math.round(this.asset.width / this.cellWidth) - 1)) {
     this.objectKeyframeLength = 0;
     return;

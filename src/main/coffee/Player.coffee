@@ -97,7 +97,7 @@ Player::name = "Player"
 
 Player::__defineGetter__ "bitmapData",->
   if @ctx isnt undefined
-    keyFrame = Math.floor @frame * @cellWidth
+    keyFrame = (Math.floor @frame) * @cellWidth
     row = @state.row * @cellHeight
     if @showCollisionRect
       @ctx.drawImage @assetData,0,0

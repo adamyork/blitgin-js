@@ -10,17 +10,23 @@ SoundEngine = (function() {
   _activeSounds = [];
 
   SoundEngine.prototype.checkPlayback = function(obj) {
+    var el;
     if (obj === void 0 || obj.sound === void 0 || _activeSounds[obj.sound]) return;
-    return _activeSounds[obj.sound] = obj.sound;
+    el = new Audio();
+    _activeSounds[obj.sound] = el;
+    el.src = obj.sound;
+    el.loopsRemaining = obj.soundLoops;
+    el.addEventListener("ended", (function() {
+      if (el.loopsRemaining && el.loopsRemaining !== 0) {
+        el.loopsRemaining--;
+        return el.play();
+      }
+    }), false);
+    return el.play();
   };
 
   SoundEngine.prototype.removeSound = function(snd) {
-    var arr, index;
-    if (_activeSounds[snd]) {
-      index = _activeSounds.indexOf(snd, 0);
-      arr = _activeSounds.splice(index, 1);
-      return arr = void 0;
-    }
+    if (_activeSounds[snd]) return delete _activeSounds[snd];
   };
 
   return SoundEngine;

@@ -28,6 +28,12 @@ class Action extends RenderObject
   _composite = {}
   _emitter = {}
   
+  loadedMetadata:()->
+    console.log "LOADED METADADA"
+    
+  audioAvailable:()->
+    console.log "audioAvailable"
+  
 Action::name = "Action"
 
 Action::__defineGetter__ "velocityX",->
@@ -181,6 +187,9 @@ Action::__defineSetter__ "frame",(val)->
   if val >= @lifeSpan
     @isComplete = true
   @_frame = val
+  if @asset is undefined
+    @objectKeyframeLength = 0
+    return
   if @objectKeyframeLength is (Math.round(@asset.width / @cellWidth)-1)
     @objectKeyframeLength = 0
     return

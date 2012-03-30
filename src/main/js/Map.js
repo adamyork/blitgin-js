@@ -63,7 +63,7 @@ Map = (function(_super) {
 
   _collisionData = {};
 
-  _sound = {};
+  _sound = void 0;
 
   _soundLoops = 0;
 

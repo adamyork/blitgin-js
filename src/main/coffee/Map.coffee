@@ -34,7 +34,7 @@ class Map extends RenderObject
   _foregroundData = {}
   _collisionData = {}
   
-  _sound = {}
+  _sound = undefined
   _soundLoops = 0
 
   initialize: ->

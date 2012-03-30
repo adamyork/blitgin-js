@@ -151,7 +151,7 @@ Player.prototype.name = "Player";
 Player.prototype.__defineGetter__("bitmapData", function() {
   var keyFrame, row;
   if (this.ctx !== void 0) {
-    keyFrame = Math.floor(this.frame * this.cellWidth);
+    keyFrame = (Math.floor(this.frame)) * this.cellWidth;
     row = this.state.row * this.cellHeight;
     if (this.showCollisionRect) {
       this.ctx.drawImage(this.assetData, 0, 0);

@@ -11,8 +11,8 @@ var CustomAction = ext(Action,function(){
     this.maxVelocityX = 26;
     this.velocityX = 20;
     this.easeCoefficient = 1;
-    this.stateRight = new State(10, 4, false, "shootRight",0);
-    this.stateLeft = new State(10, 5, false, "shootLeft",0);
+    this.stateRight = new State(10, 4, false, "shootRight",.7);
+    this.stateLeft = new State(10, 5, false, "shootLeft",.7);
     this.id = "shoot";
     this.initialize();
 })
