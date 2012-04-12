@@ -1,10 +1,12 @@
 var Input;
 
 Input = (function() {
-  var _customKey, _direction, _disabled, _jump, _jumpLock, _vDirection;
+  var _customKey, _direction, _disabled, _jump, _jumpLock, _vDirection, _waits;
 
   function Input(name) {
+    var _waits;
     this.name = name;
+    _waits = {};
   }
 
   _direction = 0;
@@ -17,7 +19,35 @@ Input = (function() {
 
   _customKey = 0;
 
+  _waits = {};
+
   _disabled = false;
+
+  Input.prototype.hasWaitFor = function(key) {
+    var val;
+    val = key.toString();
+    return _waits[val];
+  };
+
+  Input.prototype.addWaitForAction = function(key, duration) {
+    var val;
+    val = key.toString();
+    return _waits[val] = duration;
+  };
+
+  Input.prototype.manageWaits = function() {
+    var wait, _results;
+    _results = [];
+    for (wait in _waits) {
+      _waits[wait]--;
+      if (_waits[wait] <= 0) {
+        _results.push(delete _waits[wait]);
+      } else {
+        _results.push(void 0);
+      }
+    }
+    return _results;
+  };
 
   return Input;
 

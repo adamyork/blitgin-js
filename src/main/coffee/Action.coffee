@@ -5,6 +5,8 @@ class Action extends RenderObject
   _isAnimating = false
   _hasAnimated = false
   _nonObjectProducing = false
+  _spammable = false
+  _wait = 0
   _width = 0
   _height = 0
   _frame = 0
@@ -113,6 +115,18 @@ Action::__defineGetter__ "hasAnimated",->
 
 Action::__defineSetter__ "hasAnimated",(val)->
   @_hasAnimated = val
+  
+Action::__defineGetter__ "spammable",->
+  @_spammable
+
+Action::__defineSetter__ "spammable",(val)->
+  @_spammable = val
+  
+Action::__defineGetter__ "wait",->
+  @_wait
+
+Action::__defineSetter__ "wait",(val)->
+  @_wait = val
 
 Action::__defineGetter__ "stateLeft",->
   @_stateLeft

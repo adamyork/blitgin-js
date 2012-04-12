@@ -43,7 +43,7 @@ RenderEngine = (function() {
     for (action in this.actionObjects) {
       aObj = this.actionObjects[action];
       if (this.actionIsIdle(aObj)) continue;
-      this.manageAction(aObj);
+      this.manageAction(aObj, input);
       this.paint(aObj, aObj.point);
     }
     for (mapObj in this.map.activeMapObjects) {
@@ -62,6 +62,7 @@ RenderEngine = (function() {
       this.player.emitter.frame++;
       this.paint(this.player.emitter, this.player.point);
     }
+    input.manageWaits();
     return Game.prototype.instance.notifySubscribers(this.map, this.player, this.actionObjects);
   };
 
@@ -86,6 +87,14 @@ RenderEngine = (function() {
   };
 
   RenderEngine.prototype.managePlayer = function(input) {
+    if (input.customKey !== 0 && (!input.hasWaitFor(input.customKey)) && this.player.state.isCancellable) {
+      this.player.updateInherentStates();
+      this.player.isBusy = false;
+    }
+    if (input.direction !== 0 && this.player.state.isCancellable) {
+      this.player.updateInherentStates();
+      this.player.isBusy = false;
+    }
     this.manageJump(input);
     this.physicsEngine.adjustPlayerVerically(this.player, this.map);
     if (input.direction !== 0) {
@@ -125,9 +134,12 @@ RenderEngine = (function() {
   RenderEngine.prototype.manageNewActions = function(input) {
     var action, clazz;
     if (input.customKey !== 0) {
+      if (input.hasWaitFor(input.customKey)) {
+        input.customKey = 0;
+        return;
+      }
       clazz = this.player.getCustomActionForKey(input.customKey);
       action = new clazz();
-      input.customKey = 0;
       if (!this.actionExists(action)) {
         action.x += this.player.x;
         action.y += this.player.y;
@@ -138,16 +150,21 @@ RenderEngine = (function() {
         action.isAnimating = false;
         this.player.composite = action.composite;
         this.player.emitter = action.emitter;
+        if (action.spammable) {
+          input.addWaitForAction(input.customKey, action.wait);
+          action.id = action.id + this.actionObjects.length;
+        }
         this.actionObjects.push(action);
-        return this.soundEngine.checkPlayback(action);
+        this.soundEngine.checkPlayback(action);
       }
+      return input.customKey = 0;
     }
   };
 
-  RenderEngine.prototype.manageAction = function(action) {
+  RenderEngine.prototype.manageAction = function(action, input) {
     action.frame++;
     this.physicsEngine.adjustAction(action, this.map);
-    this.managePlayerState(action);
+    this.managePlayerState(action, input);
     return this.collisionEngine.manageCollisions(action);
   };
 
@@ -217,6 +234,19 @@ RenderEngine = (function() {
       this.player.emitter = void 0;
     }
     if (action.sound) return this.soundEngine.removeSound(action.sound);
+  };
+
+  RenderEngine.prototype.manageNIS = function(nis, input) {
+    if (nis === void 0) return;
+    this._nis = nis;
+    if (!input.disabled) input.disabled = true;
+    if (this.physicsEngine.manageNIS(nis, this.player, this.map)) {
+      this.map.removeNis(nis);
+      this._nis = null;
+      input.disabled = false;
+    }
+    this.paint(this.map, this.map.point);
+    return this.paint(this.player, this.player.point);
   };
 
   RenderEngine.prototype.dispose = function() {

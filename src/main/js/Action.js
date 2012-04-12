@@ -3,7 +3,7 @@ var Action,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
 Action = (function(_super) {
-  var _bitmapData, _collisionCoefficient, _composite, _damage, _emitter, _frame, _hasAnimated, _health, _height, _id, _isAnimating, _isComplete, _lifeSpan, _maxVelocityX, _nonObjectProducing, _owner, _sound, _soundLoops, _state, _stateCollisionLeft, _stateCollisionRight, _stateJumpLeft, _stateJumpRight, _stateLeft, _stateRight, _width;
+  var _bitmapData, _collisionCoefficient, _composite, _damage, _emitter, _frame, _hasAnimated, _health, _height, _id, _isAnimating, _isComplete, _lifeSpan, _maxVelocityX, _nonObjectProducing, _owner, _sound, _soundLoops, _spammable, _state, _stateCollisionLeft, _stateCollisionRight, _stateJumpLeft, _stateJumpRight, _stateLeft, _stateRight, _wait, _width;
 
   __extends(Action, _super);
 
@@ -22,6 +22,10 @@ Action = (function(_super) {
   _hasAnimated = false;
 
   _nonObjectProducing = false;
+
+  _spammable = false;
+
+  _wait = 0;
 
   _width = 0;
 
@@ -180,6 +184,22 @@ Action.prototype.__defineGetter__("hasAnimated", function() {
 
 Action.prototype.__defineSetter__("hasAnimated", function(val) {
   return this._hasAnimated = val;
+});
+
+Action.prototype.__defineGetter__("spammable", function() {
+  return this._spammable;
+});
+
+Action.prototype.__defineSetter__("spammable", function(val) {
+  return this._spammable = val;
+});
+
+Action.prototype.__defineGetter__("wait", function() {
+  return this._wait;
+});
+
+Action.prototype.__defineSetter__("wait", function(val) {
+  return this._wait = val;
 });
 
 Action.prototype.__defineGetter__("stateLeft", function() {

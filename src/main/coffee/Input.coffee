@@ -1,12 +1,28 @@
 class Input
   constructor:(@name)->
+    _waits = {}
     
   _direction = 0
   _vDirection = 0
   _jump = 0
   _jumpLock = false
   _customKey = 0
+  _waits = {}
   _disabled = false
+  
+  hasWaitFor:(key)->
+    val = key.toString()
+    return _waits[val]
+
+  addWaitForAction:(key,duration)->
+    val = key.toString()
+    _waits[val] = duration
+
+  manageWaits:->
+    for wait of _waits
+      _waits[wait]--
+      if _waits[wait] <= 0
+        delete _waits[wait]
 
 Input::name = "Input"
 

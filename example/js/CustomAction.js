@@ -12,7 +12,11 @@ var CustomAction = ext(Action,function(){
     this.velocityX = 20;
     this.easeCoefficient = 1;
     this.stateRight = new State(10, 4, false, "shootRight",.7);
+    this.stateRight.isCancellable = true;
     this.stateLeft = new State(10, 5, false, "shootLeft",.7);
+    this.stateLeft.isCancellable = true;
     this.id = "shoot";
+    this.spammable = true;
+    this.wait = 5;
     this.initialize();
 })

@@ -28,7 +28,7 @@ class RenderEngine
       aObj = @actionObjects[action]
       if @actionIsIdle aObj
         continue
-      @manageAction aObj
+      @manageAction aObj,input
       @paint aObj,aObj.point
     for mapObj of @map.activeMapObjects
       mObj = @map.activeMapObjects[mapObj]
@@ -43,6 +43,7 @@ class RenderEngine
     if @player.emitter isnt undefined and @player.emitter.hasParticles
       @player.emitter.frame++
       @paint @player.emitter,@player.point
+    input.manageWaits()
     Game::instance.notifySubscribers @map,@player,@actionObjects
 
   paint:(obj,point)->
@@ -57,6 +58,13 @@ class RenderEngine
           @_ctx.drawImage asset.data,asset.rect.x,asset.rect.y,asset.rect.width,asset.rect.height,obj.point.x,obj.point.y,asset.rect.width,asset.rect.height
 
   managePlayer:(input)->
+    if input.customKey isnt 0 and (not input.hasWaitFor(input.customKey)) and @player.state.isCancellable
+      #TODO this most like likely need to move a new function , like set back to previous state
+      @player.updateInherentStates()
+      @player.isBusy = false
+    if input.direction isnt 0 and @player.state.isCancellable
+      @player.updateInherentStates()
+      @player.isBusy = false
     @manageJump input
     @physicsEngine.adjustPlayerVerically @player,@map
     if input.direction isnt 0
@@ -91,9 +99,11 @@ class RenderEngine
     
   manageNewActions:(input)->
     if input.customKey isnt 0
+      if input.hasWaitFor(input.customKey)
+        input.customKey = 0
+        return
       clazz = @player.getCustomActionForKey input.customKey
       action = new clazz()
-      input.customKey = 0
       if not @actionExists(action)
         action.x += @player.x
         action.y += @player.y
@@ -104,13 +114,17 @@ class RenderEngine
         action.isAnimating = false
         @player.composite = action.composite
         @player.emitter = action.emitter
+        if action.spammable
+          input.addWaitForAction(input.customKey,action.wait)
+          action.id = action.id + @actionObjects.length
         @actionObjects.push action
         @soundEngine.checkPlayback action
+      input.customKey = 0
 
-  manageAction:(action)->
+  manageAction:(action,input)->
     action.frame++
     @physicsEngine.adjustAction action,@map
-    @managePlayerState action
+    @managePlayerState action,input
     @collisionEngine.manageCollisions action
 
   managePlayerState:(action,input)->
@@ -166,32 +180,19 @@ class RenderEngine
       @player.emitter = undefined
     if action.sound
       @soundEngine.removeSound action.sound
-# 
-# protected function manageNIS(nis:Nis, input:InputVO):void
-# {
-    # if(nis == null)
-    # {
-        # return;
-    # }
-# 
-    # _nis = nis;
-# 
-    # if(!input.disabled)
-    # {
-        # input.disabled = true;
-    # }
-# 
-    # if(_physicsEngine.manageNIS(nis, _player, _map))
-    # {
-        # trace("nis goal complete");
-        # _map.removeNis(nis);
-        # _nis = null;
-        # input.disabled = false;
-    # }
-# 
-    # paint(_map, _map.point);
-    # paint(_player, _player.point);
-# }
+
+  manageNIS:(nis,input)->
+    if nis is undefined
+      return      
+    @_nis = nis
+    if not input.disabled
+      input.disabled = true
+    if @physicsEngine.manageNIS nis,@player,@map
+      @map.removeNis(nis)
+      @_nis = null
+      input.disabled = false
+    @paint @map,@map.point
+    @paint @player,@player.point
 
   dispose:->
     @actionObjects = undefined

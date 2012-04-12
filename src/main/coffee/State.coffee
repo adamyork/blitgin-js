@@ -6,6 +6,7 @@ class State
   _row = 0
   _frameBuffer = 0
   _id = ""
+  _isCancellable = false
 
 State::name = "State"
 
@@ -32,6 +33,12 @@ State::__defineGetter__ "id",->
 
 State::__defineSetter__ "id",(val)->
   @_id = val
+  
+State::__defineGetter__ "isCancellable",->
+  @_isCancellable
+
+State::__defineSetter__ "isCancellable",(val)->
+  @_isCancellable = val  
 
 State::__defineGetter__ "frameBuffer",->
   @_frameBuffer

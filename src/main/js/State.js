@@ -1,7 +1,7 @@
 var State;
 
 State = (function() {
-  var _duration, _frameBuffer, _id, _persistent, _row;
+  var _duration, _frameBuffer, _id, _isCancellable, _persistent, _row;
 
   function State(duration, row, persistent, id, frameBuffer) {
     this.duration = duration;
@@ -20,6 +20,8 @@ State = (function() {
   _frameBuffer = 0;
 
   _id = "";
+
+  _isCancellable = false;
 
   return State;
 
@@ -57,6 +59,14 @@ State.prototype.__defineGetter__("id", function() {
 
 State.prototype.__defineSetter__("id", function(val) {
   return this._id = val;
+});
+
+State.prototype.__defineGetter__("isCancellable", function() {
+  return this._isCancellable;
+});
+
+State.prototype.__defineSetter__("isCancellable", function(val) {
+  return this._isCancellable = val;
 });
 
 State.prototype.__defineGetter__("frameBuffer", function() {
