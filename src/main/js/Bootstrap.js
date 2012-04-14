@@ -10,7 +10,7 @@ Bootstrap = (function() {
     this.checkAccessors();
   }
 
-  _classes = ["Point", "Rectangle", "Keyboard", "Game", "GameError", "Group", "RenderObject", "Action", "RenderEngine", "State", "PhysicsEngine", "CollisionEngine", "SoundEngine", "Input", "Player", "Map", "MapObject", "MapObjectGroup", "Nis", "NisCondition", "NisGoal", "Particle", "PhysicsEngine", "CollisionEngine", "SoundEngine", "Emitter", "Enemy", "EnemyGroup"];
+  _classes = ["Point", "Rectangle", "Keyboard", "Game", "GameError", "Group", "RenderObject", "Action", "RenderEngine", "State", "PhysicsEngine", "CollisionEngine", "SoundEngine", "Input", "Player", "Map", "MapObject", "MapObjectGroup", "Nis", "NisCondition", "NisGoal", "Particle", "Emitter", "Enemy", "EnemyGroup"];
 
   _collection = [];
 
@@ -23,6 +23,8 @@ Bootstrap = (function() {
   hasCustomAccessors = false;
 
   callBack = {};
+
+  Bootstrap.prototype.FULL = "full";
 
   Bootstrap.prototype.checkExt = function() {
     if (window.ext === void 0) {
@@ -69,11 +71,13 @@ Bootstrap = (function() {
     }
   };
 
-  Bootstrap.prototype.start = function(callback, basePath) {
+  Bootstrap.prototype.start = function(callback, basePath, mode) {
     var clazz, _i, _len;
-    for (_i = 0, _len = _classes.length; _i < _len; _i++) {
-      clazz = _classes[_i];
-      _collection[_i] = this.prepare(clazz, basePath);
+    if (mode === Bootstrap.prototype.FULL) {
+      for (_i = 0, _len = _classes.length; _i < _len; _i++) {
+        clazz = _classes[_i];
+        _collection[_i] = this.prepare(clazz, basePath);
+      }
     }
     return this.load(callback);
   };
@@ -84,6 +88,10 @@ Bootstrap = (function() {
 
   Bootstrap.prototype.load = function(callback) {
     callBack = callback;
+    if (_collection.length === 0) {
+      Bootstrap.prototype.checkForWeave();
+      return;
+    }
     return $LAB.script(_collection).wait(function() {
       return Bootstrap.prototype.checkForWeave();
     });

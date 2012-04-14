@@ -6,8 +6,7 @@ class Bootstrap
     
   _classes = ["Point","Rectangle","Keyboard","Game","GameError","Group","RenderObject",
     "Action","RenderEngine","State","PhysicsEngine","CollisionEngine","SoundEngine","Input",
-    "Player","Map","MapObject","MapObjectGroup","Nis","NisCondition","NisGoal","Particle",
-    "PhysicsEngine","CollisionEngine","SoundEngine","Emitter","Enemy","EnemyGroup"]
+    "Player","Map","MapObject","MapObjectGroup","Nis","NisCondition","NisGoal","Particle","Emitter","Enemy","EnemyGroup"]
   _collection = []
     
   _ref = this
@@ -16,6 +15,8 @@ class Bootstrap
   
   hasCustomAccessors = false
   callBack = {}
+  
+  Bootstrap::FULL = "full"
   
   checkExt:->
     if window.ext is undefined
@@ -50,19 +51,23 @@ class Bootstrap
         _ref.setters[@name]["name"] = @name
         _ref.setters[@name][prop] = func
 
-  start:(callback,basePath)->
-   _collection[_i] = @prepare clazz,basePath for clazz in _classes
-   @load callback
+  start:(callback,basePath,mode)->
+    if mode is Bootstrap::FULL
+      _collection[_i] = @prepare clazz,basePath for clazz in _classes
+    @load callback
 
   prepare:(clazz,basePath)->
     basePath + clazz + ".js"
   
   load:(callback)->
     callBack = callback
+    if _collection.length is 0
+      Bootstrap::checkForWeave()
+      return
     $LAB.script(_collection).wait(->
       Bootstrap::checkForWeave()
     )
-  
+
   checkForWeave:->
     if hasCustomAccessors
       for clazz in _classes

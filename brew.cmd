@@ -27,6 +27,7 @@ GOTO complete
 )
 
 :checkOptions
+ECHO Checking Options
 if "%options%"=="min" (
 CALL min
 GOTO cleanUP

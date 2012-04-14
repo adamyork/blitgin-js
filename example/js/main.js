@@ -1,13 +1,30 @@
 var game;
 var bs;
 
-function loadDependencies() {
+function loadDependenciesFull() {
     $LAB.setGlobalDefaults({AlwaysPreserveOrder:true,Debug:true});
     $LAB.script("../src/main/js/Bootstrap.js").wait(function(){
         bs = new Bootstrap("bs");
-        bs.start(loadCustomClasses,"../src/main/js/");
+        bs.start(loadCustomClasses,"../src/main/js/",bs.FULL);
     });
 }
+
+function loadDependenciesDebug() {
+    $LAB.setGlobalDefaults({AlwaysPreserveOrder:true,Debug:true});
+    $LAB.script("../src/main/js/blitgin.js").wait(function(){
+        bs = new Bootstrap("bs");
+        bs.start(loadCustomClasses);
+    });
+}
+
+function loadDependenciesMin() {
+    $LAB.setGlobalDefaults({AlwaysPreserveOrder:true,Debug:true});
+    $LAB.script("../src/main/js/min-blitgin.js").wait(function(){
+        bs = new Bootstrap("bs");
+        bs.start(loadCustomClasses);
+    });
+}
+
 
 function loadCustomClasses() {
     $LAB
