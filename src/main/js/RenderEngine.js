@@ -88,11 +88,11 @@ RenderEngine = (function() {
 
   RenderEngine.prototype.managePlayer = function(input) {
     if (input.customKey !== 0 && (!input.hasWaitFor(input.customKey)) && this.player.state.isCancellable) {
-      this.player.updateInherentStates();
+      this.player.revertState();
       this.player.isBusy = false;
     }
     if (input.direction !== 0 && this.player.state.isCancellable) {
-      this.player.updateInherentStates();
+      this.player.revertState();
       this.player.isBusy = false;
     }
     this.manageJump(input);

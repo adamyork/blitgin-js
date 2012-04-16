@@ -77,6 +77,7 @@ RenderObject = (function() {
   };
 
   RenderObject.prototype.assetLoadComplete = function() {
+    this.asset.onload = void 0;
     this.ctx = this.workbench.getContext('2d');
     this.objectKeyframeLength = 0;
     if (this.transparency || (!this.transparency && this.showBounds)) {

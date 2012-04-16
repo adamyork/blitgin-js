@@ -29,6 +29,7 @@ function loadDependenciesMin() {
 function loadCustomClasses() {
     $LAB
     .script("js/CustomAction.js").wait()
+    .script("js/CustomComposite.js").wait()
     .script("js/CustomComplexAction.js").wait()
     .script("js/CustomPlayer.js").wait()
     .script("js/CustomEnemy.js").wait()

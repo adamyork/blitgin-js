@@ -5,8 +5,9 @@ class Bootstrap
     @checkAccessors()
     
   _classes = ["Point","Rectangle","Keyboard","Game","GameError","Group","RenderObject",
-    "Action","RenderEngine","State","PhysicsEngine","CollisionEngine","SoundEngine","Input",
-    "Player","Map","MapObject","MapObjectGroup","Nis","NisCondition","NisGoal","Particle","Emitter","Enemy","EnemyGroup"]
+    "Action","RenderEngine","Composite","State","PhysicsEngine","CollisionEngine","SoundEngine","Input",
+    "Player","Map","MapObject","MapObjectGroup","Nis","NisCondition","NisGoal","Particle",
+    "Emitter","Enemy","EnemyGroup"]
   _collection = []
     
   _ref = this

@@ -111,7 +111,9 @@ Player = (function(_super) {
       this._collisionLeft = new State(Math.round(this.asset.width / this.cellHeight) - 1, 3, false, "collsionLeft", 0);
       this._jumpRight = new State(Math.round(this.asset.width / this.cellWidth) - 1, 0, true, "jumpRight", 0);
       this._jumpLeft = new State(Math.round(this.asset.width / this.cellWidth) - 1, 1, true, "jumpLeft", 0);
+      this.applyState();
     } else {
+      this.applyState();
       this._moveRight = this.assignActionState(action.stateRight, _moveRight);
       this._moveLeft = this.assignActionState(action.stateLeft, _moveLeft);
       this._collisionRight = this.assignActionState(action.stateCollisionRight, _collisionRight);
@@ -119,9 +121,24 @@ Player = (function(_super) {
       this._jumpRight = this.assignActionState(action.stateJumpRight, _jumpRight);
       this._jumpLeft = this.assignActionState(action.stateJumpLeft, _jumpLeft);
     }
-    this._previousState = this._moveRight;
-    this._state = this._moveRight;
-    return this._direction = 1;
+    if (this._direction === 1) {
+      return this._state = this._moveRight;
+    } else {
+      return this._state = this._moveLeft;
+    }
+  };
+
+  Player.prototype.applyState = function() {
+    if (this._direction === void 0) this._direction = 1;
+    if (this._direction === 1) {
+      return this._previousState = this._moveRight;
+    } else {
+      return this._previousState = this._moveLeft;
+    }
+  };
+
+  Player.prototype.revertState = function() {
+    return this._state = this._previousState;
   };
 
   Player.prototype.assignActionState = function(state, inherent) {
@@ -140,6 +157,12 @@ Player = (function(_super) {
   Player.prototype.setCustomActionForKey = function(keyCode, action) {
     if (this.actions === void 0) this.actions = [];
     return this.actions[keyCode] = action;
+  };
+
+  Player.prototype.updateCompositesPoint = function() {
+    if (this.composite !== void 0) {
+      return this.composite.point = this.compositePoint;
+    }
   };
 
   return Player;
@@ -179,12 +202,13 @@ Player.prototype.__defineGetter__("x", function() {
 
 Player.prototype.__defineSetter__("x", function(val) {
   if ((val >= 0) && (val <= (Game.prototype.VIEWPORT_WIDTH - this.width))) {
-    return this._x = Math.round(val);
+    this._x = Math.round(val);
   } else if (val < 0) {
-    return this._x = 0;
+    this._x = 0;
   } else if (val > 0) {
-    return this._x = Game.prototype.VIEWPORT_WIDTH - this.width;
+    this._x = Game.prototype.VIEWPORT_WIDTH - this.width;
   }
+  return this.updateCompositesPoint();
 });
 
 Player.prototype.__defineGetter__("y", function() {
@@ -194,9 +218,11 @@ Player.prototype.__defineGetter__("y", function() {
 Player.prototype.__defineSetter__("y", function(val) {
   if (val >= (Game.prototype.VIEWPORT_HEIGHT - this.cellHeight)) {
     this._y = Game.prototype.VIEWPORT_HEIGHT - this.cellHeight;
+    this.updateCompositesPoint();
     return;
   }
-  return this._y = val;
+  this._y = val;
+  return this.updateCompositesPoint();
 });
 
 Player.prototype.__defineGetter__("direction", function() {
@@ -454,7 +480,8 @@ Player.prototype.__defineGetter__("composite", function() {
 });
 
 Player.prototype.__defineSetter__("composite", function(val) {
-  return this._composite = val;
+  this._composite = val;
+  return this.updateCompositesPoint();
 });
 
 Player.prototype.__defineGetter__("compositePoint", function() {

@@ -69,16 +69,24 @@ class Player extends RenderObject
       @_collisionLeft = new State Math.round(@asset.width / @cellHeight)-1,3,false,"collsionLeft",0
       @_jumpRight = new State Math.round(@asset.width / @cellWidth)-1,0,true,"jumpRight",0
       @_jumpLeft = new State Math.round(@asset.width / @cellWidth)-1,1,true,"jumpLeft",0
+      @applyState()
     else
+      @applyState()
       @_moveRight = @assignActionState action.stateRight,_moveRight
       @_moveLeft = @assignActionState action.stateLeft,_moveLeft
       @_collisionRight = @assignActionState action.stateCollisionRight,_collisionRight
       @_collisionLeft = @assignActionState action.stateCollisionLeft,_collisionLeft
       @_jumpRight = @assignActionState action.stateJumpRight,_jumpRight
-      @_jumpLeft = @assignActionState action.stateJumpLeft,_jumpLeft
-    @_previousState = @_moveRight
-    @_state = @_moveRight
-    @_direction = 1
+      @_jumpLeft = @assignActionState action.stateJumpLeft,_jumpLeft      
+    if (@_direction == 1) then @_state = @_moveRight else @_state = @_moveLeft      
+  
+  applyState:->
+    if @_direction is undefined
+      @_direction = 1
+    if (@_direction == 1) then @_previousState = @_moveRight else @_previousState = @_moveLeft
+    
+  revertState:->
+    @_state = @_previousState
 
   assignActionState:(state,inherent)->
     if (state) then state else inherent
@@ -92,6 +100,10 @@ class Player extends RenderObject
     if @actions is undefined
       @actions = []
     @actions[keyCode] = action
+    
+  updateCompositesPoint:->
+    if @composite isnt undefined
+      @composite.point = @compositePoint
 
 Player::name = "Player"
 
@@ -118,6 +130,7 @@ Player::__defineSetter__ "x",(val)->
     @_x = 0
   else if(val > 0)
     @_x = Game::VIEWPORT_WIDTH - @width
+  @updateCompositesPoint()
 
 Player::__defineGetter__ "y",->
   @_y  
@@ -125,8 +138,10 @@ Player::__defineGetter__ "y",->
 Player::__defineSetter__ "y",(val)->
   if val >= (Game::VIEWPORT_HEIGHT - @cellHeight)
     @_y = Game::VIEWPORT_HEIGHT - @cellHeight;
+    @updateCompositesPoint()
     return
   @_y = val
+  @updateCompositesPoint()
 
 Player::__defineGetter__ "direction",->
   @_direction 
@@ -323,6 +338,7 @@ Player::__defineGetter__ "composite",->
 
 Player::__defineSetter__ "composite",(val)->
   @_composite = val
+  @updateCompositesPoint()
 
 Player::__defineGetter__ "compositePoint",->
   new Point (@x + @composite.x),(@y + @composite.y)

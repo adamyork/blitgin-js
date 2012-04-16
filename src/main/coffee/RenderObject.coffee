@@ -42,6 +42,7 @@ class RenderObject
       console.log "Set a cellwidth , cellheight , and assetClass before calling initialize."
       
   assetLoadComplete:->
+    @asset.onload = undefined
     @ctx = @workbench.getContext '2d'
     @objectKeyframeLength = 0
     if @transparency or (not @transparency and @showBounds)
@@ -88,6 +89,7 @@ RenderObject::__defineGetter__ "bitmapData",->
   keyFrame = @objectKeyframeLength * @cellWidth
   if @ctx is undefined
     return {player:{notready:true},rect:new Rectangle keyFrame,0,@cellWidth,@cellHeight}
+  #TODO its possible that a composites asset is not a single row
   {player:@assetData,rect:new Rectangle keyFrame,0,@cellWidth,@cellHeight}
     
 RenderObject::__defineGetter__ "x",->

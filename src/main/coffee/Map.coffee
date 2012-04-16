@@ -80,6 +80,10 @@ class Map extends RenderObject
     _assetsLoaded++
     if @paralaxing
       if _assetsLoaded is Map::TOTAL_PARALAX_ASSETS
+        @backgroundAsset.onload = undefined
+        @midgroundAsset.onload = undefined
+        @foregroundAsset.onload = undefined
+        @collisionAsset.onload = undefined
         @removeColorConstantAndCache @backgroundAsset,@backgroundData
         @removeColorConstantAndCache @midgroundAsset,@midgroundData
         @removeColorConstantAndCache @foregroundAsset,@foregroundData
@@ -87,6 +91,8 @@ class Map extends RenderObject
         @finalize()
     else
       if _assetsLoaded is Map::TOTAL_STANDARD_ASSETS
+        @foregroundAsset.onload = undefined
+        @collisionAsset.onload = undefined
         @removeColorConstantAndCache @foregroundAsset,@foregroundData
         @removeColorConstantAndCache @collisionAsset,@collisionData,true
         @finalize()

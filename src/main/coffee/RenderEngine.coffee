@@ -59,11 +59,10 @@ class RenderEngine
 
   managePlayer:(input)->
     if input.customKey isnt 0 and (not input.hasWaitFor(input.customKey)) and @player.state.isCancellable
-      #TODO this most like likely need to move a new function , like set back to previous state
-      @player.updateInherentStates()
+      @player.revertState()
       @player.isBusy = false
     if input.direction isnt 0 and @player.state.isCancellable
-      @player.updateInherentStates()
+      @player.revertState()
       @player.isBusy = false
     @manageJump input
     @physicsEngine.adjustPlayerVerically @player,@map

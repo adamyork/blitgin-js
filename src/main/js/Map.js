@@ -110,6 +110,10 @@ Map = (function(_super) {
     _assetsLoaded++;
     if (this.paralaxing) {
       if (_assetsLoaded === Map.prototype.TOTAL_PARALAX_ASSETS) {
+        this.backgroundAsset.onload = void 0;
+        this.midgroundAsset.onload = void 0;
+        this.foregroundAsset.onload = void 0;
+        this.collisionAsset.onload = void 0;
         this.removeColorConstantAndCache(this.backgroundAsset, this.backgroundData);
         this.removeColorConstantAndCache(this.midgroundAsset, this.midgroundData);
         this.removeColorConstantAndCache(this.foregroundAsset, this.foregroundData);
@@ -118,6 +122,8 @@ Map = (function(_super) {
       }
     } else {
       if (_assetsLoaded === Map.prototype.TOTAL_STANDARD_ASSETS) {
+        this.foregroundAsset.onload = void 0;
+        this.collisionAsset.onload = void 0;
         this.removeColorConstantAndCache(this.foregroundAsset, this.foregroundData);
         this.removeColorConstantAndCache(this.collisionAsset, this.collisionData, true);
         return this.finalize();
