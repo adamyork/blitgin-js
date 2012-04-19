@@ -12,7 +12,7 @@ Bootstrap = (function() {
     this.checkAccessors();
   }
 
-  _classes = ["Point", "Rectangle", "Keyboard", "Game", "GameError", "Group", "RenderObject", "Action", "RenderEngine", "State", "PhysicsEngine", "CollisionEngine", "SoundEngine", "Input", "Player", "Map", "MapObject", "MapObjectGroup", "Nis", "NisCondition", "NisGoal", "Particle", "Emitter", "Enemy", "EnemyGroup"];
+  _classes = ["Point", "Rectangle", "Keyboard", "Game", "GameError", "Group", "RenderObject", "Action", "RenderEngine", "Composite", "State", "PhysicsEngine", "CollisionEngine", "SoundEngine", "Input", "Player", "Map", "MapObject", "MapObjectGroup", "Nis", "NisCondition", "NisGoal", "Particle", "Emitter", "Enemy", "EnemyGroup"];
 
   _collection = [];
 
@@ -797,6 +797,7 @@ RenderObject = (function() {
   };
 
   RenderObject.prototype.assetLoadComplete = function() {
+    this.asset.onload = void 0;
     this.ctx = this.workbench.getContext('2d');
     this.objectKeyframeLength = 0;
     if (this.transparency || (!this.transparency && this.showBounds)) {
@@ -1409,66 +1410,76 @@ RenderEngine = (function() {
     }
     this.managePlayer(input);
     this.manageMap(input);
-    this.paint(this.map, this.map.point);
+    this.paint(this.map);
     this.map.manageElements(Map.prototype.MANAGE_ENEMIES);
     for (enemy in this.map.activeEnemies) {
       this.manageEnemy(this.map.activeEnemies[enemy]);
-      this.paint(this.map.activeEnemies[enemy], enemy.point);
+      this.paint(this.map.activeEnemies[enemy]);
     }
     this.manageNewActions(input);
     for (action in this.actionObjects) {
       aObj = this.actionObjects[action];
       if (this.actionIsIdle(aObj)) continue;
       this.manageAction(aObj, input);
-      this.paint(aObj, aObj.point);
+      this.paint(aObj);
     }
     for (mapObj in this.map.activeMapObjects) {
       mObj = this.map.activeMapObjects[mapObj];
       mObj.frame++;
       this.manageMapObject(mObj);
-      this.paint(mObj, mObj.point);
+      this.paint(mObj);
     }
     this.map.manageElements(Map.prototype.MANAGE_MAP_OBJECTS);
-    this.paint(this.player, this.player.point);
+    this.paint(this.player);
     if (this.player.composite !== void 0) {
       this.player.composite.frame++;
-      this.paint(this.player.composite, this.player.compositePoint);
+      this.paint(this.player.composite);
     }
     if (this.player.emitter !== void 0 && this.player.emitter.hasParticles) {
       this.player.emitter.frame++;
-      this.paint(this.player.emitter, this.player.point);
+      this.paint(this.player.emitter);
     }
     input.manageWaits();
     return Game.prototype.instance.notifySubscribers(this.map, this.player, this.actionObjects);
   };
 
-  RenderEngine.prototype.paint = function(obj, point) {
-    var asset, d, _i, _len, _ref, _results;
+  RenderEngine.prototype.paint = function(obj) {
+    var asset, d, item, pPoint, rect, _i, _j, _len, _len2, _ref, _ref2, _results, _results2;
     d = obj.bitmapData;
     if (d.player && d.player.notready === void 0) {
       return this._ctx.drawImage(d.player, d.rect.x, d.rect.y, d.rect.width, d.rect.height, obj.point.x, obj.point.y, d.rect.width, d.rect.height);
-    } else if (d.player && d.player.notready) {} else {
-      _ref = d.map;
+    } else if (d.player && d.player.notready) {} else if (d.particles) {
+      _ref = d.particles;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        asset = _ref[_i];
-        if (asset.data !== void 0) {
-          _results.push(this._ctx.drawImage(asset.data, asset.rect.x, asset.rect.y, asset.rect.width, asset.rect.height, obj.point.x, obj.point.y, asset.rect.width, asset.rect.height));
-        } else {
-          _results.push(void 0);
-        }
+        item = _ref[_i];
+        rect = item.rect;
+        pPoint = item.particle.point;
+        _results.push(this._ctx.drawImage(item.data, rect.x, rect.y, rect.width, rect.height, Math.round(pPoint.x), Math.round(pPoint.y), rect.width, rect.height));
       }
       return _results;
+    } else {
+      _ref2 = d.map;
+      _results2 = [];
+      for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
+        asset = _ref2[_j];
+        if (asset.data !== void 0) {
+          _results2.push(this._ctx.drawImage(asset.data, asset.rect.x, asset.rect.y, asset.rect.width, asset.rect.height, obj.point.x, obj.point.y, asset.rect.width, asset.rect.height));
+        } else {
+          _results2.push(void 0);
+        }
+      }
+      return _results2;
     }
   };
 
   RenderEngine.prototype.managePlayer = function(input) {
     if (input.customKey !== 0 && (!input.hasWaitFor(input.customKey)) && this.player.state.isCancellable) {
-      this.player.updateInherentStates();
+      this.player.revertState();
       this.player.isBusy = false;
     }
     if (input.direction !== 0 && this.player.state.isCancellable) {
-      this.player.updateInherentStates();
+      this.player.revertState();
       this.player.isBusy = false;
     }
     this.manageJump(input);
@@ -1547,6 +1558,7 @@ RenderEngine = (function() {
   RenderEngine.prototype.managePlayerState = function(action, input) {
     if (input) this.manageJump(input);
     if (this.player.state !== action.state && action.isAnimating === false && action.hasAnimated === false && this.player.isBusy === false) {
+      if (action.state === void 0) action.state = this.player.state;
       this.player.state = action.state;
       this.player.isBusy = true;
       action.isAnimating = true;
@@ -1993,17 +2005,46 @@ Player = (function(_super) {
       this._collisionLeft = new State(Math.round(this.asset.width / this.cellHeight) - 1, 3, false, "collsionLeft", 0);
       this._jumpRight = new State(Math.round(this.asset.width / this.cellWidth) - 1, 0, true, "jumpRight", 0);
       this._jumpLeft = new State(Math.round(this.asset.width / this.cellWidth) - 1, 1, true, "jumpLeft", 0);
+      this.applyState();
     } else {
-      this._moveRight = this.assignActionState(action.stateRight, _moveRight);
-      this._moveLeft = this.assignActionState(action.stateLeft, _moveLeft);
-      this._collisionRight = this.assignActionState(action.stateCollisionRight, _collisionRight);
-      this._collisionLeft = this.assignActionState(action.stateCollisionLeft, _collisionLeft);
-      this._jumpRight = this.assignActionState(action.stateJumpRight, _jumpRight);
-      this._jumpLeft = this.assignActionState(action.stateJumpLeft, _jumpLeft);
+      this.applyState();
+      if (action.stateRight) {
+        this._moveRight = this.assignActionState(action.stateRight, _moveRight);
+      }
+      if (action.stateLeft) {
+        this._moveLeft = this.assignActionState(action.stateLeft, _moveLeft);
+      }
+      if (action.stateCollisionRight) {
+        this._collisionRight = this.assignActionState(action.stateCollisionRight, _collisionRight);
+      }
+      if (action.stateCollisionLeft) {
+        this._collisionLeft = this.assignActionState(action.stateCollisionLeft, _collisionLeft);
+      }
+      if (action.stateJumpRight) {
+        this._jumpRight = this.assignActionState(action.stateJumpRight, _jumpRight);
+      }
+      if (action.stateJumpLeft) {
+        this._jumpLeft = this.assignActionState(action.stateJumpLeft, _jumpLeft);
+      }
     }
-    this._previousState = this._moveRight;
-    this._state = this._moveRight;
-    return this._direction = 1;
+    if (this._direction === 1) {
+      return this._state = this._moveRight;
+    } else {
+      return this._state = this._moveLeft;
+    }
+  };
+
+  Player.prototype.applyState = function() {
+    if (this._direction === void 0) this._direction = 1;
+    if (this._direction === 1) {
+      return this._previousState = this._moveRight;
+    } else {
+      return this._previousState = this._moveLeft;
+    }
+  };
+
+  Player.prototype.revertState = function() {
+    return this._state = this._previousState;
   };
 
   Player.prototype.assignActionState = function(state, inherent) {
@@ -2022,6 +2063,11 @@ Player = (function(_super) {
   Player.prototype.setCustomActionForKey = function(keyCode, action) {
     if (this.actions === void 0) this.actions = [];
     return this.actions[keyCode] = action;
+  };
+
+  Player.prototype.updatePoints = function() {
+    if (this.composite !== void 0) this.composite.point = this.compositePoint;
+    if (this.emitter !== void 0) return this.emitter.point = this.emitterPoint;
   };
 
   return Player;
@@ -2061,12 +2107,13 @@ Player.prototype.__defineGetter__("x", function() {
 
 Player.prototype.__defineSetter__("x", function(val) {
   if ((val >= 0) && (val <= (Game.prototype.VIEWPORT_WIDTH - this.width))) {
-    return this._x = Math.round(val);
+    this._x = Math.round(val);
   } else if (val < 0) {
-    return this._x = 0;
+    this._x = 0;
   } else if (val > 0) {
-    return this._x = Game.prototype.VIEWPORT_WIDTH - this.width;
+    this._x = Game.prototype.VIEWPORT_WIDTH - this.width;
   }
+  return this.updatePoints();
 });
 
 Player.prototype.__defineGetter__("y", function() {
@@ -2076,9 +2123,11 @@ Player.prototype.__defineGetter__("y", function() {
 Player.prototype.__defineSetter__("y", function(val) {
   if (val >= (Game.prototype.VIEWPORT_HEIGHT - this.cellHeight)) {
     this._y = Game.prototype.VIEWPORT_HEIGHT - this.cellHeight;
+    this.updatePoints();
     return;
   }
-  return this._y = val;
+  this._y = val;
+  return this.updatePoints();
 });
 
 Player.prototype.__defineGetter__("direction", function() {
@@ -2336,7 +2385,8 @@ Player.prototype.__defineGetter__("composite", function() {
 });
 
 Player.prototype.__defineSetter__("composite", function(val) {
-  return this._composite = val;
+  this._composite = val;
+  return this.updatePoints();
 });
 
 Player.prototype.__defineGetter__("compositePoint", function() {
@@ -2352,7 +2402,19 @@ Player.prototype.__defineGetter__("emitter", function() {
 });
 
 Player.prototype.__defineSetter__("emitter", function(val) {
-  return this._emitter = val;
+  this._emitter = val;
+  if (this._emitter !== void 0) {
+    this.updatePoints();
+    return this._emitter.createParticles();
+  }
+});
+
+Player.prototype.__defineGetter__("emitterPoint", function() {
+  return new Point(this.x + this.emitter.x, this.y + this.emitter.y);
+});
+
+Player.prototype.__defineSetter__("emitterPoint", function(val) {
+  return this._compositePoint = val;
 });
 
 Player.prototype.__defineGetter__("uniqueID", function() {
@@ -2471,6 +2533,10 @@ Map = (function(_super) {
     _assetsLoaded++;
     if (this.paralaxing) {
       if (_assetsLoaded === Map.prototype.TOTAL_PARALAX_ASSETS) {
+        this.backgroundAsset.onload = void 0;
+        this.midgroundAsset.onload = void 0;
+        this.foregroundAsset.onload = void 0;
+        this.collisionAsset.onload = void 0;
         this.removeColorConstantAndCache(this.backgroundAsset, this.backgroundData);
         this.removeColorConstantAndCache(this.midgroundAsset, this.midgroundData);
         this.removeColorConstantAndCache(this.foregroundAsset, this.foregroundData);
@@ -2479,6 +2545,8 @@ Map = (function(_super) {
       }
     } else {
       if (_assetsLoaded === Map.prototype.TOTAL_STANDARD_ASSETS) {
+        this.foregroundAsset.onload = void 0;
+        this.collisionAsset.onload = void 0;
         this.removeColorConstantAndCache(this.foregroundAsset, this.foregroundData);
         this.removeColorConstantAndCache(this.collisionAsset, this.collisionData, true);
         return this.finalize();
@@ -3137,24 +3205,27 @@ NisGoal.prototype.__defineGetter__("enemyGoals", function() {
 });
 
 Particle = (function(_super) {
-  var _index, _lifeSpan;
+  var _index, _lifeSpan, _startFrame;
 
   __extends(Particle, _super);
 
-  function Particle(index, x, y) {
+  function Particle(index) {
     this.index = index;
-    this.x = x;
-    this.y = y;
   }
 
   _index = 0;
 
   _lifeSpan = 0;
 
-  Particle.prototype.initialize = function() {
-    var duration;
-    Particle.__super__.initialize.apply(this, arguments);
-    return duration = Math.ceil(this.asset.width / this.cellWidth);
+  _startFrame = 1;
+
+  Particle.prototype.initialize = function(duration) {
+    this.objectKeyframeLength = 0;
+    this.frame = 0;
+    this.x = 0;
+    this.y = 0;
+    this.velocityX = 0;
+    return this.velocityY = 0;
   };
 
   return Particle;
@@ -3167,7 +3238,7 @@ Particle.prototype.__defineGetter__("index", function() {
   return this._index;
 });
 
-Particle.prototype.__defineSetter__("index", function(value) {
+Particle.prototype.__defineSetter__("index", function(val) {
   return this._index = val;
 });
 
@@ -3175,8 +3246,29 @@ Particle.prototype.__defineGetter__("lifeSpan", function() {
   return this._lifeSpan;
 });
 
-Particle.prototype.__defineSetter__("lifeSpan", function(value) {
+Particle.prototype.__defineSetter__("lifeSpan", function(val) {
   return this._lifeSpan = val;
+});
+
+Particle.prototype.__defineGetter__("startFrame", function() {
+  return this._startFrame;
+});
+
+Particle.prototype.__defineSetter__("startFrame", function(val) {
+  return this._startFrame = val;
+});
+
+Particle.prototype.__defineGetter__("frame", function() {
+  return this._frame;
+});
+
+Particle.prototype.__defineSetter__("frame", function(val) {
+  this._frame = val;
+  if (this.objectKeyframeLength === (this.startFrame + this.duration)) {
+    this.objectKeyframeLength = 0;
+    return;
+  }
+  return this.objectKeyframeLength++;
 });
 
 PhysicsEngine = (function() {
@@ -3634,16 +3726,31 @@ SoundEngine = (function() {
 SoundEngine.prototype.name = "SoundEngine";
 
 Emitter = (function() {
-  var _frame, _friction, _gravity, _particles, _quantity, _size, _type;
+  var _asset, _assetClass, _assetData, _ctx, _frame, _friction, _gravity, _particles, _quantity, _ready, _type, _workbench, _x, _y;
 
-  function Emitter(_type, _gravity, _friction, _quantity, _size) {
+  function Emitter(_type, _gravity, _friction, _quantity) {
     this._type = _type;
     this._gravity = _gravity;
     this._friction = _friction;
     this._quantity = _quantity;
-    this._size = _size;
-    this.createParticles();
+    this._workbench = document.createElement("canvas");
+    this._workbench.width = this._size;
+    this._workbench.height = this._size;
+    this._ctx = this._workbench.getContext('2d');
+    this._particles = [];
+    this._frame = 0;
+    this._imageData = new Image();
   }
+
+  _asset = {};
+
+  _assetClass = {};
+
+  _assetData = {};
+
+  _workbench = {};
+
+  _ctx = {};
 
   _type = {};
 
@@ -3655,29 +3762,53 @@ Emitter = (function() {
 
   _particles = [];
 
-  _size = 0;
-
   _frame = 0;
+
+  _x = 0;
+
+  _y = 0;
+
+  _ready = false;
+
+  Emitter.prototype.createParticles = function() {
+    var i, particle, _ref, _results;
+    this.ready = false;
+    _results = [];
+    for (i = 0, _ref = this._quantity - 1; 0 <= _ref ? i <= _ref : i >= _ref; 0 <= _ref ? i++ : i--) {
+      particle = new this._type(i);
+      particle.x = this.point.x;
+      particle.y = this.point.y;
+      if (i === 0) this.loadParticleAsset(particle.assetClass);
+      _results.push(this._particles.push(particle));
+    }
+    return _results;
+  };
+
+  Emitter.prototype.loadParticleAsset = function(src) {
+    this.workbench = document.createElement("canvas");
+    this.asset = new Image();
+    this.assetData = new Image();
+    this.asset.onload = this.assetLoadComplete.bind(this);
+    return this.asset.src = src;
+  };
+
+  Emitter.prototype.assetLoadComplete = function() {
+    this.asset.onload = void 0;
+    this.ctx = this.workbench.getContext('2d');
+    this.assetData = this.asset;
+    return this.ready = true;
+  };
+
+  Emitter.prototype.removeParticle = function(particle) {
+    var arr, index;
+    index = this._particles.indexOf(particle, 0);
+    arr = this._particles.splice(index, 1);
+    return arr = void 0;
+  };
 
   return Emitter;
 
 })();
-
-({
-  createParticles: function() {
-    var i, particle, _i, _len, _results;
-    _results = [];
-    for (_i = 0, _len = _quantity.length; _i < _len; _i++) {
-      i = _quantity[_i];
-      particle = new _type(i);
-      _results.push(_particles.push(particle));
-    }
-    return _results;
-  },
-  removeParticle: function(particle) {
-    return _particles.slice(particle.index, (particle.index + 1));
-  }
-});
 
 Emitter.prototype.name = "Emitter";
 
@@ -3686,35 +3817,51 @@ Emitter.prototype.__defineGetter__("frame", function() {
 });
 
 Emitter.prototype.__defineSetter__("frame", function(val) {
-  var particle, _i, _len, _ref, _results;
-  _ref = this._particles;
-  _results = [];
-  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-    particle = _ref[_i];
-    particle.frame++;
-    particle.velocityX += particle.easeCoefficient;
-    particle.velocityY += particle.easeCoefficient;
-    particle.x = (particle.x + (particle.velocityX * particle.direction)) - _friction;
-    particle.y = (particle.y + particle.velocityY) + _gravity;
-    if (particle.frame >= particle.lifeSpan) {
-      this.removeParticle(particle);
-      continue;
-    } else {
-      _results.push(void 0);
+  var particle, _i, _len, _ref;
+  if (this.ready) {
+    _ref = this._particles;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      particle = _ref[_i];
+      if (this._frame >= particle.startFrame) {
+        particle.frame++;
+        particle.velocityX += particle.easeCoefficient;
+        particle.velocityY += particle.easeCoefficient;
+        particle.x = (particle.x + (particle.velocityX * particle.direction)) - this._friction;
+        particle.y = (particle.y + particle.velocityY) + this._gravity;
+      }
     }
+    if ((particle.frame + particle.startFrame) >= particle.lifeSpan) {
+      this.removeParticle(particle);
+    }
+    return this._frame = val;
   }
-  return _results;
 });
 
 Emitter.prototype.__defineGetter__("bitmapData", function() {
-  var bmpData, particle, _i, _len, _ref;
-  bmpData = new Image();
+  var collection, keyframe, obj, particle, _i, _len, _ref;
+  if (!this.ready) {
+    return {
+      player: {
+        notready: true
+      },
+      rect: new Rectangle(0, 0, 0, 0)
+    };
+  }
+  collection = [];
   _ref = this._particles;
   for (_i = 0, _len = _ref.length; _i < _len; _i++) {
     particle = _ref[_i];
-    particle;
+    keyframe = particle.objectKeyframeLength * particle.cellWidth;
+    obj = {
+      data: this.assetData,
+      rect: new Rectangle(keyframe, 0, particle.cellWidth, particle.cellHeight),
+      particle: particle
+    };
+    collection.push(obj);
   }
-  return bmpData;
+  return {
+    particles: collection
+  };
 });
 
 Emitter.prototype.__defineGetter__("hasParticles", function() {
@@ -3725,8 +3872,93 @@ Emitter.prototype.__defineGetter__("hasParticles", function() {
   }
 });
 
-Emitter.prototype.__defineGetter__("rect", function() {
-  return new Rectangle(0, 0, this._size, this._size);
+Emitter.prototype.__defineGetter__("asset", function() {
+  return this._asset;
+});
+
+Emitter.prototype.__defineSetter__("asset", function(val) {
+  return this._asset = val;
+});
+
+Emitter.prototype.__defineGetter__("assetClass", function() {
+  return this._assetClass;
+});
+
+Emitter.prototype.__defineSetter__("assetClass", function(val) {
+  return this._assetClass = val;
+});
+
+Emitter.prototype.__defineGetter__("assetData", function() {
+  return this._assetData;
+});
+
+Emitter.prototype.__defineSetter__("assetData", function(val) {
+  return this._assetData = val;
+});
+
+Emitter.prototype.__defineGetter__("workbench", function() {
+  return this._workbench;
+});
+
+Emitter.prototype.__defineSetter__("workbench", function(val) {
+  return this._workbench = val;
+});
+
+Emitter.prototype.__defineGetter__("ctx", function() {
+  if (this._ctx === void 0) {
+    return;
+  } else {
+    return this._ctx;
+  }
+});
+
+Emitter.prototype.__defineSetter__("ctx", function(val) {
+  return this._ctx = val;
+});
+
+Emitter.prototype.__defineGetter__("point", function() {
+  return this._point;
+});
+
+Emitter.prototype.__defineSetter__("point", function(val) {
+  var particle, _i, _len, _ref, _results;
+  this._point = val;
+  _ref = this._particles;
+  _results = [];
+  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+    particle = _ref[_i];
+    if (this._frame <= particle.startFrame) {
+      particle.x = this._point.x;
+      _results.push(particle.y = this._point.y);
+    } else {
+      _results.push(void 0);
+    }
+  }
+  return _results;
+});
+
+Emitter.prototype.__defineGetter__("x", function() {
+  return this._x;
+});
+
+Emitter.prototype.__defineSetter__("x", function(val) {
+  return this._x = val;
+});
+
+Emitter.prototype.__defineGetter__("y", function() {
+  return this._y;
+});
+
+Emitter.prototype.__defineSetter__("y", function(val) {
+  return this._y = val;
+});
+
+Emitter.prototype.__defineGetter__("ready", function() {
+  return this._ready;
+});
+
+Emitter.prototype.__defineSetter__("ready", function(val) {
+  return this._ready = val;
 });
 
 Enemy = (function(_super) {
