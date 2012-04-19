@@ -18,7 +18,7 @@ or
 
 To edit...
 - Install node -> npm -> coffeescript
-- git clone https://code.google.com/p/blitgin-js/
+- git clone https://github.com/radAdam/blitgin-js.git
 - Modify coffeescript files.
 - Compile : brew.cmd or brewsh.sh brew -[onecup|wholepot] -[o[min]]
 

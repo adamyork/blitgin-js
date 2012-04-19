@@ -72,12 +72,18 @@ class Player extends RenderObject
       @applyState()
     else
       @applyState()
-      @_moveRight = @assignActionState action.stateRight,_moveRight
-      @_moveLeft = @assignActionState action.stateLeft,_moveLeft
-      @_collisionRight = @assignActionState action.stateCollisionRight,_collisionRight
-      @_collisionLeft = @assignActionState action.stateCollisionLeft,_collisionLeft
-      @_jumpRight = @assignActionState action.stateJumpRight,_jumpRight
-      @_jumpLeft = @assignActionState action.stateJumpLeft,_jumpLeft      
+      if action.stateRight
+        @_moveRight = @assignActionState action.stateRight,_moveRight
+      if action.stateLeft
+        @_moveLeft = @assignActionState action.stateLeft,_moveLeft
+      if action.stateCollisionRight
+        @_collisionRight = @assignActionState action.stateCollisionRight,_collisionRight
+      if action.stateCollisionLeft
+        @_collisionLeft = @assignActionState action.stateCollisionLeft,_collisionLeft
+      if action.stateJumpRight
+        @_jumpRight = @assignActionState action.stateJumpRight,_jumpRight
+      if action.stateJumpLeft
+        @_jumpLeft = @assignActionState action.stateJumpLeft,_jumpLeft      
     if (@_direction == 1) then @_state = @_moveRight else @_state = @_moveLeft      
   
   applyState:->
@@ -101,9 +107,11 @@ class Player extends RenderObject
       @actions = []
     @actions[keyCode] = action
     
-  updateCompositesPoint:->
+  updatePoints:->
     if @composite isnt undefined
       @composite.point = @compositePoint
+    if @emitter isnt undefined
+      @emitter.point = @emitterPoint
 
 Player::name = "Player"
 
@@ -130,7 +138,7 @@ Player::__defineSetter__ "x",(val)->
     @_x = 0
   else if(val > 0)
     @_x = Game::VIEWPORT_WIDTH - @width
-  @updateCompositesPoint()
+  @updatePoints()
 
 Player::__defineGetter__ "y",->
   @_y  
@@ -138,10 +146,10 @@ Player::__defineGetter__ "y",->
 Player::__defineSetter__ "y",(val)->
   if val >= (Game::VIEWPORT_HEIGHT - @cellHeight)
     @_y = Game::VIEWPORT_HEIGHT - @cellHeight;
-    @updateCompositesPoint()
+    @updatePoints()
     return
   @_y = val
-  @updateCompositesPoint()
+  @updatePoints()
 
 Player::__defineGetter__ "direction",->
   @_direction 
@@ -338,7 +346,7 @@ Player::__defineGetter__ "composite",->
 
 Player::__defineSetter__ "composite",(val)->
   @_composite = val
-  @updateCompositesPoint()
+  @updatePoints()
 
 Player::__defineGetter__ "compositePoint",->
   new Point (@x + @composite.x),(@y + @composite.y)
@@ -351,6 +359,15 @@ Player::__defineGetter__ "emitter",->
 
 Player::__defineSetter__ "emitter",(val)->
   @_emitter = val
+  if @_emitter isnt undefined
+    @updatePoints()
+    @_emitter.createParticles()
+  
+Player::__defineGetter__ "emitterPoint",->
+  new Point (@x + @emitter.x),(@y + @emitter.y)
+
+Player::__defineSetter__ "emitterPoint",(val)->
+  @_compositePoint = val
 
 Player::__defineGetter__ "uniqueID",->
   @_uniqueID

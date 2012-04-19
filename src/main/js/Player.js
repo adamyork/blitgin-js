@@ -114,12 +114,24 @@ Player = (function(_super) {
       this.applyState();
     } else {
       this.applyState();
-      this._moveRight = this.assignActionState(action.stateRight, _moveRight);
-      this._moveLeft = this.assignActionState(action.stateLeft, _moveLeft);
-      this._collisionRight = this.assignActionState(action.stateCollisionRight, _collisionRight);
-      this._collisionLeft = this.assignActionState(action.stateCollisionLeft, _collisionLeft);
-      this._jumpRight = this.assignActionState(action.stateJumpRight, _jumpRight);
-      this._jumpLeft = this.assignActionState(action.stateJumpLeft, _jumpLeft);
+      if (action.stateRight) {
+        this._moveRight = this.assignActionState(action.stateRight, _moveRight);
+      }
+      if (action.stateLeft) {
+        this._moveLeft = this.assignActionState(action.stateLeft, _moveLeft);
+      }
+      if (action.stateCollisionRight) {
+        this._collisionRight = this.assignActionState(action.stateCollisionRight, _collisionRight);
+      }
+      if (action.stateCollisionLeft) {
+        this._collisionLeft = this.assignActionState(action.stateCollisionLeft, _collisionLeft);
+      }
+      if (action.stateJumpRight) {
+        this._jumpRight = this.assignActionState(action.stateJumpRight, _jumpRight);
+      }
+      if (action.stateJumpLeft) {
+        this._jumpLeft = this.assignActionState(action.stateJumpLeft, _jumpLeft);
+      }
     }
     if (this._direction === 1) {
       return this._state = this._moveRight;
@@ -159,10 +171,9 @@ Player = (function(_super) {
     return this.actions[keyCode] = action;
   };
 
-  Player.prototype.updateCompositesPoint = function() {
-    if (this.composite !== void 0) {
-      return this.composite.point = this.compositePoint;
-    }
+  Player.prototype.updatePoints = function() {
+    if (this.composite !== void 0) this.composite.point = this.compositePoint;
+    if (this.emitter !== void 0) return this.emitter.point = this.emitterPoint;
   };
 
   return Player;
@@ -208,7 +219,7 @@ Player.prototype.__defineSetter__("x", function(val) {
   } else if (val > 0) {
     this._x = Game.prototype.VIEWPORT_WIDTH - this.width;
   }
-  return this.updateCompositesPoint();
+  return this.updatePoints();
 });
 
 Player.prototype.__defineGetter__("y", function() {
@@ -218,11 +229,11 @@ Player.prototype.__defineGetter__("y", function() {
 Player.prototype.__defineSetter__("y", function(val) {
   if (val >= (Game.prototype.VIEWPORT_HEIGHT - this.cellHeight)) {
     this._y = Game.prototype.VIEWPORT_HEIGHT - this.cellHeight;
-    this.updateCompositesPoint();
+    this.updatePoints();
     return;
   }
   this._y = val;
-  return this.updateCompositesPoint();
+  return this.updatePoints();
 });
 
 Player.prototype.__defineGetter__("direction", function() {
@@ -481,7 +492,7 @@ Player.prototype.__defineGetter__("composite", function() {
 
 Player.prototype.__defineSetter__("composite", function(val) {
   this._composite = val;
-  return this.updateCompositesPoint();
+  return this.updatePoints();
 });
 
 Player.prototype.__defineGetter__("compositePoint", function() {
@@ -497,7 +508,19 @@ Player.prototype.__defineGetter__("emitter", function() {
 });
 
 Player.prototype.__defineSetter__("emitter", function(val) {
-  return this._emitter = val;
+  this._emitter = val;
+  if (this._emitter !== void 0) {
+    this.updatePoints();
+    return this._emitter.createParticles();
+  }
+});
+
+Player.prototype.__defineGetter__("emitterPoint", function() {
+  return new Point(this.x + this.emitter.x, this.y + this.emitter.y);
+});
+
+Player.prototype.__defineSetter__("emitterPoint", function(val) {
+  return this._compositePoint = val;
 });
 
 Player.prototype.__defineGetter__("uniqueID", function() {

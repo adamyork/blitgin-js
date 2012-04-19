@@ -33,56 +33,66 @@ RenderEngine = (function() {
     }
     this.managePlayer(input);
     this.manageMap(input);
-    this.paint(this.map, this.map.point);
+    this.paint(this.map);
     this.map.manageElements(Map.prototype.MANAGE_ENEMIES);
     for (enemy in this.map.activeEnemies) {
       this.manageEnemy(this.map.activeEnemies[enemy]);
-      this.paint(this.map.activeEnemies[enemy], enemy.point);
+      this.paint(this.map.activeEnemies[enemy]);
     }
     this.manageNewActions(input);
     for (action in this.actionObjects) {
       aObj = this.actionObjects[action];
       if (this.actionIsIdle(aObj)) continue;
       this.manageAction(aObj, input);
-      this.paint(aObj, aObj.point);
+      this.paint(aObj);
     }
     for (mapObj in this.map.activeMapObjects) {
       mObj = this.map.activeMapObjects[mapObj];
       mObj.frame++;
       this.manageMapObject(mObj);
-      this.paint(mObj, mObj.point);
+      this.paint(mObj);
     }
     this.map.manageElements(Map.prototype.MANAGE_MAP_OBJECTS);
-    this.paint(this.player, this.player.point);
+    this.paint(this.player);
     if (this.player.composite !== void 0) {
       this.player.composite.frame++;
-      this.paint(this.player.composite, this.player.compositePoint);
+      this.paint(this.player.composite);
     }
     if (this.player.emitter !== void 0 && this.player.emitter.hasParticles) {
       this.player.emitter.frame++;
-      this.paint(this.player.emitter, this.player.point);
+      this.paint(this.player.emitter);
     }
     input.manageWaits();
     return Game.prototype.instance.notifySubscribers(this.map, this.player, this.actionObjects);
   };
 
-  RenderEngine.prototype.paint = function(obj, point) {
-    var asset, d, _i, _len, _ref, _results;
+  RenderEngine.prototype.paint = function(obj) {
+    var asset, d, item, pPoint, rect, _i, _j, _len, _len2, _ref, _ref2, _results, _results2;
     d = obj.bitmapData;
     if (d.player && d.player.notready === void 0) {
       return this._ctx.drawImage(d.player, d.rect.x, d.rect.y, d.rect.width, d.rect.height, obj.point.x, obj.point.y, d.rect.width, d.rect.height);
-    } else if (d.player && d.player.notready) {} else {
-      _ref = d.map;
+    } else if (d.player && d.player.notready) {} else if (d.particles) {
+      _ref = d.particles;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        asset = _ref[_i];
-        if (asset.data !== void 0) {
-          _results.push(this._ctx.drawImage(asset.data, asset.rect.x, asset.rect.y, asset.rect.width, asset.rect.height, obj.point.x, obj.point.y, asset.rect.width, asset.rect.height));
-        } else {
-          _results.push(void 0);
-        }
+        item = _ref[_i];
+        rect = item.rect;
+        pPoint = item.particle.point;
+        _results.push(this._ctx.drawImage(item.data, rect.x, rect.y, rect.width, rect.height, Math.round(pPoint.x), Math.round(pPoint.y), rect.width, rect.height));
       }
       return _results;
+    } else {
+      _ref2 = d.map;
+      _results2 = [];
+      for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
+        asset = _ref2[_j];
+        if (asset.data !== void 0) {
+          _results2.push(this._ctx.drawImage(asset.data, asset.rect.x, asset.rect.y, asset.rect.width, asset.rect.height, obj.point.x, obj.point.y, asset.rect.width, asset.rect.height));
+        } else {
+          _results2.push(void 0);
+        }
+      }
+      return _results2;
     }
   };
 
@@ -171,6 +181,7 @@ RenderEngine = (function() {
   RenderEngine.prototype.managePlayerState = function(action, input) {
     if (input) this.manageJump(input);
     if (this.player.state !== action.state && action.isAnimating === false && action.hasAnimated === false && this.player.isBusy === false) {
+      if (action.state === void 0) action.state = this.player.state;
       this.player.state = action.state;
       this.player.isBusy = true;
       action.isAnimating = true;

@@ -17,5 +17,6 @@ var CustomPlayer = ext(Player,function(){
     //this.frameBuffer = .5;
     this.setCustomActionForKey(76, CustomAction);
     this.setCustomActionForKey(66, CustomComplexAction);
+    this.setCustomActionForKey(81, CustomParticleAction);
     this.initialize();
 })

@@ -31,6 +31,8 @@ function loadCustomClasses() {
     .script("js/CustomAction.js").wait()
     .script("js/CustomComposite.js").wait()
     .script("js/CustomComplexAction.js").wait()
+    .script("js/CustomParticle.js").wait()
+    .script("js/CustomParticleAction.js").wait()
     .script("js/CustomPlayer.js").wait()
     .script("js/CustomEnemy.js").wait()
     .script("js/CustomMapObject.js").wait()
@@ -48,7 +50,7 @@ function createGame() {
     game.leftKeys = [game.keyboard.LEFT];
     game.rightKeys = [game.keyboard.RIGHT];
     game.jumpKeys = [game.keyboard.SPACE];
-    game.customKeys = [ 76, 66 ];
+    game.customKeys = [76,66,81];
     game.preinitialize(this,1024,432);
     game.subscribe(this);
 }

@@ -18,40 +18,45 @@ class RenderEngine
       return
     @managePlayer input
     @manageMap input
-    @paint @map, @map.point
+    @paint @map
     @map.manageElements Map::MANAGE_ENEMIES
     for enemy of @map.activeEnemies
       @manageEnemy @map.activeEnemies[enemy]
-      @paint @map.activeEnemies[enemy],enemy.point
+      @paint @map.activeEnemies[enemy]
     @manageNewActions input
     for action of @actionObjects
       aObj = @actionObjects[action]
       if @actionIsIdle aObj
         continue
       @manageAction aObj,input
-      @paint aObj,aObj.point
+      @paint aObj
     for mapObj of @map.activeMapObjects
       mObj = @map.activeMapObjects[mapObj]
       mObj.frame++
       @manageMapObject mObj
-      @paint mObj,mObj.point
+      @paint mObj
     @map.manageElements Map::MANAGE_MAP_OBJECTS
-    @paint @player,@player.point
+    @paint @player
     if @player.composite isnt undefined
       @player.composite.frame++
-      @paint @player.composite,@player.compositePoint
+      @paint @player.composite
     if @player.emitter isnt undefined and @player.emitter.hasParticles
       @player.emitter.frame++
-      @paint @player.emitter,@player.point
+      @paint @player.emitter
     input.manageWaits()
     Game::instance.notifySubscribers @map,@player,@actionObjects
 
-  paint:(obj,point)->
+  paint:(obj)->
     d = obj.bitmapData
     if d.player and d.player.notready is undefined
       @_ctx.drawImage d.player,d.rect.x,d.rect.y,d.rect.width,d.rect.height,obj.point.x,obj.point.y,d.rect.width,d.rect.height
     else if d.player and d.player.notready
       return
+    else if d.particles
+      for item in d.particles
+        rect = item.rect
+        pPoint = item.particle.point
+        @_ctx.drawImage item.data,rect.x,rect.y,rect.width,rect.height,Math.round(pPoint.x),Math.round(pPoint.y),rect.width,rect.height
     else
       for asset in d.map
         if asset.data isnt undefined
@@ -130,6 +135,8 @@ class RenderEngine
     if input
       @manageJump input
     if @player.state isnt action.state and action.isAnimating is false and action.hasAnimated is false and @player.isBusy is false
+      if action.state is undefined
+        action.state = @player.state
       @player.state = action.state
       @player.isBusy = true
       action.isAnimating = true
