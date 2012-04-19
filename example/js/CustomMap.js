@@ -13,7 +13,7 @@ var CustomMap = ext(Map, function() {
     this.paralaxing = true;
     this.platform = true;
     this.showCollisionMap = true;
-    //this.sound = "audio/map-audio.ogg";
+    this.sound = "audio/map-audio.ogg";
     this.nis = [];
     this.initialize();
 });
