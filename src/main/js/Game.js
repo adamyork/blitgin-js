@@ -8,6 +8,7 @@ Game = (function() {
     Game.prototype.instance = this;
     this.keyboard = new Keyboard();
     this.setAnimationFrameRequest();
+    this._start = window.mozAnimationStartTime || Date.now();
   }
 
   _subscribers = [];
@@ -62,10 +63,17 @@ Game = (function() {
 
   _animationFrameRequest = {};
 
-  Game.prototype.render = function() {
+  Game.prototype.render = function(timestamp) {
+    var progress;
+    progress = timestamp - this._start;
+    _renderEngine.render(_input);
+    if (progress < 2000) return requestAnimationFrame(this.render);
+  };
+
+  Game.prototype.renderDelegate = function() {
     if (this._pause) return;
     if (_animationFrameRequest) {
-      return _animationFrameRequest(_renderEngine.render(_input));
+      return _animationFrameRequest(this.render);
     } else {
       return _renderEngine.render(_input);
     }
@@ -79,7 +87,7 @@ Game = (function() {
 
   Game.prototype.start = function() {
     if (!_isStarted) {
-      _timer = setInterval(this.render.bind(this), 80);
+      _timer = setInterval(this.renderDelegate.bind(this), 80);
       return _isStarted = true;
     }
   };

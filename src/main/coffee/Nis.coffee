@@ -6,13 +6,17 @@ class Nis
   _player = {}
   _map = {}
   _enemies = {}
-  _frame = 0  
+  _frame = 0
+  
+  initialize:->
+    @frame = 0
   
   checkConditions:(target,condition)->
-    for prop in condition
+    conditionsMet = true
+    for prop of condition
       value = condition[prop]
-      return @evaluatePropAndValue target,prop,value
-    true
+      conditionsMet = @evaluatePropAndValue target,prop,value
+    return conditionsMet
 
   evaluatePropAndValue:(target,prop,value)->
     if(typeof value is "boolean" or typeof value is "string")
@@ -24,14 +28,15 @@ class Nis
     false
 
   checkForEnemyConditions:->
+    #TODO this needs to be expanded upon. Check more than just number of enemies
     (@enemies.length is @nisCondition.enemies.length)
 
 Nis::name = "Nis"
 
 Nis::__defineGetter__ "conditionsMet",(val)->
-  pCondition:Boolean = checkConditions @_player,@nisCondition.playerCondition
-  mCondition:Boolean = checkConditions @_map,@nisCondition.mapCondition
-  eCondition:Boolean = @checkForEnemyConditions()
+  pCondition = @checkConditions @_player,@nisCondition.playerCondition
+  mCondition = @checkConditions @_map,@nisCondition.mapCondition
+  eCondition = @checkForEnemyConditions()
   (pCondition && mCondition && eCondition)
 
 Nis::__defineGetter__ "nisCondition",->
@@ -46,7 +51,7 @@ Nis::__defineGetter__ "nisGoal",->
 Nis::__defineSetter__ "nisGoal",(val)->
   @_nisGoal = val
   
-Nis::__defineGetter__ "map()",->
+Nis::__defineGetter__ "map",->
   @_map
   
 Nis::__defineSetter__ "map",(val)->

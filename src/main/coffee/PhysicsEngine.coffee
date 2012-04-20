@@ -148,17 +148,17 @@ class PhysicsEngine
     prop = {}
     value = 0
     pGoals = nis.nisGoal.playerGoals
-    for prop in pGoals
+    for prop of pGoals
       value = pGoals[prop]
       target = (value - player[prop]) / (nis.nisGoal.duration - nis.frame)
       player.direction = if (target < 0) then -1 else 1
       player[prop] += target
       player.frame++
-    mGoals:Object = nis.nisGoal.mapGoals
+    mGoals = nis.nisGoal.mapGoals
     for prop in mGoals
       value = mGoals[prop]
       map[prop] += (value - map[prop]) / (nis.nisGoal.duration - nis.frame)
-      @adjustMapVerically(map,player)
+      @adjustMapVerically map,player
     nis.frame++
     (nis.frame >= nis.nisGoal.duration)
 

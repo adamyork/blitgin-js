@@ -1,7 +1,7 @@
 var NisGoal;
 
 NisGoal = (function() {
-  var _duration, _enemyGoals, _mapGoals, _playerGoals;
+  var _duration, _enemyGoals, _mapGoals, _playerGoals, _useCollision;
 
   function NisGoal(name) {
     this.name = name;
@@ -14,6 +14,8 @@ NisGoal = (function() {
   _mapGoals = {};
 
   _enemyGoals = {};
+
+  _useCollision = true;
 
   return NisGoal;
 
@@ -51,4 +53,12 @@ NisGoal.prototype.__defineSetter__("enemyGoals", function(val) {
 
 NisGoal.prototype.__defineGetter__("enemyGoals", function() {
   return this._enemyGoals;
+});
+
+NisGoal.prototype.__defineSetter__("useCollision", function(val) {
+  return this._useCollision = val;
+});
+
+NisGoal.prototype.__defineGetter__("useCollision", function() {
+  return this._useCollision;
 });

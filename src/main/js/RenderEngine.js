@@ -27,8 +27,8 @@ RenderEngine = (function() {
   RenderEngine.prototype.render = function(input) {
     var aObj, action, enemy, mObj, mapObj;
     this._ctx.clearRect(0, 0, Game.prototype.VIEWPORT_WIDTH, Game.prototype.VIEWPORT_HEIGHT);
-    if (this.nis) {
-      this.manageNIS(this.nis, input);
+    if (this._nis !== void 0) {
+      this.manageNis(this._nis, input);
       return;
     }
     this.managePlayer(input);
@@ -70,7 +70,7 @@ RenderEngine = (function() {
     var asset, d, item, pPoint, rect, _i, _j, _len, _len2, _ref, _ref2, _results, _results2;
     d = obj.bitmapData;
     if (d.player && d.player.notready === void 0) {
-      return this._ctx.drawImage(d.player, d.rect.x, d.rect.y, d.rect.width, d.rect.height, obj.point.x, obj.point.y, d.rect.width, d.rect.height);
+      return this._ctx.drawImage(d.player, d.rect.x, d.rect.y, d.rect.width, d.rect.height, Math.round(obj.point.x), Math.round(obj.point.y), d.rect.width, d.rect.height);
     } else if (d.player && d.player.notready) {} else if (d.particles) {
       _ref = d.particles;
       _results = [];
@@ -131,7 +131,8 @@ RenderEngine = (function() {
 
   RenderEngine.prototype.manageMap = function(input) {
     this.soundEngine.checkPlayback(this.map);
-    return this.physicsEngine.adjustMapVerically(this.map, this.player);
+    this.physicsEngine.adjustMapVerically(this.map, this.player);
+    return this.manageNis(this.map.checkForNis(this.player), input);
   };
 
   RenderEngine.prototype.manageEnemy = function(enemy) {
@@ -247,17 +248,18 @@ RenderEngine = (function() {
     if (action.sound) return this.soundEngine.removeSound(action.sound);
   };
 
-  RenderEngine.prototype.manageNIS = function(nis, input) {
+  RenderEngine.prototype.manageNis = function(nis, input) {
     if (nis === void 0) return;
     this._nis = nis;
     if (!input.disabled) input.disabled = true;
-    if (this.physicsEngine.manageNIS(nis, this.player, this.map)) {
+    if (this.physicsEngine.manageNis(nis, this.player, this.map)) {
       this.map.removeNis(nis);
-      this._nis = null;
+      this._nis = void 0;
       input.disabled = false;
+      return;
     }
-    this.paint(this.map, this.map.point);
-    return this.paint(this.player, this.player.point);
+    this.paint(this.map);
+    return this.paint(this.player);
   };
 
   RenderEngine.prototype.dispose = function() {

@@ -186,23 +186,20 @@ PhysicsEngine = (function() {
   };
 
   PhysicsEngine.prototype.manageNis = function(nis, player, map) {
-    var Object, pGoals, prop, target, value, _i, _j, _len, _len2;
+    var mGoals, pGoals, prop, target, value, _i, _len;
     prop = {};
     value = 0;
     pGoals = nis.nisGoal.playerGoals;
-    for (_i = 0, _len = pGoals.length; _i < _len; _i++) {
-      prop = pGoals[_i];
+    for (prop in pGoals) {
       value = pGoals[prop];
       target = (value - player[prop]) / (nis.nisGoal.duration - nis.frame);
       player.direction = target < 0 ? -1 : 1;
       player[prop] += target;
       player.frame++;
     }
-    ({
-      mGoals: Object = nis.nisGoal.mapGoals
-    });
-    for (_j = 0, _len2 = mGoals.length; _j < _len2; _j++) {
-      prop = mGoals[_j];
+    mGoals = nis.nisGoal.mapGoals;
+    for (_i = 0, _len = mGoals.length; _i < _len; _i++) {
+      prop = mGoals[_i];
       value = mGoals[prop];
       map[prop] += (value - map[prop]) / (nis.nisGoal.duration - nis.frame);
       this.adjustMapVerically(map, player);

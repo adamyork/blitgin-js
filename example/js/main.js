@@ -2,6 +2,7 @@ var game;
 var bs;
 
 function loadDependenciesFull() {
+    //TODO allow for dependency loader to be defined by implementer
     $LAB.setGlobalDefaults({AlwaysPreserveOrder:true,Debug:true});
     $LAB.script("../src/main/js/Bootstrap.js").wait(function(){
         bs = new Bootstrap("bs");
@@ -35,6 +36,7 @@ function loadCustomClasses() {
     .script("js/CustomParticleAction.js").wait()
     .script("js/CustomPlayer.js").wait()
     .script("js/CustomEnemy.js").wait()
+    .script("js/CustomNis.js").wait()
     .script("js/CustomMapObject.js").wait()
     .script("js/CustomMap.js").wait(function(){
     	createGame();
@@ -52,10 +54,12 @@ function createGame() {
     game.jumpKeys = [game.keyboard.SPACE];
     game.customKeys = [76,66,81];
     game.preinitialize(this,1024,432);
+    //TODO define a means in which to pass a list of objects to fetch for performance
     game.subscribe(this);
 }
 
 function notify(args) {
+    //TODO tie in preloading
 	//console.log("notified " + args)
 }
 

@@ -5,6 +5,7 @@ class NisGoal
   _playerGoals = {}
   _mapGoals = {}
   _enemyGoals = {}
+  _useCollision = true
 
 NisGoal::name = "NisGoal"
 
@@ -31,3 +32,9 @@ NisGoal::__defineSetter__ "enemyGoals",(val)->
 
 NisGoal::__defineGetter__ "enemyGoals",->
   @_enemyGoals
+  
+NisGoal::__defineSetter__ "useCollision",(val)->
+  @_useCollision = val
+
+NisGoal::__defineGetter__ "useCollision",->
+  @_useCollision

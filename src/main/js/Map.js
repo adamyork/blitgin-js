@@ -193,22 +193,24 @@ Map = (function(_super) {
     return hBounds && vBounds;
   };
 
-  Map.prototype.checkForNIS = function(player) {
-    var nis, _i, _len;
+  Map.prototype.checkForNis = function(player) {
+    var n, _i, _len, _ref;
     if (player === void 0) return;
-    for (_i = 0, _len = _nis.length; _i < _len; _i++) {
-      nis = _nis[_i];
-      nis.player = player;
-      nis.enemies = [];
-      nis.map = this;
-      if (nis.conditionsMet) return nis;
+    _ref = this.nis;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      n = _ref[_i];
+      n.player = player;
+      n.enemies = [];
+      n.map = this;
+      if (n.conditionsMet) return n;
     }
   };
 
   Map.prototype.removeNis = function(nis) {
     var arr, index;
-    index = _nis.indexOf(nis, 0);
-    arr = _nis.splice(index, 1);
+    console.log("need to remove my nis");
+    index = this.nis.indexOf(nis, 0);
+    arr = this.nis.splice(index, 1);
     return arr = void 0;
   };
 

@@ -19,14 +19,18 @@ Nis = (function() {
 
   _frame = 0;
 
+  Nis.prototype.initialize = function() {
+    return this.frame = 0;
+  };
+
   Nis.prototype.checkConditions = function(target, condition) {
-    var prop, value, _i, _len;
-    for (_i = 0, _len = condition.length; _i < _len; _i++) {
-      prop = condition[_i];
+    var conditionsMet, prop, value;
+    conditionsMet = true;
+    for (prop in condition) {
       value = condition[prop];
-      return this.evaluatePropAndValue(target, prop, value);
+      conditionsMet = this.evaluatePropAndValue(target, prop, value);
     }
-    return true;
+    return conditionsMet;
   };
 
   Nis.prototype.evaluatePropAndValue = function(target, prop, value) {
@@ -49,12 +53,10 @@ Nis = (function() {
 Nis.prototype.name = "Nis";
 
 Nis.prototype.__defineGetter__("conditionsMet", function(val) {
-  var Boolean;
-  ({
-    pCondition: Boolean = checkConditions(this._player, this.nisCondition.playerCondition),
-    mCondition: Boolean = checkConditions(this._map, this.nisCondition.mapCondition),
-    eCondition: Boolean = this.checkForEnemyConditions()
-  });
+  var eCondition, mCondition, pCondition;
+  pCondition = this.checkConditions(this._player, this.nisCondition.playerCondition);
+  mCondition = this.checkConditions(this._map, this.nisCondition.mapCondition);
+  eCondition = this.checkForEnemyConditions();
   return pCondition && mCondition && eCondition;
 });
 
@@ -74,7 +76,7 @@ Nis.prototype.__defineSetter__("nisGoal", function(val) {
   return this._nisGoal = val;
 });
 
-Nis.prototype.__defineGetter__("map()", function() {
+Nis.prototype.__defineGetter__("map", function() {
   return this._map;
 });
 

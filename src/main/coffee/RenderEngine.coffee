@@ -13,8 +13,8 @@ class RenderEngine
 
   render:(input)->
     @_ctx.clearRect 0,0,Game::VIEWPORT_WIDTH,Game::VIEWPORT_HEIGHT  
-    if @nis
-      @manageNIS @nis,input
+    if @_nis isnt undefined
+      @manageNis @_nis,input
       return
     @managePlayer input
     @manageMap input
@@ -49,7 +49,7 @@ class RenderEngine
   paint:(obj)->
     d = obj.bitmapData
     if d.player and d.player.notready is undefined
-      @_ctx.drawImage d.player,d.rect.x,d.rect.y,d.rect.width,d.rect.height,obj.point.x,obj.point.y,d.rect.width,d.rect.height
+      @_ctx.drawImage d.player,d.rect.x,d.rect.y,d.rect.width,d.rect.height,Math.round(obj.point.x),Math.round(obj.point.y),d.rect.width,d.rect.height
     else if d.player and d.player.notready
       return
     else if d.particles
@@ -93,7 +93,7 @@ class RenderEngine
   manageMap:(input)->
     @soundEngine.checkPlayback @map
     @physicsEngine.adjustMapVerically @map, @player
-    #@manageNIS @map.checkForNIS(@player),input
+    @manageNis @map.checkForNis(@player),input
 
   manageEnemy:(enemy)->
     enemy.frame++
@@ -187,18 +187,19 @@ class RenderEngine
     if action.sound
       @soundEngine.removeSound action.sound
 
-  manageNIS:(nis,input)->
+  manageNis:(nis,input)->
     if nis is undefined
       return      
     @_nis = nis
     if not input.disabled
       input.disabled = true
-    if @physicsEngine.manageNIS nis,@player,@map
+    if @physicsEngine.manageNis nis,@player,@map
       @map.removeNis(nis)
-      @_nis = null
+      @_nis = undefined
       input.disabled = false
-    @paint @map,@map.point
-    @paint @player,@player.point
+      return
+    @paint @map
+    @paint @player
 
   dispose:->
     @actionObjects = undefined

@@ -152,21 +152,21 @@ class Map extends RenderObject
     vBounds = (((posY + indep) - @y) - vh) <= 0 && (((posY - indep) - @y) - vh) >= -(vh)
     return (hBounds && vBounds)
 
-  checkForNIS:(player)->
-    if (player == undefined)
+  checkForNis:(player)->
+    if player is undefined
       return undefined
-
-    for nis in _nis
-      nis.player = player
-      nis.enemies = []
-      nis.map = this
-      if (nis.conditionsMet)
-        return nis
+    for n in @nis
+      n.player = player
+      n.enemies = []
+      n.map = @
+      if n.conditionsMet
+        return n
     return undefined
 
   removeNis:(nis)->
-    index = _nis.indexOf nis, 0 
-    arr = _nis.splice index, 1
+    console.log "need to remove my nis"
+    index = @nis.indexOf nis, 0 
+    arr = @nis.splice index, 1
     arr = undefined
         
   dispose:->

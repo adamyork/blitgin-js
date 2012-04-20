@@ -3,6 +3,7 @@ class Game
     Game::instance = @
     @keyboard = new Keyboard()
     @setAnimationFrameRequest()
+    @_start = window.mozAnimationStartTime || Date.now()
    
   _subscribers = []
   _pause = false
@@ -31,21 +32,28 @@ class Game
   _instance = {}
   _animationFrameRequest = {}
   
-  render: ->
+  render:(timestamp)->
+    progress = timestamp - @_start
+    _renderEngine.render _input
+    #TODO determine if 2000 needs to be configurable
+    if progress < 2000
+      requestAnimationFrame @render
+
+  renderDelegate:->
     if @_pause
         return
     if _animationFrameRequest
-      _animationFrameRequest _renderEngine.render(_input)
+      _animationFrameRequest @render
     else
-      _renderEngine.render(_input)
-    
+      _renderEngine.render _input
+
   setAnimationFrameRequest:->
     w = window
     _animationFrameRequest = w.requestAnimationFrame or w.webkitRequestAnimationFrame or w.mozRequestAnimationFrame or w.oRequestAnimationFrame or w.msRequestAnimationFrame
     
   start: ->
     if not _isStarted
-      _timer = setInterval @render.bind(this) , 80
+      _timer = setInterval @renderDelegate.bind(@) , 80
       _isStarted = true
 
   preinitialize: (parent, width, height) ->
