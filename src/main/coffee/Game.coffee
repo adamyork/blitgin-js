@@ -4,6 +4,7 @@ class Game
     @keyboard = new Keyboard()
     @setAnimationFrameRequest()
     @_start = window.mozAnimationStartTime || Date.now()
+    @_requiredAssets = 0
    
   _subscribers = []
   _pause = false
@@ -31,6 +32,9 @@ class Game
   _timer = {}
   _instance = {}
   _animationFrameRequest = {}
+  _toFetchAssets = 0
+  _requiredAssets = 0
+  _prefetchTmp = []
   
   render:(timestamp)->
     progress = timestamp - @_start
@@ -55,6 +59,47 @@ class Game
     if not _isStarted
       _timer = setInterval @renderDelegate.bind(@) , 80
       _isStarted = true
+  
+  prefetch:(items)->
+    @_toFetchAssets = 0
+    @_prefetchTmp = []
+    for item in items
+      tmp = new item()
+      @_prefetchTmp.push tmp
+      if tmp.assetClass
+        @_requiredAssets++
+        @_toFetchAssets++
+        img = new Image()
+        @_prefetchTmp.push img
+        img.onload = @handleImagePrefetch.bind @
+        img.src = tmp.assetClass
+      if tmp.sound
+        @_toFetchAssets++
+        @_requiredAssets++
+        audio = new Audio()
+        @_prefetchTmp.push audio
+        audio.addEventListener 'canplaythrough',@handleAudioPrefetch.bind(@),false
+        audio.src = tmp.sound
+  
+  handleImagePrefetch:->
+    @_toFetchAssets--
+    if @_toFetchAssets is 0
+      @_prefetchTmp = []
+      @checkForReady()
+    else
+      @_requiredAssets--
+  
+  handleAudioPrefetch:(e)->
+    index = @_prefetchTmp.indexOf e.originalTarget,0
+    if index >= 0
+      @_prefetchTmp.splice index,index+1
+      @handleImagePrefetch()
+      
+  checkForReady:->
+    @_requiredAssets--
+    console.log "checking " + @_requiredAssets
+    if @_requiredAssets is 0
+      Game::instance.notifySubscribers Game::Ready,{},{},[]
 
   preinitialize: (parent, width, height) ->
     _parent = parent
@@ -98,6 +143,14 @@ class Game
     _renderEngine.scrn = _screen
     _renderEngine.map = new map()
     _renderEngine.player = new player()
+    
+    if _renderEngine.map.platform
+      @_requiredAssets += Map::TOTAL_PARALAX_ASSETS - 1
+    else 
+      @_requiredAssets += Map::TOTAL_STANDARD_ASSETS - 1
+    
+    #This is for the player asset that must exist
+    @_requiredAssets += 1
     
     _input = new Input();
     _input.direction = 0;
@@ -169,8 +222,8 @@ class Game
     _subscribers = undefined
     _screen = undefined
 
-  notifySubscribers:(map,player,actions)->
-    subscriber.notify(map, player, actions) for subscriber in _subscribers
+  notifySubscribers:(event,map,player,actions)->
+    subscriber.notify(event,map, player, actions) for subscriber in _subscribers
 
   subscribe:(subscriber)->
     _subscribers.push(subscriber)
@@ -179,6 +232,8 @@ class Game
     _subscribers[_subscribers.indexOf(subscriber).._subscribers.indexOf(subscriber)]
 
 Game::name = "Game"
+Game::Ready = "Ready"
+Game::Rendered = "Rendered"
   
 Game::__defineGetter__ "instance",->
   @_instance

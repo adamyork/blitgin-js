@@ -1,7 +1,7 @@
 var Game;
 
 Game = (function() {
-  var _activeMap, _activePlayer, _animationFrameRequest, _collisionEngineClass, _customKey, _customKeys, _downKeys, _input, _instance, _isStarted, _jumpKeys, _leftKeys, _maps, _movement, _parent, _pause, _physicsEngineClass, _players, _renderEngine, _renderEngineClass, _rightKeys, _screen, _soundEngine, _subscribers, _timer, _upKeys;
+  var _activeMap, _activePlayer, _animationFrameRequest, _collisionEngineClass, _customKey, _customKeys, _downKeys, _input, _instance, _isStarted, _jumpKeys, _leftKeys, _maps, _movement, _parent, _pause, _physicsEngineClass, _players, _prefetchTmp, _renderEngine, _renderEngineClass, _requiredAssets, _rightKeys, _screen, _soundEngine, _subscribers, _timer, _toFetchAssets, _upKeys;
 
   function Game(name) {
     this.name = name;
@@ -9,6 +9,7 @@ Game = (function() {
     this.keyboard = new Keyboard();
     this.setAnimationFrameRequest();
     this._start = window.mozAnimationStartTime || Date.now();
+    this._requiredAssets = 0;
   }
 
   _subscribers = [];
@@ -63,6 +64,12 @@ Game = (function() {
 
   _animationFrameRequest = {};
 
+  _toFetchAssets = 0;
+
+  _requiredAssets = 0;
+
+  _prefetchTmp = [];
+
   Game.prototype.render = function(timestamp) {
     var progress;
     progress = timestamp - this._start;
@@ -89,6 +96,64 @@ Game = (function() {
     if (!_isStarted) {
       _timer = setInterval(this.renderDelegate.bind(this), 80);
       return _isStarted = true;
+    }
+  };
+
+  Game.prototype.prefetch = function(items) {
+    var audio, img, item, tmp, _i, _len, _results;
+    this._toFetchAssets = 0;
+    this._prefetchTmp = [];
+    _results = [];
+    for (_i = 0, _len = items.length; _i < _len; _i++) {
+      item = items[_i];
+      tmp = new item();
+      this._prefetchTmp.push(tmp);
+      if (tmp.assetClass) {
+        this._requiredAssets++;
+        this._toFetchAssets++;
+        img = new Image();
+        this._prefetchTmp.push(img);
+        img.onload = this.handleImagePrefetch.bind(this);
+        img.src = tmp.assetClass;
+      }
+      if (tmp.sound) {
+        this._toFetchAssets++;
+        this._requiredAssets++;
+        audio = new Audio();
+        this._prefetchTmp.push(audio);
+        audio.addEventListener('canplaythrough', this.handleAudioPrefetch.bind(this), false);
+        _results.push(audio.src = tmp.sound);
+      } else {
+        _results.push(void 0);
+      }
+    }
+    return _results;
+  };
+
+  Game.prototype.handleImagePrefetch = function() {
+    this._toFetchAssets--;
+    if (this._toFetchAssets === 0) {
+      this._prefetchTmp = [];
+      return this.checkForReady();
+    } else {
+      return this._requiredAssets--;
+    }
+  };
+
+  Game.prototype.handleAudioPrefetch = function(e) {
+    var index;
+    index = this._prefetchTmp.indexOf(e.originalTarget, 0);
+    if (index >= 0) {
+      this._prefetchTmp.splice(index, index + 1);
+      return this.handleImagePrefetch();
+    }
+  };
+
+  Game.prototype.checkForReady = function() {
+    this._requiredAssets--;
+    console.log("checking " + this._requiredAssets);
+    if (this._requiredAssets === 0) {
+      return Game.prototype.instance.notifySubscribers(Game.prototype.Ready, {}, {}, []);
     }
   };
 
@@ -134,6 +199,12 @@ Game = (function() {
     _renderEngine.scrn = _screen;
     _renderEngine.map = new map();
     _renderEngine.player = new player();
+    if (_renderEngine.map.platform) {
+      this._requiredAssets += Map.prototype.TOTAL_PARALAX_ASSETS - 1;
+    } else {
+      this._requiredAssets += Map.prototype.TOTAL_STANDARD_ASSETS - 1;
+    }
+    this._requiredAssets += 1;
     _input = new Input();
     _input.direction = 0;
     _input.jump = 0;
@@ -207,12 +278,12 @@ Game = (function() {
     return _screen = void 0;
   };
 
-  Game.prototype.notifySubscribers = function(map, player, actions) {
+  Game.prototype.notifySubscribers = function(event, map, player, actions) {
     var subscriber, _i, _len, _results;
     _results = [];
     for (_i = 0, _len = _subscribers.length; _i < _len; _i++) {
       subscriber = _subscribers[_i];
-      _results.push(subscriber.notify(map, player, actions));
+      _results.push(subscriber.notify(event, map, player, actions));
     }
     return _results;
   };
@@ -230,6 +301,10 @@ Game = (function() {
 })();
 
 Game.prototype.name = "Game";
+
+Game.prototype.Ready = "Ready";
+
+Game.prototype.Rendered = "Rendered";
 
 Game.prototype.__defineGetter__("instance", function() {
   return this._instance;

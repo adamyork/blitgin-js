@@ -1,8 +1,11 @@
 var game;
 var bs;
+var startButton;
 
 function loadDependenciesFull() {
     //TODO allow for dependency loader to be defined by implementer
+    startButton = document.getElementById("startButton");
+    startButton.disabled = true;
     $LAB.setGlobalDefaults({AlwaysPreserveOrder:true,Debug:true});
     $LAB.script("../src/main/js/Bootstrap.js").wait(function(){
         bs = new Bootstrap("bs");
@@ -11,6 +14,8 @@ function loadDependenciesFull() {
 }
 
 function loadDependenciesDebug() {
+    startButton = document.getElementById("startButton");
+    startButton.disabled = true;
     $LAB.setGlobalDefaults({AlwaysPreserveOrder:true,Debug:true});
     $LAB.script("../src/main/js/blitgin.js").wait(function(){
         bs = new Bootstrap("bs");
@@ -19,6 +24,8 @@ function loadDependenciesDebug() {
 }
 
 function loadDependenciesMin() {
+    startButton = document.getElementById("startButton");
+    startButton.disabled = true;
     $LAB.setGlobalDefaults({AlwaysPreserveOrder:true,Debug:true});
     $LAB.script("../src/main/js/min-blitgin.js").wait(function(){
         bs = new Bootstrap("bs");
@@ -54,13 +61,14 @@ function createGame() {
     game.jumpKeys = [game.keyboard.SPACE];
     game.customKeys = [76,66,81];
     game.preinitialize(this,1024,432);
-    //TODO define a means in which to pass a list of objects to fetch for performance
+    game.prefetch([CustomAction,CustomEnemy,CustomComplexAction])
     game.subscribe(this);
 }
 
 function notify(args) {
-    //TODO tie in preloading
-	//console.log("notified " + args)
+    if(args == Game.prototype.Ready) {
+        startButton.disabled = false;
+    }
 }
 
 function unsubscribeMain() {

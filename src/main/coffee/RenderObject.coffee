@@ -73,11 +73,14 @@ class RenderObject
       targetData.src = null
       targetData.src = ref.workbench.toDataURL()
       ref.ctx.clearRect 0,0,asset.width,asset.height
-      console.log "sample complete"
+      ref.notifyReady()
       worker.terminate()
     worker.onerror=(e)->
       console.log "error in worker"
     worker.postMessage {"imageData":imageData,"colorConstant":@colorConstant,"rgbTolerance":@rgbTolerance}
+  
+  notifyReady:->
+    Game::instance.checkForReady()
               
   dispose:->
     _assetClass = undefined

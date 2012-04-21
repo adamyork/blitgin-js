@@ -63,7 +63,7 @@ RenderEngine = (function() {
       this.paint(this.player.emitter);
     }
     input.manageWaits();
-    return Game.prototype.instance.notifySubscribers(this.map, this.player, this.actionObjects);
+    return Game.prototype.instance.notifySubscribers(Game.prototype.RENDERED, this.map, this.player, this.actionObjects);
   };
 
   RenderEngine.prototype.paint = function(obj) {

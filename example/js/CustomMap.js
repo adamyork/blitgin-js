@@ -14,6 +14,6 @@ var CustomMap = ext(Map, function() {
     this.platform = true;
     this.showCollisionMap = true;
     this.sound = "audio/map-audio.ogg";
-    this.nis = [new CustomNis()];
+    this.nis = [];//[new CustomNis()];
     this.initialize();
 });

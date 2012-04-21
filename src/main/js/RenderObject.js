@@ -110,7 +110,7 @@ RenderObject = (function() {
       targetData.src = null;
       targetData.src = ref.workbench.toDataURL();
       ref.ctx.clearRect(0, 0, asset.width, asset.height);
-      console.log("sample complete");
+      ref.notifyReady();
       return worker.terminate();
     };
     worker.onerror = function(e) {
@@ -121,6 +121,10 @@ RenderObject = (function() {
       "colorConstant": this.colorConstant,
       "rgbTolerance": this.rgbTolerance
     });
+  };
+
+  RenderObject.prototype.notifyReady = function() {
+    return Game.prototype.instance.checkForReady();
   };
 
   RenderObject.prototype.dispose = function() {

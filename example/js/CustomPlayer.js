@@ -8,6 +8,7 @@ var CustomPlayer = ext(Player,function(){
     this.collisionCoefficient = .5;
     this.thresholdX = 12;
     this.thresholdY = 12;
+    this.maxVelocityX = 30;
     this.maxVelocityY = 52;
     this.health = 100;
     this.damage = 20;

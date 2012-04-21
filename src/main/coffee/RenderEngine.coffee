@@ -44,7 +44,7 @@ class RenderEngine
       @player.emitter.frame++
       @paint @player.emitter
     input.manageWaits()
-    Game::instance.notifySubscribers @map,@player,@actionObjects
+    Game::instance.notifySubscribers Game::RENDERED,@map,@player,@actionObjects
 
   paint:(obj)->
     d = obj.bitmapData
