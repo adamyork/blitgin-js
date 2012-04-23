@@ -5,6 +5,8 @@ class Game
     @setAnimationFrameRequest()
     @_start = window.mozAnimationStartTime || Date.now()
     @_requiredAssets = 0
+    @_useMultipleCanvas = false
+    @_frameWait = 0
    
   _subscribers = []
   _pause = false
@@ -22,7 +24,7 @@ class Game
   _customKeys = []
   _parent = {}
   _screen = {}
-  _fgscreen = {}
+  _fgscreen = undefined
   _renderEngineClass = {}
   _collisionEngineClass = {}
   _physicsEngineClass = {}
@@ -36,6 +38,9 @@ class Game
   _toFetchAssets = 0
   _requiredAssets = 0
   _prefetchTmp = []
+  _container = {}
+  _useMultipleCanvas = false
+  _frameWait = 0
   
   render:(timestamp)->
     progress = timestamp - @_start
@@ -110,21 +115,23 @@ class Game
     _parent = parent
     Game::VIEWPORT_HEIGHT = height
     Game::VIEWPORT_WIDTH = width
+    holder = if @container then @container else document.body 
     _screen = document.createElement "canvas"
     _screen.setAttribute "width", @VIEWPORT_WIDTH
     _screen.setAttribute "height", @VIEWPORT_HEIGHT
     _screen.setAttribute "tabIndex", 0
     _screen.setAttribute "id", "scrn"
-    _screen.setAttribute "style","position: absolute; z-index: 0"
-    #TODO allow author to specify container for screens
-    document.body.appendChild _screen
-    _fgscreen = document.createElement "canvas"
-    _fgscreen.setAttribute "width", @VIEWPORT_WIDTH
-    _fgscreen.setAttribute "height", @VIEWPORT_HEIGHT
-    _fgscreen.setAttribute "tabIndex", 1
-    _fgscreen.setAttribute "id", "fgscrn"
-    _fgscreen.setAttribute "style","position: absolute; z-index: 1"
-    document.body.appendChild _fgscreen
+    if @useMultipleCanvas
+      _screen.setAttribute "style","position: absolute; z-index: 0"
+    holder.appendChild _screen
+    if @useMultipleCanvas
+      _fgscreen = document.createElement "canvas"
+      _fgscreen.setAttribute "width", @VIEWPORT_WIDTH
+      _fgscreen.setAttribute "height", @VIEWPORT_HEIGHT
+      _fgscreen.setAttribute "tabIndex", 1
+      _fgscreen.setAttribute "id", "fgscrn"
+      _fgscreen.setAttribute "style","position: absolute; z-index: 1"
+      holder.appendChild _fgscreen
     @initialize()
   
   initialize: ->
@@ -159,6 +166,7 @@ class Game
     _renderEngine.fgscrn = _fgscreen
     _renderEngine.map = new map()
     _renderEngine.player = new player()
+    _renderEngine.frameWait = @frameWait
     
     if _renderEngine.map.platform
       @_requiredAssets += Map::TOTAL_PARALAX_ASSETS - 1
@@ -346,3 +354,21 @@ Game::__defineGetter__ "keyboard",->
 
 Game::__defineSetter__ "keyboard",(val)->
   @_keyboard = val
+
+Game::__defineGetter__ "container",->
+  @_container
+
+Game::__defineSetter__ "container",(val)->
+  @_container = val
+
+Game::__defineGetter__ "useMultipleCanvas",->
+  @_useMultipleCanvas
+
+Game::__defineSetter__ "useMultipleCanvas",(val)->
+  @_useMultipleCanvas = val
+  
+Game::__defineGetter__ "frameWait",->
+  @_frameWait
+
+Game::__defineSetter__ "frameWait",(val)->
+  @_frameWait = val

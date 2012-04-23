@@ -60,6 +60,9 @@ function createGame() {
     game.rightKeys = [game.keyboard.RIGHT];
     game.jumpKeys = [game.keyboard.SPACE];
     game.customKeys = [76,66,81];
+    game.container = document.getElementById("container");
+    game.useMultipleCanvas = false;
+    game.frameWait = 1;
     game.preinitialize(this,1024,432);
     game.prefetch([CustomAction,CustomEnemy,CustomComplexAction])
     game.subscribe(this);

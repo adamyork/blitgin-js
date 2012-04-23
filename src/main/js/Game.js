@@ -1,7 +1,7 @@
 var Game;
 
 Game = (function() {
-  var _activeMap, _activePlayer, _animationFrameRequest, _collisionEngineClass, _customKey, _customKeys, _downKeys, _fgscreen, _input, _instance, _isStarted, _jumpKeys, _leftKeys, _maps, _movement, _parent, _pause, _physicsEngineClass, _players, _prefetchTmp, _renderEngine, _renderEngineClass, _requiredAssets, _rightKeys, _screen, _soundEngine, _subscribers, _timer, _toFetchAssets, _upKeys;
+  var _activeMap, _activePlayer, _animationFrameRequest, _collisionEngineClass, _container, _customKey, _customKeys, _downKeys, _fgscreen, _frameWait, _input, _instance, _isStarted, _jumpKeys, _leftKeys, _maps, _movement, _parent, _pause, _physicsEngineClass, _players, _prefetchTmp, _renderEngine, _renderEngineClass, _requiredAssets, _rightKeys, _screen, _soundEngine, _subscribers, _timer, _toFetchAssets, _upKeys, _useMultipleCanvas;
 
   function Game(name) {
     this.name = name;
@@ -10,6 +10,8 @@ Game = (function() {
     this.setAnimationFrameRequest();
     this._start = window.mozAnimationStartTime || Date.now();
     this._requiredAssets = 0;
+    this._useMultipleCanvas = false;
+    this._frameWait = 0;
   }
 
   _subscribers = [];
@@ -44,7 +46,7 @@ Game = (function() {
 
   _screen = {};
 
-  _fgscreen = {};
+  _fgscreen = void 0;
 
   _renderEngineClass = {};
 
@@ -71,6 +73,12 @@ Game = (function() {
   _requiredAssets = 0;
 
   _prefetchTmp = [];
+
+  _container = {};
+
+  _useMultipleCanvas = false;
+
+  _frameWait = 0;
 
   Game.prototype.render = function(timestamp) {
     var progress;
@@ -169,23 +177,29 @@ Game = (function() {
   };
 
   Game.prototype.preinitialize = function(parent, width, height) {
+    var holder;
     _parent = parent;
     Game.prototype.VIEWPORT_HEIGHT = height;
     Game.prototype.VIEWPORT_WIDTH = width;
+    holder = this.container ? this.container : document.body;
     _screen = document.createElement("canvas");
     _screen.setAttribute("width", this.VIEWPORT_WIDTH);
     _screen.setAttribute("height", this.VIEWPORT_HEIGHT);
     _screen.setAttribute("tabIndex", 0);
     _screen.setAttribute("id", "scrn");
-    _screen.setAttribute("style", "position: absolute; z-index: 0");
-    document.body.appendChild(_screen);
-    _fgscreen = document.createElement("canvas");
-    _fgscreen.setAttribute("width", this.VIEWPORT_WIDTH);
-    _fgscreen.setAttribute("height", this.VIEWPORT_HEIGHT);
-    _fgscreen.setAttribute("tabIndex", 1);
-    _fgscreen.setAttribute("id", "fgscrn");
-    _fgscreen.setAttribute("style", "position: absolute; z-index: 1");
-    document.body.appendChild(_fgscreen);
+    if (this.useMultipleCanvas) {
+      _screen.setAttribute("style", "position: absolute; z-index: 0");
+    }
+    holder.appendChild(_screen);
+    if (this.useMultipleCanvas) {
+      _fgscreen = document.createElement("canvas");
+      _fgscreen.setAttribute("width", this.VIEWPORT_WIDTH);
+      _fgscreen.setAttribute("height", this.VIEWPORT_HEIGHT);
+      _fgscreen.setAttribute("tabIndex", 1);
+      _fgscreen.setAttribute("id", "fgscrn");
+      _fgscreen.setAttribute("style", "position: absolute; z-index: 1");
+      holder.appendChild(_fgscreen);
+    }
     return this.initialize();
   };
 
@@ -220,6 +234,7 @@ Game = (function() {
     _renderEngine.fgscrn = _fgscreen;
     _renderEngine.map = new map();
     _renderEngine.player = new player();
+    _renderEngine.frameWait = this.frameWait;
     if (_renderEngine.map.platform) {
       this._requiredAssets += Map.prototype.TOTAL_PARALAX_ASSETS - 1;
     } else {
@@ -453,4 +468,28 @@ Game.prototype.__defineGetter__("keyboard", function() {
 
 Game.prototype.__defineSetter__("keyboard", function(val) {
   return this._keyboard = val;
+});
+
+Game.prototype.__defineGetter__("container", function() {
+  return this._container;
+});
+
+Game.prototype.__defineSetter__("container", function(val) {
+  return this._container = val;
+});
+
+Game.prototype.__defineGetter__("useMultipleCanvas", function() {
+  return this._useMultipleCanvas;
+});
+
+Game.prototype.__defineSetter__("useMultipleCanvas", function(val) {
+  return this._useMultipleCanvas = val;
+});
+
+Game.prototype.__defineGetter__("frameWait", function() {
+  return this._frameWait;
+});
+
+Game.prototype.__defineSetter__("frameWait", function(val) {
+  return this._frameWait = val;
 });

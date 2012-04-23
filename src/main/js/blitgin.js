@@ -330,7 +330,7 @@ Keyboard.prototype.RIGHT = 68;
 Keyboard.prototype.SPACE = 32;
 
 Game = (function() {
-  var _activeMap, _activePlayer, _animationFrameRequest, _collisionEngineClass, _customKey, _customKeys, _downKeys, _fgscreen, _input, _instance, _isStarted, _jumpKeys, _leftKeys, _maps, _movement, _parent, _pause, _physicsEngineClass, _players, _prefetchTmp, _renderEngine, _renderEngineClass, _requiredAssets, _rightKeys, _screen, _soundEngine, _subscribers, _timer, _toFetchAssets, _upKeys;
+  var _activeMap, _activePlayer, _animationFrameRequest, _collisionEngineClass, _container, _customKey, _customKeys, _downKeys, _fgscreen, _frameWait, _input, _instance, _isStarted, _jumpKeys, _leftKeys, _maps, _movement, _parent, _pause, _physicsEngineClass, _players, _prefetchTmp, _renderEngine, _renderEngineClass, _requiredAssets, _rightKeys, _screen, _soundEngine, _subscribers, _timer, _toFetchAssets, _upKeys, _useMultipleCanvas;
 
   function Game(name) {
     this.name = name;
@@ -339,6 +339,8 @@ Game = (function() {
     this.setAnimationFrameRequest();
     this._start = window.mozAnimationStartTime || Date.now();
     this._requiredAssets = 0;
+    this._useMultipleCanvas = false;
+    this._frameWait = 0;
   }
 
   _subscribers = [];
@@ -373,7 +375,7 @@ Game = (function() {
 
   _screen = {};
 
-  _fgscreen = {};
+  _fgscreen = void 0;
 
   _renderEngineClass = {};
 
@@ -400,6 +402,12 @@ Game = (function() {
   _requiredAssets = 0;
 
   _prefetchTmp = [];
+
+  _container = {};
+
+  _useMultipleCanvas = false;
+
+  _frameWait = 0;
 
   Game.prototype.render = function(timestamp) {
     var progress;
@@ -498,23 +506,29 @@ Game = (function() {
   };
 
   Game.prototype.preinitialize = function(parent, width, height) {
+    var holder;
     _parent = parent;
     Game.prototype.VIEWPORT_HEIGHT = height;
     Game.prototype.VIEWPORT_WIDTH = width;
+    holder = this.container ? this.container : document.body;
     _screen = document.createElement("canvas");
     _screen.setAttribute("width", this.VIEWPORT_WIDTH);
     _screen.setAttribute("height", this.VIEWPORT_HEIGHT);
     _screen.setAttribute("tabIndex", 0);
     _screen.setAttribute("id", "scrn");
-    _screen.setAttribute("style", "position: absolute; z-index: 0");
-    document.body.appendChild(_screen);
-    _fgscreen = document.createElement("canvas");
-    _fgscreen.setAttribute("width", this.VIEWPORT_WIDTH);
-    _fgscreen.setAttribute("height", this.VIEWPORT_HEIGHT);
-    _fgscreen.setAttribute("tabIndex", 1);
-    _fgscreen.setAttribute("id", "fgscrn");
-    _fgscreen.setAttribute("style", "position: absolute; z-index: 1");
-    document.body.appendChild(_fgscreen);
+    if (this.useMultipleCanvas) {
+      _screen.setAttribute("style", "position: absolute; z-index: 0");
+    }
+    holder.appendChild(_screen);
+    if (this.useMultipleCanvas) {
+      _fgscreen = document.createElement("canvas");
+      _fgscreen.setAttribute("width", this.VIEWPORT_WIDTH);
+      _fgscreen.setAttribute("height", this.VIEWPORT_HEIGHT);
+      _fgscreen.setAttribute("tabIndex", 1);
+      _fgscreen.setAttribute("id", "fgscrn");
+      _fgscreen.setAttribute("style", "position: absolute; z-index: 1");
+      holder.appendChild(_fgscreen);
+    }
     return this.initialize();
   };
 
@@ -549,6 +563,7 @@ Game = (function() {
     _renderEngine.fgscrn = _fgscreen;
     _renderEngine.map = new map();
     _renderEngine.player = new player();
+    _renderEngine.frameWait = this.frameWait;
     if (_renderEngine.map.platform) {
       this._requiredAssets += Map.prototype.TOTAL_PARALAX_ASSETS - 1;
     } else {
@@ -782,6 +797,30 @@ Game.prototype.__defineGetter__("keyboard", function() {
 
 Game.prototype.__defineSetter__("keyboard", function(val) {
   return this._keyboard = val;
+});
+
+Game.prototype.__defineGetter__("container", function() {
+  return this._container;
+});
+
+Game.prototype.__defineSetter__("container", function(val) {
+  return this._container = val;
+});
+
+Game.prototype.__defineGetter__("useMultipleCanvas", function() {
+  return this._useMultipleCanvas;
+});
+
+Game.prototype.__defineSetter__("useMultipleCanvas", function(val) {
+  return this._useMultipleCanvas = val;
+});
+
+Game.prototype.__defineGetter__("frameWait", function() {
+  return this._frameWait;
+});
+
+Game.prototype.__defineSetter__("frameWait", function(val) {
+  return this._frameWait = val;
 });
 
 GameError = (function() {
@@ -1548,7 +1587,7 @@ Action.prototype.ENEMY = "enemy";
 Action.prototype.PLAYER = "player";
 
 RenderEngine = (function() {
-  var _collisionEngine, _fgscrn, _map, _nis, _physicsEngine, _player, _scrn, _soundEngine;
+  var _collisionEngine, _fgscrn, _frameWait, _map, _nis, _physicsEngine, _player, _scrn, _soundEngine;
 
   function RenderEngine(name) {
     this.name = name;
@@ -1573,9 +1612,15 @@ RenderEngine = (function() {
 
   RenderEngine._ctx = {};
 
+  _frameWait = 0;
+
   RenderEngine.prototype.render = function(input) {
     var aObj, action, enemy, mObj, mapObj;
-    this._fgctx.clearRect(0, 0, Game.prototype.VIEWPORT_WIDTH, Game.prototype.VIEWPORT_HEIGHT);
+    if (this._fgctx !== void 0) {
+      this._fgctx.clearRect(0, 0, Game.prototype.VIEWPORT_WIDTH, Game.prototype.VIEWPORT_HEIGHT);
+    } else {
+      this._ctx.clearRect(0, 0, Game.prototype.VIEWPORT_WIDTH, Game.prototype.VIEWPORT_HEIGHT);
+    }
     if (this._nis !== void 0) {
       this.manageNis(this._nis, input);
       return;
@@ -1619,10 +1664,11 @@ RenderEngine = (function() {
   };
 
   RenderEngine.prototype.paint = function(obj) {
-    var asset, d, i, item, pPoint, rect, _i, _len, _len2, _ref, _ref2, _results, _results2;
+    var asset, d, i, item, pPoint, rect, tar, _i, _len, _len2, _ref, _ref2, _results, _results2;
     d = obj.bitmapData;
+    tar = this._fgctx === void 0 ? this._ctx : this._fgctx;
     if (d.player && d.player.notready === void 0) {
-      return this._fgctx.drawImage(d.player, d.rect.x, d.rect.y, d.rect.width, d.rect.height, Math.round(obj.point.x), Math.round(obj.point.y), d.rect.width, d.rect.height);
+      return tar.drawImage(d.player, d.rect.x, d.rect.y, d.rect.width, d.rect.height, Math.round(obj.point.x), Math.round(obj.point.y), d.rect.width, d.rect.height);
     } else if (d.player && d.player.notready) {} else if (d.particles) {
       _ref = d.particles;
       _results = [];
@@ -1630,7 +1676,7 @@ RenderEngine = (function() {
         item = _ref[_i];
         rect = item.rect;
         pPoint = item.particle.point;
-        _results.push(this._fgctx.drawImage(item.data, rect.x, rect.y, rect.width, rect.height, Math.round(pPoint.x), Math.round(pPoint.y), rect.width, rect.height));
+        _results.push(tar.drawImage(item.data, rect.x, rect.y, rect.width, rect.height, Math.round(pPoint.x), Math.round(pPoint.y), rect.width, rect.height));
       }
       return _results;
     } else {
@@ -1639,17 +1685,19 @@ RenderEngine = (function() {
       for (i = 0, _len2 = _ref2.length; i < _len2; i++) {
         asset = _ref2[i];
         if (asset.data !== void 0) {
-          if (i === 0 && this._fcount >= 1) {
+          if (this._fgscrn === void 0) {
+            this._ctx.drawImage(asset.data, asset.rect.x, asset.rect.y, asset.rect.width, asset.rect.height, obj.point.x, obj.point.y, asset.rect.width, asset.rect.height);
+            continue;
+          }
+          if (i === 0 && this._fcount >= this.frameWait) {
             this._fcount = 0;
-            console.log("redrawing bg");
             this._ctx.drawImage(asset.data, asset.rect.x, asset.rect.y, asset.rect.width, asset.rect.height, obj.point.x, obj.point.y, asset.rect.width, asset.rect.height);
             this._fcount++;
             continue;
-          } else if (i === 0 && this._fcount < 1) {
+          } else if (i === 0 && this._fcount < this.frameWait) {
             this._fcount++;
             continue;
           }
-          console.log("regular draw");
           _results2.push(this._fgctx.drawImage(asset.data, asset.rect.x, asset.rect.y, asset.rect.width, asset.rect.height, obj.point.x, obj.point.y, asset.rect.width, asset.rect.height));
         } else {
           _results2.push(void 0);
@@ -1848,8 +1896,7 @@ RenderEngine.prototype.__defineGetter__("scrn", function() {
 
 RenderEngine.prototype.__defineSetter__("scrn", function(val) {
   this._scrn = val;
-  this._ctx = this._scrn.getContext('2d');
-  return this._fcount = 100;
+  return this._ctx = this._scrn.getContext('2d');
 });
 
 RenderEngine.prototype.__defineGetter__("fgscrn", function() {
@@ -1858,7 +1905,7 @@ RenderEngine.prototype.__defineGetter__("fgscrn", function() {
 
 RenderEngine.prototype.__defineSetter__("fgscrn", function(val) {
   this._fgscrn = val;
-  return this._fgctx = this._fgscrn.getContext('2d');
+  if (this._fgscrn !== void 0) return this._fgctx = this._fgscrn.getContext('2d');
 });
 
 RenderEngine.prototype.__defineGetter__("map", function() {
@@ -1903,6 +1950,15 @@ RenderEngine.prototype.__defineGetter__("physicsEngine", function() {
 RenderEngine.prototype.__defineSetter__("physicsEngine", function(val) {
   this._physicsEngine = val;
   return this.collisionEngine.physicsEngine = val;
+});
+
+RenderEngine.prototype.__defineGetter__("frameWait", function() {
+  return this._frameWait;
+});
+
+RenderEngine.prototype.__defineSetter__("frameWait", function(val) {
+  this._frameWait = val;
+  return this._fcount = val;
 });
 
 State = (function() {

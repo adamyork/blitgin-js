@@ -1,7 +1,7 @@
 var RenderEngine;
 
 RenderEngine = (function() {
-  var _collisionEngine, _fgscrn, _map, _nis, _physicsEngine, _player, _scrn, _soundEngine;
+  var _collisionEngine, _fgscrn, _frameWait, _map, _nis, _physicsEngine, _player, _scrn, _soundEngine;
 
   function RenderEngine(name) {
     this.name = name;
@@ -26,9 +26,15 @@ RenderEngine = (function() {
 
   RenderEngine._ctx = {};
 
+  _frameWait = 0;
+
   RenderEngine.prototype.render = function(input) {
     var aObj, action, enemy, mObj, mapObj;
-    this._fgctx.clearRect(0, 0, Game.prototype.VIEWPORT_WIDTH, Game.prototype.VIEWPORT_HEIGHT);
+    if (this._fgctx !== void 0) {
+      this._fgctx.clearRect(0, 0, Game.prototype.VIEWPORT_WIDTH, Game.prototype.VIEWPORT_HEIGHT);
+    } else {
+      this._ctx.clearRect(0, 0, Game.prototype.VIEWPORT_WIDTH, Game.prototype.VIEWPORT_HEIGHT);
+    }
     if (this._nis !== void 0) {
       this.manageNis(this._nis, input);
       return;
@@ -72,10 +78,11 @@ RenderEngine = (function() {
   };
 
   RenderEngine.prototype.paint = function(obj) {
-    var asset, d, i, item, pPoint, rect, _i, _len, _len2, _ref, _ref2, _results, _results2;
+    var asset, d, i, item, pPoint, rect, tar, _i, _len, _len2, _ref, _ref2, _results, _results2;
     d = obj.bitmapData;
+    tar = this._fgctx === void 0 ? this._ctx : this._fgctx;
     if (d.player && d.player.notready === void 0) {
-      return this._fgctx.drawImage(d.player, d.rect.x, d.rect.y, d.rect.width, d.rect.height, Math.round(obj.point.x), Math.round(obj.point.y), d.rect.width, d.rect.height);
+      return tar.drawImage(d.player, d.rect.x, d.rect.y, d.rect.width, d.rect.height, Math.round(obj.point.x), Math.round(obj.point.y), d.rect.width, d.rect.height);
     } else if (d.player && d.player.notready) {} else if (d.particles) {
       _ref = d.particles;
       _results = [];
@@ -83,7 +90,7 @@ RenderEngine = (function() {
         item = _ref[_i];
         rect = item.rect;
         pPoint = item.particle.point;
-        _results.push(this._fgctx.drawImage(item.data, rect.x, rect.y, rect.width, rect.height, Math.round(pPoint.x), Math.round(pPoint.y), rect.width, rect.height));
+        _results.push(tar.drawImage(item.data, rect.x, rect.y, rect.width, rect.height, Math.round(pPoint.x), Math.round(pPoint.y), rect.width, rect.height));
       }
       return _results;
     } else {
@@ -92,17 +99,19 @@ RenderEngine = (function() {
       for (i = 0, _len2 = _ref2.length; i < _len2; i++) {
         asset = _ref2[i];
         if (asset.data !== void 0) {
-          if (i === 0 && this._fcount >= 1) {
+          if (this._fgscrn === void 0) {
+            this._ctx.drawImage(asset.data, asset.rect.x, asset.rect.y, asset.rect.width, asset.rect.height, obj.point.x, obj.point.y, asset.rect.width, asset.rect.height);
+            continue;
+          }
+          if (i === 0 && this._fcount >= this.frameWait) {
             this._fcount = 0;
-            console.log("redrawing bg");
             this._ctx.drawImage(asset.data, asset.rect.x, asset.rect.y, asset.rect.width, asset.rect.height, obj.point.x, obj.point.y, asset.rect.width, asset.rect.height);
             this._fcount++;
             continue;
-          } else if (i === 0 && this._fcount < 1) {
+          } else if (i === 0 && this._fcount < this.frameWait) {
             this._fcount++;
             continue;
           }
-          console.log("regular draw");
           _results2.push(this._fgctx.drawImage(asset.data, asset.rect.x, asset.rect.y, asset.rect.width, asset.rect.height, obj.point.x, obj.point.y, asset.rect.width, asset.rect.height));
         } else {
           _results2.push(void 0);
@@ -301,8 +310,7 @@ RenderEngine.prototype.__defineGetter__("scrn", function() {
 
 RenderEngine.prototype.__defineSetter__("scrn", function(val) {
   this._scrn = val;
-  this._ctx = this._scrn.getContext('2d');
-  return this._fcount = 100;
+  return this._ctx = this._scrn.getContext('2d');
 });
 
 RenderEngine.prototype.__defineGetter__("fgscrn", function() {
@@ -311,7 +319,7 @@ RenderEngine.prototype.__defineGetter__("fgscrn", function() {
 
 RenderEngine.prototype.__defineSetter__("fgscrn", function(val) {
   this._fgscrn = val;
-  return this._fgctx = this._fgscrn.getContext('2d');
+  if (this._fgscrn !== void 0) return this._fgctx = this._fgscrn.getContext('2d');
 });
 
 RenderEngine.prototype.__defineGetter__("map", function() {
@@ -356,4 +364,13 @@ RenderEngine.prototype.__defineGetter__("physicsEngine", function() {
 RenderEngine.prototype.__defineSetter__("physicsEngine", function(val) {
   this._physicsEngine = val;
   return this.collisionEngine.physicsEngine = val;
+});
+
+RenderEngine.prototype.__defineGetter__("frameWait", function() {
+  return this._frameWait;
+});
+
+RenderEngine.prototype.__defineSetter__("frameWait", function(val) {
+  this._frameWait = val;
+  return this._fcount = val;
 });

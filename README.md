@@ -30,6 +30,8 @@
  - FF 11
  - Chrome 18 **For Chrome to render properly make use of '--disable-accelerated-2d-canvas'. Until the peformance issue is fixed**
  - IE 9 **Webworkers are not available in IE. Sampling out of colors is very slow.**
+ - Opera 11+ **Barely works. FPS is atrocious**
+ - Safari **Doesnt work yet.**
 
 ## Todo...
 - its possible that a composites asset is not a single row 

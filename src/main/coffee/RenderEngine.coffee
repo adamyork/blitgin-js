@@ -11,9 +11,13 @@ class RenderEngine
   _collisionEngine = {}
   _physicsEngine = {}
   @_ctx = {}
+  _frameWait = 0
 
   render:(input)->
-    @_fgctx.clearRect 0,0,Game::VIEWPORT_WIDTH,Game::VIEWPORT_HEIGHT
+    if @_fgctx isnt undefined
+      @_fgctx.clearRect 0,0,Game::VIEWPORT_WIDTH,Game::VIEWPORT_HEIGHT
+    else
+      @_ctx.clearRect 0,0,Game::VIEWPORT_WIDTH,Game::VIEWPORT_HEIGHT
     if @_nis isnt undefined
       @manageNis @_nis,input
       return
@@ -55,29 +59,30 @@ class RenderEngine
 
   paint:(obj)->
     d = obj.bitmapData
+    tar = if @_fgctx is undefined then @_ctx else @_fgctx
     if d.player and d.player.notready is undefined
-      @_fgctx.drawImage d.player,d.rect.x,d.rect.y,d.rect.width,d.rect.height,Math.round(obj.point.x),Math.round(obj.point.y),d.rect.width,d.rect.height
+      tar.drawImage d.player,d.rect.x,d.rect.y,d.rect.width,d.rect.height,Math.round(obj.point.x),Math.round(obj.point.y),d.rect.width,d.rect.height
     else if d.player and d.player.notready
       return
     else if d.particles
       for item in d.particles
         rect = item.rect
         pPoint = item.particle.point
-        @_fgctx.drawImage item.data,rect.x,rect.y,rect.width,rect.height,Math.round(pPoint.x),Math.round(pPoint.y),rect.width,rect.height
+        tar.drawImage item.data,rect.x,rect.y,rect.width,rect.height,Math.round(pPoint.x),Math.round(pPoint.y),rect.width,rect.height
     else
       for asset,i in d.map
         if asset.data isnt undefined
-          #TODO make fcount configurable
-          if i is 0 and @_fcount >= 1
+          if @_fgscrn is undefined
+            @_ctx.drawImage asset.data,asset.rect.x,asset.rect.y,asset.rect.width,asset.rect.height,obj.point.x,obj.point.y,asset.rect.width,asset.rect.height
+            continue
+          if i is 0 and @_fcount >= @frameWait
             @_fcount = 0
-            console.log "redrawing bg"
             @_ctx.drawImage asset.data,asset.rect.x,asset.rect.y,asset.rect.width,asset.rect.height,obj.point.x,obj.point.y,asset.rect.width,asset.rect.height
             @_fcount++
             continue
-          else if i is 0 and @_fcount < 1
+          else if i is 0 and @_fcount < @frameWait
             @_fcount++
             continue
-          console.log "regular draw"
           @_fgctx.drawImage asset.data,asset.rect.x,asset.rect.y,asset.rect.width,asset.rect.height,obj.point.x,obj.point.y,asset.rect.width,asset.rect.height
 
   managePlayer:(input)->
@@ -237,14 +242,14 @@ RenderEngine::__defineGetter__ "scrn",->
 RenderEngine::__defineSetter__ "scrn",(val)->
   @_scrn = val
   @_ctx = @_scrn.getContext '2d'
-  @_fcount = 100
   
 RenderEngine::__defineGetter__ "fgscrn",->
   @_fgscrn
   
 RenderEngine::__defineSetter__ "fgscrn",(val)->
   @_fgscrn = val
-  @_fgctx = @_fgscrn.getContext '2d'
+  if @_fgscrn isnt undefined
+    @_fgctx = @_fgscrn.getContext '2d'
   
 RenderEngine::__defineGetter__ "map",->
   @_map
@@ -280,3 +285,10 @@ RenderEngine::__defineGetter__ "physicsEngine",->
 RenderEngine::__defineSetter__ "physicsEngine",(val)->
   @_physicsEngine = val
   @collisionEngine.physicsEngine = val
+  
+RenderEngine::__defineGetter__ "frameWait",->
+  @_frameWait
+
+RenderEngine::__defineSetter__ "frameWait",(val)->
+  @_frameWait = val
+  @_fcount = val
