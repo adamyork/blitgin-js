@@ -7,6 +7,7 @@ Bootstrap = (function() {
 
   function Bootstrap(name) {
     this.name = name;
+    this.checkForIE();
     this.checkExt();
     this.checkBind();
     this.checkAccessors();
@@ -27,6 +28,26 @@ Bootstrap = (function() {
   callBack = {};
 
   Bootstrap.prototype.FULL = "full";
+
+  Bootstrap.prototype.IS_IE = false;
+
+  Bootstrap.prototype.checkForIE = function() {
+    var all, div, i, undef, v;
+    undef = "not ie";
+    v = 8;
+    div = document.createElement('div');
+    all = div.getElementsByTagName('i');
+    for (i = v; v <= 11 ? i <= 11 : i >= 11; v <= 11 ? i++ : i--) {
+      div.innerHTML = "<!--[if gt IE " + v + "]><i></i><![endif]-->";
+      if (div.innerHTML === "") break;
+      v = i;
+    }
+    if (v > 8) {
+      return Bootstrap.prototype.IS_IE = true;
+    } else {
+      return Boostrap.prototype.IS_IE = false;
+    }
+  };
 
   Bootstrap.prototype.checkExt = function() {
     if (window.ext === void 0) {
@@ -309,13 +330,15 @@ Keyboard.prototype.RIGHT = 68;
 Keyboard.prototype.SPACE = 32;
 
 Game = (function() {
-  var _activeMap, _activePlayer, _animationFrameRequest, _collisionEngineClass, _customKey, _customKeys, _downKeys, _input, _instance, _isStarted, _jumpKeys, _leftKeys, _maps, _movement, _parent, _pause, _physicsEngineClass, _players, _renderEngine, _renderEngineClass, _rightKeys, _screen, _soundEngine, _subscribers, _timer, _upKeys;
+  var _activeMap, _activePlayer, _animationFrameRequest, _collisionEngineClass, _customKey, _customKeys, _downKeys, _fgscreen, _input, _instance, _isStarted, _jumpKeys, _leftKeys, _maps, _movement, _parent, _pause, _physicsEngineClass, _players, _prefetchTmp, _renderEngine, _renderEngineClass, _requiredAssets, _rightKeys, _screen, _soundEngine, _subscribers, _timer, _toFetchAssets, _upKeys;
 
   function Game(name) {
     this.name = name;
     Game.prototype.instance = this;
     this.keyboard = new Keyboard();
     this.setAnimationFrameRequest();
+    this._start = window.mozAnimationStartTime || Date.now();
+    this._requiredAssets = 0;
   }
 
   _subscribers = [];
@@ -350,6 +373,8 @@ Game = (function() {
 
   _screen = {};
 
+  _fgscreen = {};
+
   _renderEngineClass = {};
 
   _collisionEngineClass = {};
@@ -370,10 +395,23 @@ Game = (function() {
 
   _animationFrameRequest = {};
 
-  Game.prototype.render = function() {
+  _toFetchAssets = 0;
+
+  _requiredAssets = 0;
+
+  _prefetchTmp = [];
+
+  Game.prototype.render = function(timestamp) {
+    var progress;
+    progress = timestamp - this._start;
+    _renderEngine.render(_input);
+    if (progress < 2000) return requestAnimationFrame(this.render.bind(this));
+  };
+
+  Game.prototype.renderDelegate = function() {
     if (this._pause) return;
     if (_animationFrameRequest) {
-      return _animationFrameRequest(_renderEngine.render(_input));
+      return _animationFrameRequest(this.render.bind(this));
     } else {
       return _renderEngine.render(_input);
     }
@@ -387,8 +425,75 @@ Game = (function() {
 
   Game.prototype.start = function() {
     if (!_isStarted) {
-      _timer = setInterval(this.render.bind(this), 80);
+      _timer = setInterval(this.renderDelegate.bind(this), 80);
       return _isStarted = true;
+    }
+  };
+
+  Game.prototype.prefetch = function(items) {
+    var audio, img, item, tmp, _i, _len, _results;
+    this._toFetchAssets = 0;
+    this._prefetchTmp = [];
+    _results = [];
+    for (_i = 0, _len = items.length; _i < _len; _i++) {
+      item = items[_i];
+      tmp = new item();
+      this._prefetchTmp.push(tmp);
+      if (tmp.assetClass) {
+        this._requiredAssets++;
+        this._toFetchAssets++;
+        img = new Image();
+        this._prefetchTmp.push(img);
+        img.onload = this.handleImagePrefetch.bind(this);
+        img.src = tmp.assetClass;
+      }
+      if (tmp.sound) {
+        this._toFetchAssets++;
+        this._requiredAssets++;
+        audio = new Audio();
+        this._prefetchTmp.push(audio);
+        audio.addEventListener('canplaythrough', this.handleAudioPrefetch.bind(this), false);
+        audio.src = tmp.sound;
+        if (Bootstrap.prototype.IS_IE) {
+          _results.push(this.handleAudioPrefetch({
+            currentTarget: audio
+          }));
+        } else {
+          _results.push(void 0);
+        }
+      } else {
+        _results.push(void 0);
+      }
+    }
+    return _results;
+  };
+
+  Game.prototype.handleImagePrefetch = function() {
+    this._toFetchAssets--;
+    console.log("pretch asset loaded " + this._toFetchAssets);
+    if (this._toFetchAssets === 0) {
+      this._prefetchTmp = [];
+      return this.checkForReady();
+    } else {
+      return this._requiredAssets--;
+    }
+  };
+
+  Game.prototype.handleAudioPrefetch = function(e) {
+    var index;
+    console.log("audio asset loaded");
+    index = this._prefetchTmp.indexOf(e.currentTarget, 0);
+    if (index >= 0) {
+      this._prefetchTmp.splice(index, index + 1);
+      return this.handleImagePrefetch();
+    }
+  };
+
+  Game.prototype.checkForReady = function() {
+    this._requiredAssets--;
+    console.log("checking " + this._requiredAssets);
+    if (this._requiredAssets === 0) {
+      return Game.prototype.instance.notifySubscribers(Game.prototype.Ready, {}, {}, []);
     }
   };
 
@@ -400,7 +505,16 @@ Game = (function() {
     _screen.setAttribute("width", this.VIEWPORT_WIDTH);
     _screen.setAttribute("height", this.VIEWPORT_HEIGHT);
     _screen.setAttribute("tabIndex", 0);
+    _screen.setAttribute("id", "scrn");
+    _screen.setAttribute("style", "position: absolute; z-index: 0");
     document.body.appendChild(_screen);
+    _fgscreen = document.createElement("canvas");
+    _fgscreen.setAttribute("width", this.VIEWPORT_WIDTH);
+    _fgscreen.setAttribute("height", this.VIEWPORT_HEIGHT);
+    _fgscreen.setAttribute("tabIndex", 1);
+    _fgscreen.setAttribute("id", "fgscrn");
+    _fgscreen.setAttribute("style", "position: absolute; z-index: 1");
+    document.body.appendChild(_fgscreen);
     return this.initialize();
   };
 
@@ -432,8 +546,15 @@ Game = (function() {
     map = this.maps[_activeMap];
     player = this.players[_activePlayer];
     _renderEngine.scrn = _screen;
+    _renderEngine.fgscrn = _fgscreen;
     _renderEngine.map = new map();
     _renderEngine.player = new player();
+    if (_renderEngine.map.platform) {
+      this._requiredAssets += Map.prototype.TOTAL_PARALAX_ASSETS - 1;
+    } else {
+      this._requiredAssets += Map.prototype.TOTAL_STANDARD_ASSETS - 1;
+    }
+    this._requiredAssets += 1;
     _input = new Input();
     _input.direction = 0;
     _input.jump = 0;
@@ -507,12 +628,12 @@ Game = (function() {
     return _screen = void 0;
   };
 
-  Game.prototype.notifySubscribers = function(map, player, actions) {
+  Game.prototype.notifySubscribers = function(event, map, player, actions) {
     var subscriber, _i, _len, _results;
     _results = [];
     for (_i = 0, _len = _subscribers.length; _i < _len; _i++) {
       subscriber = _subscribers[_i];
-      _results.push(subscriber.notify(map, player, actions));
+      _results.push(subscriber.notify(event, map, player, actions));
     }
     return _results;
   };
@@ -530,6 +651,10 @@ Game = (function() {
 })();
 
 Game.prototype.name = "Game";
+
+Game.prototype.Ready = "Ready";
+
+Game.prototype.Rendered = "Rendered";
 
 Game.prototype.__defineGetter__("instance", function() {
   return this._instance;
@@ -818,20 +943,30 @@ RenderObject = (function() {
     this.workbench.width = asset.width;
     this.workbench.height = asset.height;
     this.ctx.drawImage(asset, 0, 0);
+    console.log("getting data " + asset.src);
     imageData = this.ctx.getImageData(0, 0, this.workbench.width, this.workbench.height);
-    worker = new Worker('../src/main/js/RemoveColorTask.js');
+    try {
+      worker = new Worker('../src/main/js/RemoveColorTask.js');
+    } catch (error) {
+      worker = {};
+      worker.postMessage = this.removeSampleColor;
+      worker.terminate = function() {};
+    }
     ref = this;
     worker.onmessage = function(e) {
       if (cachePixels) {
         console.log('pixels cached');
         ref.collisionPixels = e.data;
       }
+      ref.ctx.clearRect(0, 0, ref.workbench.width, ref.workbench.height);
       ref.ctx.putImageData(e.data, 0, 0);
       targetData.src = null;
       targetData.src = ref.workbench.toDataURL();
-      ref.ctx.clearRect(0, 0, asset.width, asset.height);
-      console.log("sample complete");
-      return worker.terminate();
+      console.log("asset " + asset.src);
+      console.log("bout to clear ctx ref.workbench.width : " + ref.workbench.width + "ref.workbench.height : " + ref.workbench.height);
+      ref.notifyReady();
+      worker.terminate();
+      return worker = null;
     };
     worker.onerror = function(e) {
       return console.log("error in worker");
@@ -841,6 +976,41 @@ RenderObject = (function() {
       "colorConstant": this.colorConstant,
       "rgbTolerance": this.rgbTolerance
     });
+  };
+
+  RenderObject.prototype.removeSampleColor = function(event) {
+    var a, b, bv, dataRef, g, gv, imageData, index, parsed, r, rv, t, val, xpos, ypos, _ref, _ref2;
+    imageData = event.imageData;
+    parsed = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(event.colorConstant);
+    rv = parseInt(parsed[1], 16);
+    gv = parseInt(parsed[2], 16);
+    bv = parseInt(parsed[3], 16);
+    val = rv + gv + bv;
+    t = event.rgbTolerance;
+    for (xpos = 0, _ref = imageData.width - 1; 0 <= _ref ? xpos <= _ref : xpos >= _ref; 0 <= _ref ? xpos++ : xpos--) {
+      for (ypos = 0, _ref2 = imageData.height - 1; 0 <= _ref2 ? ypos <= _ref2 : ypos >= _ref2; 0 <= _ref2 ? ypos++ : ypos--) {
+        index = 4 * (ypos * imageData.width + xpos);
+        dataRef = imageData.data;
+        r = dataRef[index];
+        g = dataRef[index + 1];
+        b = dataRef[index + 2];
+        a = dataRef[index + 3];
+        if (t !== void 0) {
+          if (r <= rv + t.r && g <= gv + t.g && b <= bv + t.b) {
+            dataRef[index + 3] = 0;
+          }
+        } else if ((r + g + b) === val) {
+          dataRef[index + 3] = 0;
+        }
+      }
+    }
+    return this.onmessage({
+      data: imageData
+    });
+  };
+
+  RenderObject.prototype.notifyReady = function() {
+    return Game.prototype.instance.checkForReady();
   };
 
   RenderObject.prototype.dispose = function() {
@@ -1378,7 +1548,7 @@ Action.prototype.ENEMY = "enemy";
 Action.prototype.PLAYER = "player";
 
 RenderEngine = (function() {
-  var _collisionEngine, _map, _nis, _physicsEngine, _player, _scrn, _soundEngine;
+  var _collisionEngine, _fgscrn, _map, _nis, _physicsEngine, _player, _scrn, _soundEngine;
 
   function RenderEngine(name) {
     this.name = name;
@@ -1386,6 +1556,8 @@ RenderEngine = (function() {
   }
 
   _scrn = {};
+
+  _fgscrn = {};
 
   _map = {};
 
@@ -1403,9 +1575,9 @@ RenderEngine = (function() {
 
   RenderEngine.prototype.render = function(input) {
     var aObj, action, enemy, mObj, mapObj;
-    this._ctx.clearRect(0, 0, Game.prototype.VIEWPORT_WIDTH, Game.prototype.VIEWPORT_HEIGHT);
-    if (this.nis) {
-      this.manageNIS(this.nis, input);
+    this._fgctx.clearRect(0, 0, Game.prototype.VIEWPORT_WIDTH, Game.prototype.VIEWPORT_HEIGHT);
+    if (this._nis !== void 0) {
+      this.manageNis(this._nis, input);
       return;
     }
     this.managePlayer(input);
@@ -1413,17 +1585,20 @@ RenderEngine = (function() {
     this.paint(this.map);
     this.map.manageElements(Map.prototype.MANAGE_ENEMIES);
     for (enemy in this.map.activeEnemies) {
+      if (enemy === "__defineGetter__" || enemy === "__defineSetter__") continue;
       this.manageEnemy(this.map.activeEnemies[enemy]);
       this.paint(this.map.activeEnemies[enemy]);
     }
     this.manageNewActions(input);
     for (action in this.actionObjects) {
+      if (action === "__defineGetter__" || action === "__defineSetter__") continue;
       aObj = this.actionObjects[action];
       if (this.actionIsIdle(aObj)) continue;
       this.manageAction(aObj, input);
       this.paint(aObj);
     }
     for (mapObj in this.map.activeMapObjects) {
+      if (mapObj === "__defineGetter__" || mapObj === "__defineSetter__") continue;
       mObj = this.map.activeMapObjects[mapObj];
       mObj.frame++;
       this.manageMapObject(mObj);
@@ -1440,14 +1615,14 @@ RenderEngine = (function() {
       this.paint(this.player.emitter);
     }
     input.manageWaits();
-    return Game.prototype.instance.notifySubscribers(this.map, this.player, this.actionObjects);
+    return Game.prototype.instance.notifySubscribers(Game.prototype.RENDERED, this.map, this.player, this.actionObjects);
   };
 
   RenderEngine.prototype.paint = function(obj) {
-    var asset, d, item, pPoint, rect, _i, _j, _len, _len2, _ref, _ref2, _results, _results2;
+    var asset, d, i, item, pPoint, rect, _i, _len, _len2, _ref, _ref2, _results, _results2;
     d = obj.bitmapData;
     if (d.player && d.player.notready === void 0) {
-      return this._ctx.drawImage(d.player, d.rect.x, d.rect.y, d.rect.width, d.rect.height, obj.point.x, obj.point.y, d.rect.width, d.rect.height);
+      return this._fgctx.drawImage(d.player, d.rect.x, d.rect.y, d.rect.width, d.rect.height, Math.round(obj.point.x), Math.round(obj.point.y), d.rect.width, d.rect.height);
     } else if (d.player && d.player.notready) {} else if (d.particles) {
       _ref = d.particles;
       _results = [];
@@ -1455,16 +1630,27 @@ RenderEngine = (function() {
         item = _ref[_i];
         rect = item.rect;
         pPoint = item.particle.point;
-        _results.push(this._ctx.drawImage(item.data, rect.x, rect.y, rect.width, rect.height, Math.round(pPoint.x), Math.round(pPoint.y), rect.width, rect.height));
+        _results.push(this._fgctx.drawImage(item.data, rect.x, rect.y, rect.width, rect.height, Math.round(pPoint.x), Math.round(pPoint.y), rect.width, rect.height));
       }
       return _results;
     } else {
       _ref2 = d.map;
       _results2 = [];
-      for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
-        asset = _ref2[_j];
+      for (i = 0, _len2 = _ref2.length; i < _len2; i++) {
+        asset = _ref2[i];
         if (asset.data !== void 0) {
-          _results2.push(this._ctx.drawImage(asset.data, asset.rect.x, asset.rect.y, asset.rect.width, asset.rect.height, obj.point.x, obj.point.y, asset.rect.width, asset.rect.height));
+          if (i === 0 && this._fcount >= 1) {
+            this._fcount = 0;
+            console.log("redrawing bg");
+            this._ctx.drawImage(asset.data, asset.rect.x, asset.rect.y, asset.rect.width, asset.rect.height, obj.point.x, obj.point.y, asset.rect.width, asset.rect.height);
+            this._fcount++;
+            continue;
+          } else if (i === 0 && this._fcount < 1) {
+            this._fcount++;
+            continue;
+          }
+          console.log("regular draw");
+          _results2.push(this._fgctx.drawImage(asset.data, asset.rect.x, asset.rect.y, asset.rect.width, asset.rect.height, obj.point.x, obj.point.y, asset.rect.width, asset.rect.height));
         } else {
           _results2.push(void 0);
         }
@@ -1508,7 +1694,8 @@ RenderEngine = (function() {
 
   RenderEngine.prototype.manageMap = function(input) {
     this.soundEngine.checkPlayback(this.map);
-    return this.physicsEngine.adjustMapVerically(this.map, this.player);
+    this.physicsEngine.adjustMapVerically(this.map, this.player);
+    return this.manageNis(this.map.checkForNis(this.player), input);
   };
 
   RenderEngine.prototype.manageEnemy = function(enemy) {
@@ -1624,17 +1811,18 @@ RenderEngine = (function() {
     if (action.sound) return this.soundEngine.removeSound(action.sound);
   };
 
-  RenderEngine.prototype.manageNIS = function(nis, input) {
+  RenderEngine.prototype.manageNis = function(nis, input) {
     if (nis === void 0) return;
     this._nis = nis;
     if (!input.disabled) input.disabled = true;
-    if (this.physicsEngine.manageNIS(nis, this.player, this.map)) {
+    if (this.physicsEngine.manageNis(nis, this.player, this.map)) {
       this.map.removeNis(nis);
-      this._nis = null;
+      this._nis = void 0;
       input.disabled = false;
+      return;
     }
-    this.paint(this.map, this.map.point);
-    return this.paint(this.player, this.player.point);
+    this.paint(this.map);
+    return this.paint(this.player);
   };
 
   RenderEngine.prototype.dispose = function() {
@@ -1660,7 +1848,17 @@ RenderEngine.prototype.__defineGetter__("scrn", function() {
 
 RenderEngine.prototype.__defineSetter__("scrn", function(val) {
   this._scrn = val;
-  return this._ctx = this.scrn.getContext('2d');
+  this._ctx = this._scrn.getContext('2d');
+  return this._fcount = 100;
+});
+
+RenderEngine.prototype.__defineGetter__("fgscrn", function() {
+  return this._fgscrn;
+});
+
+RenderEngine.prototype.__defineSetter__("fgscrn", function(val) {
+  this._fgscrn = val;
+  return this._fgctx = this._fgscrn.getContext('2d');
 });
 
 RenderEngine.prototype.__defineGetter__("map", function() {
@@ -2558,16 +2756,18 @@ Map = (function(_super) {
     this._initializeComplete = true;
     this.x = 0;
     this.y = 0;
-    this.activeEnemies = [];
-    return this.activeMapObjects = [];
+    this.activeEnemies = {};
+    this.activeMapObjects = {};
+    this._inactiveEnemies = {};
+    return this._inactiveMapObjects = {};
   };
 
   Map.prototype.manageElements = function(type) {
-    var activeTargets, enemy, enemyOffScreen, group, inactiveTargets, indep, j, key, obj, posX, posY, position, target, targetArray, vh, vw, _i, _len, _len2, _ref;
+    var activeTargets, enemy, enemyOffScreen, group, inactiveTargets, indep, j, key, obj, posX, posY, position, target, targetArray, tmpE, vh, vw, _i, _len, _len2, _ref;
     inactiveTargets = {};
     activeTargets = {};
     targetArray = type === Map.prototype.MANAGE_ENEMIES ? this.enemies : this.mapObjects;
-    inactiveTargets = type === Map.prototype.MANAGE_ENEMIES ? _inactiveEnemies : _inactiveMapObjects;
+    inactiveTargets = type === Map.prototype.MANAGE_ENEMIES ? this._inactiveEnemies : this._inactiveMapObjects;
     activeTargets = type === Map.prototype.MANAGE_ENEMIES ? this._activeEnemies : this._activeMapObjects;
     for (_i = 0, _len = targetArray.length; _i < _len; _i++) {
       group = targetArray[_i];
@@ -2581,7 +2781,12 @@ Map = (function(_super) {
         posY = target ? target.mapY : group.positions[j].y;
         vw = Game.prototype.VIEWPORT_WIDTH;
         vh = Game.prototype.VIEWPORT_HEIGHT;
-        if (inactiveTargets[key]) return;
+        try {
+          tmpE = inactiveTargets[key];
+          if (tmpE) return;
+        } catch (error) {
+
+        }
         indep = group.independence;
         if (target === void 0) {
           if (this.isEnemyOnScreen(posX, posY, vw, vh, indep)) {
@@ -2616,22 +2821,24 @@ Map = (function(_super) {
     return hBounds && vBounds;
   };
 
-  Map.prototype.checkForNIS = function(player) {
-    var nis, _i, _len;
+  Map.prototype.checkForNis = function(player) {
+    var n, _i, _len, _ref;
     if (player === void 0) return;
-    for (_i = 0, _len = _nis.length; _i < _len; _i++) {
-      nis = _nis[_i];
-      nis.player = player;
-      nis.enemies = [];
-      nis.map = this;
-      if (nis.conditionsMet) return nis;
+    _ref = this.nis;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      n = _ref[_i];
+      n.player = player;
+      n.enemies = [];
+      n.map = this;
+      if (n.conditionsMet) return n;
     }
   };
 
   Map.prototype.removeNis = function(nis) {
     var arr, index;
-    index = _nis.indexOf(nis, 0);
-    arr = _nis.splice(index, 1);
+    console.log("need to remove my nis");
+    index = this.nis.indexOf(nis, 0);
+    arr = this.nis.splice(index, 1);
     return arr = void 0;
   };
 
@@ -2676,7 +2883,6 @@ Map.prototype.name = "Map";
 Map.prototype.__defineGetter__("bitmapData", function() {
   var bg, cd, fg, mid, vh, vw, yPos;
   if (this._initializeComplete) {
-    this.ctx.clearRect(0, 0, this.workbench.width, this.workbench.height);
     yPos = this.platform ? this._y : 0;
     vh = Game.prototype.VIEWPORT_HEIGHT;
     vw = Game.prototype.VIEWPORT_WIDTH;
@@ -2687,11 +2893,10 @@ Map.prototype.__defineGetter__("bitmapData", function() {
     if (this.paralaxing) {
       bg = this.buildDataVO(this.backgroundData, new Rectangle(Math.round(this._x * .25), yPos, vw, vh));
       mid = this.buildDataVO(this.midgroundData, new Rectangle(Math.round(this._x * .5), yPos, vw, vh));
-    } else {
-      fg = this.buildDataVO(this.foregroundData, new Rectangle(this._x, yPos, vw, vh));
     }
+    fg = this.buildDataVO(this.foregroundData, new Rectangle(Math.round(this._x), Math.round(yPos), vw, vh));
     if (this.showCollisionMap) {
-      cd = this.buildDataVO(this.collisionData, new Rectangle(this._x, yPos, vw, vh));
+      cd = this.buildDataVO(this.collisionData, new Rectangle(Math.round(this._x), Math.round(yPos), vw, vh));
     }
     return {
       map: [bg, mid, fg, cd]
@@ -3021,14 +3226,18 @@ Nis = (function() {
 
   _frame = 0;
 
+  Nis.prototype.initialize = function() {
+    return this.frame = 0;
+  };
+
   Nis.prototype.checkConditions = function(target, condition) {
-    var prop, value, _i, _len;
-    for (_i = 0, _len = condition.length; _i < _len; _i++) {
-      prop = condition[_i];
+    var conditionsMet, prop, value;
+    conditionsMet = true;
+    for (prop in condition) {
       value = condition[prop];
-      return this.evaluatePropAndValue(target, prop, value);
+      conditionsMet = this.evaluatePropAndValue(target, prop, value);
     }
-    return true;
+    return conditionsMet;
   };
 
   Nis.prototype.evaluatePropAndValue = function(target, prop, value) {
@@ -3051,12 +3260,10 @@ Nis = (function() {
 Nis.prototype.name = "Nis";
 
 Nis.prototype.__defineGetter__("conditionsMet", function(val) {
-  var Boolean;
-  ({
-    pCondition: Boolean = checkConditions(this._player, this.nisCondition.playerCondition),
-    mCondition: Boolean = checkConditions(this._map, this.nisCondition.mapCondition),
-    eCondition: Boolean = this.checkForEnemyConditions()
-  });
+  var eCondition, mCondition, pCondition;
+  pCondition = this.checkConditions(this._player, this.nisCondition.playerCondition);
+  mCondition = this.checkConditions(this._map, this.nisCondition.mapCondition);
+  eCondition = this.checkForEnemyConditions();
   return pCondition && mCondition && eCondition;
 });
 
@@ -3076,7 +3283,7 @@ Nis.prototype.__defineSetter__("nisGoal", function(val) {
   return this._nisGoal = val;
 });
 
-Nis.prototype.__defineGetter__("map()", function() {
+Nis.prototype.__defineGetter__("map", function() {
   return this._map;
 });
 
@@ -3152,7 +3359,7 @@ NisCondition.prototype.__defineSetter__("enemies", function(val) {
 });
 
 NisGoal = (function() {
-  var _duration, _enemyGoals, _mapGoals, _playerGoals;
+  var _duration, _enemyGoals, _mapGoals, _playerGoals, _useCollision;
 
   function NisGoal(name) {
     this.name = name;
@@ -3165,6 +3372,8 @@ NisGoal = (function() {
   _mapGoals = {};
 
   _enemyGoals = {};
+
+  _useCollision = true;
 
   return NisGoal;
 
@@ -3202,6 +3411,14 @@ NisGoal.prototype.__defineSetter__("enemyGoals", function(val) {
 
 NisGoal.prototype.__defineGetter__("enemyGoals", function() {
   return this._enemyGoals;
+});
+
+NisGoal.prototype.__defineSetter__("useCollision", function(val) {
+  return this._useCollision = val;
+});
+
+NisGoal.prototype.__defineGetter__("useCollision", function() {
+  return this._useCollision;
 });
 
 Particle = (function(_super) {
@@ -3332,9 +3549,24 @@ PhysicsEngine = (function() {
     }
   };
 
+  PhysicsEngine.prototype.fullyEvalulateSuperClass = function(obj) {
+    if (obj instanceof MapObject) {
+      return CollisionEngine.prototype.TYPE_OF_MAPOBJECT;
+    }
+    if (obj instanceof Action) return CollisionEngine.prototype.TYPE_OF_ACTION;
+    if (obj instanceof Enemy) return Enemy.prototype.name;
+    if (obj instanceof Player) return Player.prototype.name;
+  };
+
   PhysicsEngine.prototype.handleHorizontalCollision = function(target, focus, map) {
+    var targetBase;
+    try {
+      targetBase = target.__proto__.name;
+    } catch (error) {
+      targetBase = this.fullyEvalulateSuperClass(target);
+    }
     if (target.direction === 1) {
-      if (target.__proto__.name === CollisionEngine.prototype.TYPE_OF_ACTION) {
+      if (targetBase === CollisionEngine.prototype.TYPE_OF_ACTION) {
         focus.x += focus.width * focus.collisionCoefficient;
         focus.velocityX = 0;
       } else {
@@ -3344,7 +3576,7 @@ PhysicsEngine = (function() {
         target.velocityX = 0;
       }
     } else if (target.direction === -1) {
-      if (target.__proto__.name === CollisionEngine.prototype.TYPE_OF_ACTION) {
+      if (targetBase === CollisionEngine.prototype.TYPE_OF_ACTION) {
         focus.x -= focus.width * focus.collisionCoefficient;
         focus.velocityX = 0;
       } else {
@@ -3457,23 +3689,20 @@ PhysicsEngine = (function() {
   };
 
   PhysicsEngine.prototype.manageNis = function(nis, player, map) {
-    var Object, pGoals, prop, target, value, _i, _j, _len, _len2;
+    var mGoals, pGoals, prop, target, value, _i, _len;
     prop = {};
     value = 0;
     pGoals = nis.nisGoal.playerGoals;
-    for (_i = 0, _len = pGoals.length; _i < _len; _i++) {
-      prop = pGoals[_i];
+    for (prop in pGoals) {
       value = pGoals[prop];
       target = (value - player[prop]) / (nis.nisGoal.duration - nis.frame);
       player.direction = target < 0 ? -1 : 1;
       player[prop] += target;
       player.frame++;
     }
-    ({
-      mGoals: Object = nis.nisGoal.mapGoals
-    });
-    for (_j = 0, _len2 = mGoals.length; _j < _len2; _j++) {
-      prop = mGoals[_j];
+    mGoals = nis.nisGoal.mapGoals;
+    for (_i = 0, _len = mGoals.length; _i < _len; _i++) {
+      prop = mGoals[_i];
       value = mGoals[prop];
       map[prop] += (value - map[prop]) / (nis.nisGoal.duration - nis.frame);
       this.adjustMapVerically(map, player);
@@ -3534,6 +3763,15 @@ CollisionEngine = (function() {
     return this.checkForCollision(focus, target);
   };
 
+  CollisionEngine.prototype.fullyEvalulateSuperClass = function(obj) {
+    if (obj instanceof MapObject) {
+      return CollisionEngine.prototype.TYPE_OF_MAPOBJECT;
+    }
+    if (obj instanceof Action) return CollisionEngine.prototype.TYPE_OF_ACTION;
+    if (obj instanceof Enemy) return Enemy.prototype.name;
+    if (obj instanceof Player) return Player.prototype.name;
+  };
+
   CollisionEngine.prototype.checkForCollision = function(focus, target) {
     var focusBase, intersection, targetBase;
     if (target.collisionRect.intersects(focus.collisionRect)) {
@@ -3541,8 +3779,13 @@ CollisionEngine = (function() {
         intersection = target.collisionRect.intersection(focus.collisionRect);
         this.physicsEngine.handleVerticalCollision(target, focus, intersection);
       }
-      focusBase = focus.__proto__.name;
-      targetBase = target.__proto__.name;
+      try {
+        focusBase = focus.__proto__.name;
+        targetBase = target.__proto__.name;
+      } catch (error) {
+        focusBase = this.fullyEvalulateSuperClass(focus);
+        targetBase = this.fullyEvalulateSuperClass(target);
+      }
       if (target.direction === 1 && focusBase !== CollisionEngine.prototype.TYPE_OF_MAPOBJECT) {
         if (targetBase === CollisionEngine.prototype.TYPE_OF_ACTION) {
           focus.state = focus.collisionLeft;
