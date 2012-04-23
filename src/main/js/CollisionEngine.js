@@ -30,6 +30,15 @@ CollisionEngine = (function() {
     return this.checkForCollision(focus, target);
   };
 
+  CollisionEngine.prototype.fullyEvalulateSuperClass = function(obj) {
+    if (obj instanceof MapObject) {
+      return CollisionEngine.prototype.TYPE_OF_MAPOBJECT;
+    }
+    if (obj instanceof Action) return CollisionEngine.prototype.TYPE_OF_ACTION;
+    if (obj instanceof Enemy) return Enemy.prototype.name;
+    if (obj instanceof Player) return Player.prototype.name;
+  };
+
   CollisionEngine.prototype.checkForCollision = function(focus, target) {
     var focusBase, intersection, targetBase;
     if (target.collisionRect.intersects(focus.collisionRect)) {
@@ -37,8 +46,13 @@ CollisionEngine = (function() {
         intersection = target.collisionRect.intersection(focus.collisionRect);
         this.physicsEngine.handleVerticalCollision(target, focus, intersection);
       }
-      focusBase = focus.__proto__.name;
-      targetBase = target.__proto__.name;
+      try {
+        focusBase = focus.__proto__.name;
+        targetBase = target.__proto__.name;
+      } catch (error) {
+        focusBase = this.fullyEvalulateSuperClass(focus);
+        targetBase = this.fullyEvalulateSuperClass(target);
+      }
       if (target.direction === 1 && focusBase !== CollisionEngine.prototype.TYPE_OF_MAPOBJECT) {
         if (targetBase === CollisionEngine.prototype.TYPE_OF_ACTION) {
           focus.state = focus.collisionLeft;

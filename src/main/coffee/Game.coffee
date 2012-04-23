@@ -22,6 +22,7 @@ class Game
   _customKeys = []
   _parent = {}
   _screen = {}
+  _fgscreen = {}
   _renderEngineClass = {}
   _collisionEngineClass = {}
   _physicsEngineClass = {}
@@ -41,13 +42,13 @@ class Game
     _renderEngine.render _input
     #TODO determine if 2000 needs to be configurable
     if progress < 2000
-      requestAnimationFrame @render
+      requestAnimationFrame @render.bind @
 
   renderDelegate:->
     if @_pause
         return
     if _animationFrameRequest
-      _animationFrameRequest @render
+      _animationFrameRequest @render.bind @
     else
       _renderEngine.render _input
 
@@ -80,9 +81,12 @@ class Game
         @_prefetchTmp.push audio
         audio.addEventListener 'canplaythrough',@handleAudioPrefetch.bind(@),false
         audio.src = tmp.sound
+        if Bootstrap::IS_IE
+          @handleAudioPrefetch {currentTarget:audio}
   
   handleImagePrefetch:->
     @_toFetchAssets--
+    console.log "pretch asset loaded " + @_toFetchAssets
     if @_toFetchAssets is 0
       @_prefetchTmp = []
       @checkForReady()
@@ -90,7 +94,8 @@ class Game
       @_requiredAssets--
   
   handleAudioPrefetch:(e)->
-    index = @_prefetchTmp.indexOf e.originalTarget,0
+    console.log "audio asset loaded"
+    index = @_prefetchTmp.indexOf e.currentTarget,0
     if index >= 0
       @_prefetchTmp.splice index,index+1
       @handleImagePrefetch()
@@ -109,7 +114,17 @@ class Game
     _screen.setAttribute "width", @VIEWPORT_WIDTH
     _screen.setAttribute "height", @VIEWPORT_HEIGHT
     _screen.setAttribute "tabIndex", 0
+    _screen.setAttribute "id", "scrn"
+    _screen.setAttribute "style","position: absolute; z-index: 0"
+    #TODO allow author to specify container for screens
     document.body.appendChild _screen
+    _fgscreen = document.createElement "canvas"
+    _fgscreen.setAttribute "width", @VIEWPORT_WIDTH
+    _fgscreen.setAttribute "height", @VIEWPORT_HEIGHT
+    _fgscreen.setAttribute "tabIndex", 1
+    _fgscreen.setAttribute "id", "fgscrn"
+    _fgscreen.setAttribute "style","position: absolute; z-index: 1"
+    document.body.appendChild _fgscreen
     @initialize()
   
   initialize: ->
@@ -141,6 +156,7 @@ class Game
     player= @players[_activePlayer]
     
     _renderEngine.scrn = _screen
+    _renderEngine.fgscrn = _fgscreen
     _renderEngine.map = new map()
     _renderEngine.player = new player()
     

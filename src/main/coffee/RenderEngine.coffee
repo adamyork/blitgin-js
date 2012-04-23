@@ -3,6 +3,7 @@ class RenderEngine
     @actionObjects = []
 
   _scrn = {}
+  _fgscrn = {}
   _map = {}
   _player = {}
   _nis = {}
@@ -12,7 +13,7 @@ class RenderEngine
   @_ctx = {}
 
   render:(input)->
-    @_ctx.clearRect 0,0,Game::VIEWPORT_WIDTH,Game::VIEWPORT_HEIGHT  
+    @_fgctx.clearRect 0,0,Game::VIEWPORT_WIDTH,Game::VIEWPORT_HEIGHT
     if @_nis isnt undefined
       @manageNis @_nis,input
       return
@@ -21,16 +22,22 @@ class RenderEngine
     @paint @map
     @map.manageElements Map::MANAGE_ENEMIES
     for enemy of @map.activeEnemies
+      if enemy is "__defineGetter__" or enemy is "__defineSetter__"
+        continue
       @manageEnemy @map.activeEnemies[enemy]
       @paint @map.activeEnemies[enemy]
     @manageNewActions input
     for action of @actionObjects
+      if action is "__defineGetter__" or action is "__defineSetter__"
+        continue
       aObj = @actionObjects[action]
       if @actionIsIdle aObj
         continue
       @manageAction aObj,input
       @paint aObj
     for mapObj of @map.activeMapObjects
+      if mapObj is "__defineGetter__" or mapObj is "__defineSetter__"
+        continue
       mObj = @map.activeMapObjects[mapObj]
       mObj.frame++
       @manageMapObject mObj
@@ -49,18 +56,29 @@ class RenderEngine
   paint:(obj)->
     d = obj.bitmapData
     if d.player and d.player.notready is undefined
-      @_ctx.drawImage d.player,d.rect.x,d.rect.y,d.rect.width,d.rect.height,Math.round(obj.point.x),Math.round(obj.point.y),d.rect.width,d.rect.height
+      @_fgctx.drawImage d.player,d.rect.x,d.rect.y,d.rect.width,d.rect.height,Math.round(obj.point.x),Math.round(obj.point.y),d.rect.width,d.rect.height
     else if d.player and d.player.notready
       return
     else if d.particles
       for item in d.particles
         rect = item.rect
         pPoint = item.particle.point
-        @_ctx.drawImage item.data,rect.x,rect.y,rect.width,rect.height,Math.round(pPoint.x),Math.round(pPoint.y),rect.width,rect.height
+        @_fgctx.drawImage item.data,rect.x,rect.y,rect.width,rect.height,Math.round(pPoint.x),Math.round(pPoint.y),rect.width,rect.height
     else
-      for asset in d.map
+      for asset,i in d.map
         if asset.data isnt undefined
-          @_ctx.drawImage asset.data,asset.rect.x,asset.rect.y,asset.rect.width,asset.rect.height,obj.point.x,obj.point.y,asset.rect.width,asset.rect.height
+          #TODO make fcount configurable
+          if i is 0 and @_fcount >= 1
+            @_fcount = 0
+            console.log "redrawing bg"
+            @_ctx.drawImage asset.data,asset.rect.x,asset.rect.y,asset.rect.width,asset.rect.height,obj.point.x,obj.point.y,asset.rect.width,asset.rect.height
+            @_fcount++
+            continue
+          else if i is 0 and @_fcount < 1
+            @_fcount++
+            continue
+          console.log "regular draw"
+          @_fgctx.drawImage asset.data,asset.rect.x,asset.rect.y,asset.rect.width,asset.rect.height,obj.point.x,obj.point.y,asset.rect.width,asset.rect.height
 
   managePlayer:(input)->
     if input.customKey isnt 0 and (not input.hasWaitFor(input.customKey)) and @player.state.isCancellable
@@ -218,8 +236,16 @@ RenderEngine::__defineGetter__ "scrn",->
   
 RenderEngine::__defineSetter__ "scrn",(val)->
   @_scrn = val
-  @_ctx = @scrn.getContext '2d'
-
+  @_ctx = @_scrn.getContext '2d'
+  @_fcount = 100
+  
+RenderEngine::__defineGetter__ "fgscrn",->
+  @_fgscrn
+  
+RenderEngine::__defineSetter__ "fgscrn",(val)->
+  @_fgscrn = val
+  @_fgctx = @_fgscrn.getContext '2d'
+  
 RenderEngine::__defineGetter__ "map",->
   @_map
 

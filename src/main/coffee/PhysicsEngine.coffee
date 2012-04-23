@@ -43,10 +43,25 @@ class PhysicsEngine
       target.velocityY = 0
     if target.collisionRect.y < intersection.y
       target.velocityY = target.maxVelocityY
+  
+  fullyEvalulateSuperClass:(obj)->
+    if obj instanceof MapObject
+      return CollisionEngine::TYPE_OF_MAPOBJECT
+    if obj instanceof Action
+      return CollisionEngine::TYPE_OF_ACTION
+    if obj instanceof Enemy
+      return Enemy::name
+    if obj instanceof Player
+      return Player::name
 
   handleHorizontalCollision:(target,focus,map)->
+    try
+      targetBase = target.__proto__.name
+    catch error
+      targetBase = @fullyEvalulateSuperClass target
+      
     if target.direction is 1
-      if target.__proto__.name is CollisionEngine::TYPE_OF_ACTION
+      if targetBase is CollisionEngine::TYPE_OF_ACTION
           focus.x += focus.width * focus.collisionCoefficient
           focus.velocityX = 0
       else
@@ -55,7 +70,7 @@ class PhysicsEngine
           map.x -= target.width * target.collisionCoefficient
           target.velocityX = 0
     else if target.direction is -1
-      if target.__proto__.name is CollisionEngine::TYPE_OF_ACTION
+      if targetBase is CollisionEngine::TYPE_OF_ACTION
           focus.x -= focus.width * focus.collisionCoefficient
           focus.velocityX = 0
       else

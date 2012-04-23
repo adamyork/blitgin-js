@@ -16,14 +16,28 @@ class CollisionEngine
         @checkForCollision tmpCollection[obj],focus
       return
     @checkForCollision focus,target
+  
+  fullyEvalulateSuperClass:(obj)->
+    if obj instanceof MapObject
+      return CollisionEngine::TYPE_OF_MAPOBJECT
+    if obj instanceof Action
+      return CollisionEngine::TYPE_OF_ACTION
+    if obj instanceof Enemy
+      return Enemy::name
+    if obj instanceof Player
+      return Player::name
 
   checkForCollision:(focus,target)->
     if target.collisionRect.intersects(focus.collisionRect)
       if @physicsEngine.isTargetMovingVertically(target)
         intersection = target.collisionRect.intersection(focus.collisionRect)
         @physicsEngine.handleVerticalCollision(target, focus, intersection)
-      focusBase = focus.__proto__.name
-      targetBase = target.__proto__.name
+      try
+        focusBase = focus.__proto__.name
+        targetBase = target.__proto__.name
+      catch error
+        focusBase = @fullyEvalulateSuperClass focus
+        targetBase = @fullyEvalulateSuperClass target
       if(target.direction == 1 and focusBase isnt CollisionEngine::TYPE_OF_MAPOBJECT)
         if targetBase is CollisionEngine::TYPE_OF_ACTION
             focus.state = focus.collisionLeft

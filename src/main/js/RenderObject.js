@@ -98,20 +98,30 @@ RenderObject = (function() {
     this.workbench.width = asset.width;
     this.workbench.height = asset.height;
     this.ctx.drawImage(asset, 0, 0);
+    console.log("getting data " + asset.src);
     imageData = this.ctx.getImageData(0, 0, this.workbench.width, this.workbench.height);
-    worker = new Worker('../src/main/js/RemoveColorTask.js');
+    try {
+      worker = new Worker('../src/main/js/RemoveColorTask.js');
+    } catch (error) {
+      worker = {};
+      worker.postMessage = this.removeSampleColor;
+      worker.terminate = function() {};
+    }
     ref = this;
     worker.onmessage = function(e) {
       if (cachePixels) {
         console.log('pixels cached');
         ref.collisionPixels = e.data;
       }
+      ref.ctx.clearRect(0, 0, ref.workbench.width, ref.workbench.height);
       ref.ctx.putImageData(e.data, 0, 0);
       targetData.src = null;
       targetData.src = ref.workbench.toDataURL();
-      ref.ctx.clearRect(0, 0, asset.width, asset.height);
+      console.log("asset " + asset.src);
+      console.log("bout to clear ctx ref.workbench.width : " + ref.workbench.width + "ref.workbench.height : " + ref.workbench.height);
       ref.notifyReady();
-      return worker.terminate();
+      worker.terminate();
+      return worker = null;
     };
     worker.onerror = function(e) {
       return console.log("error in worker");
@@ -120,6 +130,37 @@ RenderObject = (function() {
       "imageData": imageData,
       "colorConstant": this.colorConstant,
       "rgbTolerance": this.rgbTolerance
+    });
+  };
+
+  RenderObject.prototype.removeSampleColor = function(event) {
+    var a, b, bv, dataRef, g, gv, imageData, index, parsed, r, rv, t, val, xpos, ypos, _ref, _ref2;
+    imageData = event.imageData;
+    parsed = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(event.colorConstant);
+    rv = parseInt(parsed[1], 16);
+    gv = parseInt(parsed[2], 16);
+    bv = parseInt(parsed[3], 16);
+    val = rv + gv + bv;
+    t = event.rgbTolerance;
+    for (xpos = 0, _ref = imageData.width - 1; 0 <= _ref ? xpos <= _ref : xpos >= _ref; 0 <= _ref ? xpos++ : xpos--) {
+      for (ypos = 0, _ref2 = imageData.height - 1; 0 <= _ref2 ? ypos <= _ref2 : ypos >= _ref2; 0 <= _ref2 ? ypos++ : ypos--) {
+        index = 4 * (ypos * imageData.width + xpos);
+        dataRef = imageData.data;
+        r = dataRef[index];
+        g = dataRef[index + 1];
+        b = dataRef[index + 2];
+        a = dataRef[index + 3];
+        if (t !== void 0) {
+          if (r <= rv + t.r && g <= gv + t.g && b <= bv + t.b) {
+            dataRef[index + 3] = 0;
+          }
+        } else if ((r + g + b) === val) {
+          dataRef[index + 3] = 0;
+        }
+      }
+    }
+    return this.onmessage({
+      data: imageData
     });
   };
 

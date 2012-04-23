@@ -135,16 +135,18 @@ Map = (function(_super) {
     this._initializeComplete = true;
     this.x = 0;
     this.y = 0;
-    this.activeEnemies = [];
-    return this.activeMapObjects = [];
+    this.activeEnemies = {};
+    this.activeMapObjects = {};
+    this._inactiveEnemies = {};
+    return this._inactiveMapObjects = {};
   };
 
   Map.prototype.manageElements = function(type) {
-    var activeTargets, enemy, enemyOffScreen, group, inactiveTargets, indep, j, key, obj, posX, posY, position, target, targetArray, vh, vw, _i, _len, _len2, _ref;
+    var activeTargets, enemy, enemyOffScreen, group, inactiveTargets, indep, j, key, obj, posX, posY, position, target, targetArray, tmpE, vh, vw, _i, _len, _len2, _ref;
     inactiveTargets = {};
     activeTargets = {};
     targetArray = type === Map.prototype.MANAGE_ENEMIES ? this.enemies : this.mapObjects;
-    inactiveTargets = type === Map.prototype.MANAGE_ENEMIES ? _inactiveEnemies : _inactiveMapObjects;
+    inactiveTargets = type === Map.prototype.MANAGE_ENEMIES ? this._inactiveEnemies : this._inactiveMapObjects;
     activeTargets = type === Map.prototype.MANAGE_ENEMIES ? this._activeEnemies : this._activeMapObjects;
     for (_i = 0, _len = targetArray.length; _i < _len; _i++) {
       group = targetArray[_i];
@@ -158,7 +160,12 @@ Map = (function(_super) {
         posY = target ? target.mapY : group.positions[j].y;
         vw = Game.prototype.VIEWPORT_WIDTH;
         vh = Game.prototype.VIEWPORT_HEIGHT;
-        if (inactiveTargets[key]) return;
+        try {
+          tmpE = inactiveTargets[key];
+          if (tmpE) return;
+        } catch (error) {
+
+        }
         indep = group.independence;
         if (target === void 0) {
           if (this.isEnemyOnScreen(posX, posY, vw, vh, indep)) {
@@ -255,7 +262,6 @@ Map.prototype.name = "Map";
 Map.prototype.__defineGetter__("bitmapData", function() {
   var bg, cd, fg, mid, vh, vw, yPos;
   if (this._initializeComplete) {
-    this.ctx.clearRect(0, 0, this.workbench.width, this.workbench.height);
     yPos = this.platform ? this._y : 0;
     vh = Game.prototype.VIEWPORT_HEIGHT;
     vw = Game.prototype.VIEWPORT_WIDTH;
@@ -266,11 +272,10 @@ Map.prototype.__defineGetter__("bitmapData", function() {
     if (this.paralaxing) {
       bg = this.buildDataVO(this.backgroundData, new Rectangle(Math.round(this._x * .25), yPos, vw, vh));
       mid = this.buildDataVO(this.midgroundData, new Rectangle(Math.round(this._x * .5), yPos, vw, vh));
-    } else {
-      fg = this.buildDataVO(this.foregroundData, new Rectangle(this._x, yPos, vw, vh));
     }
+    fg = this.buildDataVO(this.foregroundData, new Rectangle(Math.round(this._x), Math.round(yPos), vw, vh));
     if (this.showCollisionMap) {
-      cd = this.buildDataVO(this.collisionData, new Rectangle(this._x, yPos, vw, vh));
+      cd = this.buildDataVO(this.collisionData, new Rectangle(Math.round(this._x), Math.round(yPos), vw, vh));
     }
     return {
       map: [bg, mid, fg, cd]

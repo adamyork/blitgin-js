@@ -101,14 +101,16 @@ class Map extends RenderObject
     @_initializeComplete = true
     @x = 0
     @y = 0
-    @activeEnemies = []
-    @activeMapObjects = []
+    @activeEnemies = {}
+    @activeMapObjects = {}
+    @_inactiveEnemies = {}
+    @_inactiveMapObjects = {}
 
   manageElements:(type)->
     inactiveTargets = {}
     activeTargets = {}
     targetArray = if (type == Map::MANAGE_ENEMIES) then @enemies else @mapObjects;
-    inactiveTargets = if (type == Map::MANAGE_ENEMIES) then _inactiveEnemies else _inactiveMapObjects
+    inactiveTargets = if (type == Map::MANAGE_ENEMIES) then @_inactiveEnemies else @_inactiveMapObjects
     activeTargets = if (type == Map::MANAGE_ENEMIES) then @_activeEnemies else @_activeMapObjects
   
     for group in targetArray
@@ -122,11 +124,13 @@ class Map extends RenderObject
         vw = Game::VIEWPORT_WIDTH
         vh = Game::VIEWPORT_HEIGHT
 
-        if inactiveTargets[key]
-          return
+        try 
+          tmpE = inactiveTargets[key]
+          if tmpE
+            return
+        catch error
 
         indep = group.independence
-
         if target is undefined
           if(@isEnemyOnScreen posX,posY,vw,vh,indep)
             enemy = group.type
@@ -204,7 +208,6 @@ Map::name = "Map"
   
 Map::__defineGetter__ "bitmapData",->
   if @_initializeComplete
-    @ctx.clearRect 0,0,@workbench.width,@workbench.height
     yPos = if @platform then @_y else 0
     vh = Game::VIEWPORT_HEIGHT
     vw = Game::VIEWPORT_WIDTH
@@ -215,10 +218,9 @@ Map::__defineGetter__ "bitmapData",->
     if(@paralaxing)
       bg = @buildDataVO @backgroundData,new Rectangle(Math.round(@_x*.25),yPos,vw,vh)
       mid = @buildDataVO @midgroundData,new Rectangle(Math.round(@_x*.5),yPos,vw,vh)
-    else
-      fg = @buildDataVO @foregroundData,new Rectangle(@_x,yPos,vw,vh)
+    fg = @buildDataVO @foregroundData,new Rectangle(Math.round(@_x),Math.round(yPos),vw,vh)
     if(@showCollisionMap)
-      cd = @buildDataVO @collisionData,new Rectangle(@_x,yPos,vw,vh)
+      cd = @buildDataVO @collisionData,new Rectangle(Math.round(@_x),Math.round(yPos),vw,vh)
     {map:[bg,mid,fg,cd]}
   else
     console.log 'You cannot start the game yet. Map assets are not loaded.'

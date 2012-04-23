@@ -61,9 +61,24 @@ PhysicsEngine = (function() {
     }
   };
 
+  PhysicsEngine.prototype.fullyEvalulateSuperClass = function(obj) {
+    if (obj instanceof MapObject) {
+      return CollisionEngine.prototype.TYPE_OF_MAPOBJECT;
+    }
+    if (obj instanceof Action) return CollisionEngine.prototype.TYPE_OF_ACTION;
+    if (obj instanceof Enemy) return Enemy.prototype.name;
+    if (obj instanceof Player) return Player.prototype.name;
+  };
+
   PhysicsEngine.prototype.handleHorizontalCollision = function(target, focus, map) {
+    var targetBase;
+    try {
+      targetBase = target.__proto__.name;
+    } catch (error) {
+      targetBase = this.fullyEvalulateSuperClass(target);
+    }
     if (target.direction === 1) {
-      if (target.__proto__.name === CollisionEngine.prototype.TYPE_OF_ACTION) {
+      if (targetBase === CollisionEngine.prototype.TYPE_OF_ACTION) {
         focus.x += focus.width * focus.collisionCoefficient;
         focus.velocityX = 0;
       } else {
@@ -73,7 +88,7 @@ PhysicsEngine = (function() {
         target.velocityX = 0;
       }
     } else if (target.direction === -1) {
-      if (target.__proto__.name === CollisionEngine.prototype.TYPE_OF_ACTION) {
+      if (targetBase === CollisionEngine.prototype.TYPE_OF_ACTION) {
         focus.x -= focus.width * focus.collisionCoefficient;
         focus.velocityX = 0;
       } else {

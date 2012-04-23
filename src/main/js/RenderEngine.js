@@ -1,7 +1,7 @@
 var RenderEngine;
 
 RenderEngine = (function() {
-  var _collisionEngine, _map, _nis, _physicsEngine, _player, _scrn, _soundEngine;
+  var _collisionEngine, _fgscrn, _map, _nis, _physicsEngine, _player, _scrn, _soundEngine;
 
   function RenderEngine(name) {
     this.name = name;
@@ -9,6 +9,8 @@ RenderEngine = (function() {
   }
 
   _scrn = {};
+
+  _fgscrn = {};
 
   _map = {};
 
@@ -26,7 +28,7 @@ RenderEngine = (function() {
 
   RenderEngine.prototype.render = function(input) {
     var aObj, action, enemy, mObj, mapObj;
-    this._ctx.clearRect(0, 0, Game.prototype.VIEWPORT_WIDTH, Game.prototype.VIEWPORT_HEIGHT);
+    this._fgctx.clearRect(0, 0, Game.prototype.VIEWPORT_WIDTH, Game.prototype.VIEWPORT_HEIGHT);
     if (this._nis !== void 0) {
       this.manageNis(this._nis, input);
       return;
@@ -36,17 +38,20 @@ RenderEngine = (function() {
     this.paint(this.map);
     this.map.manageElements(Map.prototype.MANAGE_ENEMIES);
     for (enemy in this.map.activeEnemies) {
+      if (enemy === "__defineGetter__" || enemy === "__defineSetter__") continue;
       this.manageEnemy(this.map.activeEnemies[enemy]);
       this.paint(this.map.activeEnemies[enemy]);
     }
     this.manageNewActions(input);
     for (action in this.actionObjects) {
+      if (action === "__defineGetter__" || action === "__defineSetter__") continue;
       aObj = this.actionObjects[action];
       if (this.actionIsIdle(aObj)) continue;
       this.manageAction(aObj, input);
       this.paint(aObj);
     }
     for (mapObj in this.map.activeMapObjects) {
+      if (mapObj === "__defineGetter__" || mapObj === "__defineSetter__") continue;
       mObj = this.map.activeMapObjects[mapObj];
       mObj.frame++;
       this.manageMapObject(mObj);
@@ -67,10 +72,10 @@ RenderEngine = (function() {
   };
 
   RenderEngine.prototype.paint = function(obj) {
-    var asset, d, item, pPoint, rect, _i, _j, _len, _len2, _ref, _ref2, _results, _results2;
+    var asset, d, i, item, pPoint, rect, _i, _len, _len2, _ref, _ref2, _results, _results2;
     d = obj.bitmapData;
     if (d.player && d.player.notready === void 0) {
-      return this._ctx.drawImage(d.player, d.rect.x, d.rect.y, d.rect.width, d.rect.height, Math.round(obj.point.x), Math.round(obj.point.y), d.rect.width, d.rect.height);
+      return this._fgctx.drawImage(d.player, d.rect.x, d.rect.y, d.rect.width, d.rect.height, Math.round(obj.point.x), Math.round(obj.point.y), d.rect.width, d.rect.height);
     } else if (d.player && d.player.notready) {} else if (d.particles) {
       _ref = d.particles;
       _results = [];
@@ -78,16 +83,27 @@ RenderEngine = (function() {
         item = _ref[_i];
         rect = item.rect;
         pPoint = item.particle.point;
-        _results.push(this._ctx.drawImage(item.data, rect.x, rect.y, rect.width, rect.height, Math.round(pPoint.x), Math.round(pPoint.y), rect.width, rect.height));
+        _results.push(this._fgctx.drawImage(item.data, rect.x, rect.y, rect.width, rect.height, Math.round(pPoint.x), Math.round(pPoint.y), rect.width, rect.height));
       }
       return _results;
     } else {
       _ref2 = d.map;
       _results2 = [];
-      for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
-        asset = _ref2[_j];
+      for (i = 0, _len2 = _ref2.length; i < _len2; i++) {
+        asset = _ref2[i];
         if (asset.data !== void 0) {
-          _results2.push(this._ctx.drawImage(asset.data, asset.rect.x, asset.rect.y, asset.rect.width, asset.rect.height, obj.point.x, obj.point.y, asset.rect.width, asset.rect.height));
+          if (i === 0 && this._fcount >= 1) {
+            this._fcount = 0;
+            console.log("redrawing bg");
+            this._ctx.drawImage(asset.data, asset.rect.x, asset.rect.y, asset.rect.width, asset.rect.height, obj.point.x, obj.point.y, asset.rect.width, asset.rect.height);
+            this._fcount++;
+            continue;
+          } else if (i === 0 && this._fcount < 1) {
+            this._fcount++;
+            continue;
+          }
+          console.log("regular draw");
+          _results2.push(this._fgctx.drawImage(asset.data, asset.rect.x, asset.rect.y, asset.rect.width, asset.rect.height, obj.point.x, obj.point.y, asset.rect.width, asset.rect.height));
         } else {
           _results2.push(void 0);
         }
@@ -285,7 +301,17 @@ RenderEngine.prototype.__defineGetter__("scrn", function() {
 
 RenderEngine.prototype.__defineSetter__("scrn", function(val) {
   this._scrn = val;
-  return this._ctx = this.scrn.getContext('2d');
+  this._ctx = this._scrn.getContext('2d');
+  return this._fcount = 100;
+});
+
+RenderEngine.prototype.__defineGetter__("fgscrn", function() {
+  return this._fgscrn;
+});
+
+RenderEngine.prototype.__defineSetter__("fgscrn", function(val) {
+  this._fgscrn = val;
+  return this._fgctx = this._fgscrn.getContext('2d');
 });
 
 RenderEngine.prototype.__defineGetter__("map", function() {

@@ -62,22 +62,55 @@ class RenderObject
     @workbench.width = asset.width
     @workbench.height = asset.height
     @ctx.drawImage asset,0,0
+    console.log "getting data " + asset.src
     imageData = @ctx.getImageData 0, 0, @workbench.width, @workbench.height
-    worker = new Worker '../src/main/js/RemoveColorTask.js'
-    ref = @
+    try 
+      worker = new Worker '../src/main/js/RemoveColorTask.js'
+    catch error
+      worker = {}
+      worker.postMessage = @removeSampleColor
+      worker.terminate = ()->
+    ref = @ 
     worker.onmessage=(e)->
       if cachePixels
         console.log 'pixels cached'
         ref.collisionPixels = e.data
+      ref.ctx.clearRect 0,0,ref.workbench.width,ref.workbench.height
       ref.ctx.putImageData e.data,0,0
       targetData.src = null
       targetData.src = ref.workbench.toDataURL()
-      ref.ctx.clearRect 0,0,asset.width,asset.height
+      console.log "asset " + asset.src
+      console.log "bout to clear ctx ref.workbench.width : " + ref.workbench.width + "ref.workbench.height : " + ref.workbench.height
       ref.notifyReady()
       worker.terminate()
+      worker = null
     worker.onerror=(e)->
       console.log "error in worker"
     worker.postMessage {"imageData":imageData,"colorConstant":@colorConstant,"rgbTolerance":@rgbTolerance}
+    
+  removeSampleColor:(event)->
+    imageData = event.imageData
+    parsed = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(event.colorConstant)
+    rv = parseInt parsed[1],16
+    gv = parseInt parsed[2],16
+    bv = parseInt parsed[3],16
+    val = rv + gv + bv
+    t = event.rgbTolerance
+    for xpos in [0 .. imageData.width-1]
+      for ypos in [0 .. imageData.height-1]
+        index = 4 * (ypos * imageData.width + xpos)
+        dataRef = imageData.data
+        r = dataRef[index]
+        g = dataRef[index + 1]
+        b = dataRef[index + 2]
+        a = dataRef[index + 3]
+        if t isnt undefined
+          if r <= rv + t.r and g <= gv + t.g and b <= bv + t.b
+            dataRef[index + 3] = 0
+        else if (r+g+b) is val
+          dataRef[index + 3] = 0
+    @onmessage {data:imageData}  
+
   
   notifyReady:->
     Game::instance.checkForReady()

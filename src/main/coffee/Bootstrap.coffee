@@ -1,5 +1,6 @@
 class Bootstrap  
   constructor:(@name)->
+    @checkForIE()
     @checkExt()
     @checkBind()
     @checkAccessors()
@@ -18,7 +19,20 @@ class Bootstrap
   callBack = {}
   
   Bootstrap::FULL = "full"
+  Bootstrap::IS_IE = false
   
+  checkForIE:->
+    undef = "not ie"
+    v = 8
+    div = document.createElement 'div'
+    all = div.getElementsByTagName 'i'
+    for i in [v..11]
+      div.innerHTML = "<!--[if gt IE " + v + "]><i></i><![endif]-->"
+      if div.innerHTML is ""
+        break
+      v = i
+    if v > 8 then Bootstrap::IS_IE = true else Boostrap::IS_IE = false
+
   checkExt:->
     if window.ext is undefined
       window.ext=(superClass,subClass)->

@@ -5,6 +5,7 @@ Bootstrap = (function() {
 
   function Bootstrap(name) {
     this.name = name;
+    this.checkForIE();
     this.checkExt();
     this.checkBind();
     this.checkAccessors();
@@ -25,6 +26,26 @@ Bootstrap = (function() {
   callBack = {};
 
   Bootstrap.prototype.FULL = "full";
+
+  Bootstrap.prototype.IS_IE = false;
+
+  Bootstrap.prototype.checkForIE = function() {
+    var all, div, i, undef, v;
+    undef = "not ie";
+    v = 8;
+    div = document.createElement('div');
+    all = div.getElementsByTagName('i');
+    for (i = v; v <= 11 ? i <= 11 : i >= 11; v <= 11 ? i++ : i--) {
+      div.innerHTML = "<!--[if gt IE " + v + "]><i></i><![endif]-->";
+      if (div.innerHTML === "") break;
+      v = i;
+    }
+    if (v > 8) {
+      return Bootstrap.prototype.IS_IE = true;
+    } else {
+      return Boostrap.prototype.IS_IE = false;
+    }
+  };
 
   Bootstrap.prototype.checkExt = function() {
     if (window.ext === void 0) {

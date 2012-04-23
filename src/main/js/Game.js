@@ -1,7 +1,7 @@
 var Game;
 
 Game = (function() {
-  var _activeMap, _activePlayer, _animationFrameRequest, _collisionEngineClass, _customKey, _customKeys, _downKeys, _input, _instance, _isStarted, _jumpKeys, _leftKeys, _maps, _movement, _parent, _pause, _physicsEngineClass, _players, _prefetchTmp, _renderEngine, _renderEngineClass, _requiredAssets, _rightKeys, _screen, _soundEngine, _subscribers, _timer, _toFetchAssets, _upKeys;
+  var _activeMap, _activePlayer, _animationFrameRequest, _collisionEngineClass, _customKey, _customKeys, _downKeys, _fgscreen, _input, _instance, _isStarted, _jumpKeys, _leftKeys, _maps, _movement, _parent, _pause, _physicsEngineClass, _players, _prefetchTmp, _renderEngine, _renderEngineClass, _requiredAssets, _rightKeys, _screen, _soundEngine, _subscribers, _timer, _toFetchAssets, _upKeys;
 
   function Game(name) {
     this.name = name;
@@ -44,6 +44,8 @@ Game = (function() {
 
   _screen = {};
 
+  _fgscreen = {};
+
   _renderEngineClass = {};
 
   _collisionEngineClass = {};
@@ -74,13 +76,13 @@ Game = (function() {
     var progress;
     progress = timestamp - this._start;
     _renderEngine.render(_input);
-    if (progress < 2000) return requestAnimationFrame(this.render);
+    if (progress < 2000) return requestAnimationFrame(this.render.bind(this));
   };
 
   Game.prototype.renderDelegate = function() {
     if (this._pause) return;
     if (_animationFrameRequest) {
-      return _animationFrameRequest(this.render);
+      return _animationFrameRequest(this.render.bind(this));
     } else {
       return _renderEngine.render(_input);
     }
@@ -122,7 +124,14 @@ Game = (function() {
         audio = new Audio();
         this._prefetchTmp.push(audio);
         audio.addEventListener('canplaythrough', this.handleAudioPrefetch.bind(this), false);
-        _results.push(audio.src = tmp.sound);
+        audio.src = tmp.sound;
+        if (Bootstrap.prototype.IS_IE) {
+          _results.push(this.handleAudioPrefetch({
+            currentTarget: audio
+          }));
+        } else {
+          _results.push(void 0);
+        }
       } else {
         _results.push(void 0);
       }
@@ -132,6 +141,7 @@ Game = (function() {
 
   Game.prototype.handleImagePrefetch = function() {
     this._toFetchAssets--;
+    console.log("pretch asset loaded " + this._toFetchAssets);
     if (this._toFetchAssets === 0) {
       this._prefetchTmp = [];
       return this.checkForReady();
@@ -142,7 +152,8 @@ Game = (function() {
 
   Game.prototype.handleAudioPrefetch = function(e) {
     var index;
-    index = this._prefetchTmp.indexOf(e.originalTarget, 0);
+    console.log("audio asset loaded");
+    index = this._prefetchTmp.indexOf(e.currentTarget, 0);
     if (index >= 0) {
       this._prefetchTmp.splice(index, index + 1);
       return this.handleImagePrefetch();
@@ -165,7 +176,16 @@ Game = (function() {
     _screen.setAttribute("width", this.VIEWPORT_WIDTH);
     _screen.setAttribute("height", this.VIEWPORT_HEIGHT);
     _screen.setAttribute("tabIndex", 0);
+    _screen.setAttribute("id", "scrn");
+    _screen.setAttribute("style", "position: absolute; z-index: 0");
     document.body.appendChild(_screen);
+    _fgscreen = document.createElement("canvas");
+    _fgscreen.setAttribute("width", this.VIEWPORT_WIDTH);
+    _fgscreen.setAttribute("height", this.VIEWPORT_HEIGHT);
+    _fgscreen.setAttribute("tabIndex", 1);
+    _fgscreen.setAttribute("id", "fgscrn");
+    _fgscreen.setAttribute("style", "position: absolute; z-index: 1");
+    document.body.appendChild(_fgscreen);
     return this.initialize();
   };
 
@@ -197,6 +217,7 @@ Game = (function() {
     map = this.maps[_activeMap];
     player = this.players[_activePlayer];
     _renderEngine.scrn = _screen;
+    _renderEngine.fgscrn = _fgscreen;
     _renderEngine.map = new map();
     _renderEngine.player = new player();
     if (_renderEngine.map.platform) {
