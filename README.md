@@ -11,27 +11,27 @@
 						   |_) |   |  |  / _ | |\ | 
 						   |_) | , |  |  \ / | | \| js.
 
-# To use...
-## Create an instance of Bootstrap , then ...
+## To use...
+### Create an instance of Bootstrap , then ...
 - Include blitgin-js classes individually
 **or**
 - Include blitgin-js
 **or**
 - Include blitgin-js-min
 
-# To edit...
+## To edit...
 - Install node -> npm -> coffeescript
 - git clone https://github.com/radAdam/blitgin-js.git
 - Modify coffeescript files.
 - Compile : brew.cmd or brewsh.sh brew -[onecup|wholepot] -[o[min]]
 
-# Browser Compatibility...
+## Browser Compatibility...
 - Tested in 
--- FF 11
--- Chrome 18 **For Chrome to render properly make use of '--disable-accelerated-2d-canvas'. Until the peformance issue is fixed**
--- IE 9 **Webworkers are not available in IE. Sampling out of colors is very slow.**
+ - FF 11
+ - Chrome 18 **For Chrome to render properly make use of '--disable-accelerated-2d-canvas'. Until the peformance issue is fixed**
+ - IE 9 **Webworkers are not available in IE. Sampling out of colors is very slow.**
 
-# Todo...
+## Todo...
 - its possible that a composites asset is not a single row 
 - make fcount configurable
 - this needs to be expanded upon. Check more than just number of enemies
