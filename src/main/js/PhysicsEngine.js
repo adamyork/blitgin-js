@@ -15,6 +15,11 @@ PhysicsEngine = (function() {
     player.y -= player.velocityY;
     player.velocityY -= map.gravity;
     player.y += map.gravity;
+    if (player.y - player.height <= 0 && player.floor) {
+      if (map.floor === void 0) map.floor = map.y;
+      map.floor += map.gravity;
+      return;
+    }
     return map.y += map.gravity;
   };
 

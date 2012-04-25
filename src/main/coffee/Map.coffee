@@ -36,6 +36,7 @@ class Map extends RenderObject
   
   _sound = undefined
   _soundLoops = 0
+  _floor = undefined
 
   initialize: ->
     @workbench = document.createElement "canvas"
@@ -246,6 +247,9 @@ Map::__defineSetter__ "y",(val)->
   if (val < 0)
     @_y = 0
     return
+  if @floor isnt undefined and val >= @floor
+    @_y = @floor
+    return
   @_y = val
 
 Map::__defineGetter__ "backgroundAssetClass",->
@@ -388,6 +392,12 @@ Map::__defineGetter__ "soundLoops",->
 
 Map::__defineSetter__ "soundLoops",(val)->
   @_soundLoops = val
+
+Map::__defineGetter__ "floor",->
+  @_floor
+
+Map::__defineSetter__ "floor",(val)->
+  @_floor = val
 
 Map::MANAGE_ENEMIES = "manageEnemies"
 Map::MANAGE_MAP_OBJECTS = "manageMapObjects"

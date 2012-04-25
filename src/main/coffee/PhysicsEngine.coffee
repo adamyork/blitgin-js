@@ -8,6 +8,10 @@ class PhysicsEngine
     player.y -= player.velocityY
     player.velocityY-= map.gravity
     player.y += map.gravity
+    if player.y - player.height <= 0 and player.floor
+      if map.floor is undefined then map.floor = map.y
+      map.floor += map.gravity
+      return
     map.y += map.gravity
 
   applyPlayerInput:(player,input)->

@@ -3,7 +3,7 @@ var Map,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
 Map = (function(_super) {
-  var _activeEnemies, _activeMapObjects, _assetsLoaded, _backgroundAsset, _backgroundAssetClass, _backgroundData, _collisionAsset, _collisionAssetClass, _collisionData, _enemies, _foregroundAsset, _foregroundAssetClass, _foregroundData, _friction, _gravity, _inactiveEnemies, _inactiveMapObjects, _initializeComplete, _mapObjects, _midgroundAsset, _midgroundAssetClass, _midgroundData, _nis, _paralaxing, _platform, _showCollisionMap, _sound, _soundLoops;
+  var _activeEnemies, _activeMapObjects, _assetsLoaded, _backgroundAsset, _backgroundAssetClass, _backgroundData, _collisionAsset, _collisionAssetClass, _collisionData, _enemies, _floor, _foregroundAsset, _foregroundAssetClass, _foregroundData, _friction, _gravity, _inactiveEnemies, _inactiveMapObjects, _initializeComplete, _mapObjects, _midgroundAsset, _midgroundAssetClass, _midgroundData, _nis, _paralaxing, _platform, _showCollisionMap, _sound, _soundLoops;
 
   __extends(Map, _super);
 
@@ -66,6 +66,8 @@ Map = (function(_super) {
   _sound = void 0;
 
   _soundLoops = 0;
+
+  _floor = void 0;
 
   Map.prototype.initialize = function() {
     this.workbench = document.createElement("canvas");
@@ -312,6 +314,10 @@ Map.prototype.__defineSetter__("y", function(val) {
     this._y = 0;
     return;
   }
+  if (this.floor !== void 0 && val >= this.floor) {
+    this._y = this.floor;
+    return;
+  }
   return this._y = val;
 });
 
@@ -501,6 +507,14 @@ Map.prototype.__defineGetter__("soundLoops", function() {
 
 Map.prototype.__defineSetter__("soundLoops", function(val) {
   return this._soundLoops = val;
+});
+
+Map.prototype.__defineGetter__("floor", function() {
+  return this._floor;
+});
+
+Map.prototype.__defineSetter__("floor", function(val) {
+  return this._floor = val;
 });
 
 Map.prototype.MANAGE_ENEMIES = "manageEnemies";
