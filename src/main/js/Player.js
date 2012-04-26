@@ -84,7 +84,7 @@ Player = (function(_super) {
 
   Player.prototype.initialize = function() {
     Player.__super__.initialize.call(this, this.updateInherentStates);
-    this.y = _floor = Game.prototype.VIEWPORT_HEIGHT - (this.asset.height - this.cellHeight);
+    this.y = 0;
     this._frame = 0;
     this._minVelocity = 0;
     this._isBusy = false;

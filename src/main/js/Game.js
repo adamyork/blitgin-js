@@ -97,17 +97,17 @@ Game = (function() {
 
   Game.prototype.render = function(timestamp) {
     var delta;
-    _animationFrameRequest(this.render.bind(this));
     if (this._currentFrame !== this._framerateBuffer) {
       this._currentFrame++;
+      _animationFrameRequest(this.render.bind(this));
       return;
     }
-    delta = Date.now() - this._start;
-    if (delta === NaN || delta === void 0) delta = 0;
-    Game.prototype.DeltaTime = 1 + ((((delta * 1000) - 32) / 32) / 1000);
+    delta = timestamp - this._start;
+    Game.prototype.DeltaTime = delta / 1000;
     _renderEngine.render(_input);
-    this._start = Date.now();
-    return this._currentFrame = 0;
+    this._start = timestamp;
+    this._currentFrame = 0;
+    return _animationFrameRequest(this.render.bind(this));
   };
 
   Game.prototype.renderDelegate = function() {
@@ -115,7 +115,7 @@ Game = (function() {
     if (_animationFrameRequest) {
       this._start = Date.now();
       this._currentFrame = 0;
-      return this.render();
+      return this.render(this._start);
     } else {
       return _renderEngine.render(_input);
     }

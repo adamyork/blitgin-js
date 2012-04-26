@@ -52,17 +52,16 @@ class Game
   _currentFrame = 0
   
   render:(timestamp)->
-    _animationFrameRequest @render.bind @
     if @_currentFrame isnt @_framerateBuffer
       @_currentFrame++
+      _animationFrameRequest @render.bind @
       return
-    delta = Date.now() - @_start
-    if delta is NaN or delta is undefined
-      delta = 0
-    Game::DeltaTime = 1 + ((((delta * 1000) - 32 ) / 32 ) / 1000)
+    delta = timestamp - @_start
+    Game::DeltaTime = delta/1000
     _renderEngine.render _input
-    @_start = Date.now()
+    @_start = timestamp
     @_currentFrame = 0
+    _animationFrameRequest @render.bind @
     
   renderDelegate:->
     if @_pause
@@ -70,8 +69,7 @@ class Game
     if _animationFrameRequest
       @_start = Date.now()
       @_currentFrame = 0
-      @render()
-      #_animationFrameRequest @render.bind @
+      @render @_start
     else
       _renderEngine.render _input
 
@@ -81,7 +79,7 @@ class Game
     
   start: ->
     if not _isStarted
-      #_timer = setInterval @renderDelegate.bind(@) , 84
+      #_timer = setInterval @renderDelegate.bind(@) , 27
       @renderDelegate()
       _isStarted = true
   

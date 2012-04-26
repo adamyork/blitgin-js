@@ -42,7 +42,7 @@ class Player extends RenderObject
   
   initialize:->
     super @updateInherentStates
-    @y = _floor = ((Game::VIEWPORT_HEIGHT) - (@asset.height - @cellHeight))
+    @y = 0#_floor = ((Game::VIEWPORT_HEIGHT) - (@asset.height - @cellHeight))
     @_frame = 0
     @_minVelocity = 0
     @_isBusy = false
