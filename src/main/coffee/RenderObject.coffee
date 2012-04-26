@@ -39,7 +39,7 @@ class RenderObject
       @asset.onload = @assetLoadComplete.bind this
       @asset.src = @assetClass
     else
-      console.log "Set a cellwidth , cellheight , and assetClass before calling initialize."
+      GameError.warn "Set a cellwidth , cellheight , and assetClass before calling initialize."
       
   assetLoadComplete:->
     @asset.onload = undefined
@@ -58,11 +58,10 @@ class RenderObject
 
   removeColorConstantAndCache:(asset,targetData,cachePixels)->
     if @colorConstant is undefined
-      console.log "Error : You need to set a hex value for colorConstant , or set tranparency true if no color is to be sampled out."
+      GameError.warn "You need to set a hex value for colorConstant , or set tranparency true if no color is to be sampled out."
     @workbench.width = asset.width
     @workbench.height = asset.height
     @ctx.drawImage asset,0,0
-    console.log "getting data " + asset.src
     imageData = @ctx.getImageData 0, 0, @workbench.width, @workbench.height
     try 
       worker = new Worker '../src/main/js/RemoveColorTask.js'
@@ -73,19 +72,16 @@ class RenderObject
     ref = @ 
     worker.onmessage=(e)->
       if cachePixels
-        console.log 'pixels cached'
         ref.collisionPixels = e.data
       ref.ctx.clearRect 0,0,ref.workbench.width,ref.workbench.height
       ref.ctx.putImageData e.data,0,0
       targetData.src = null
       targetData.src = ref.workbench.toDataURL()
-      console.log "asset " + asset.src
-      console.log "bout to clear ctx ref.workbench.width : " + ref.workbench.width + "ref.workbench.height : " + ref.workbench.height
       ref.notifyReady()
       worker.terminate()
       worker = null
     worker.onerror=(e)->
-      console.log "error in worker"
+      GameError.warn "Error in worker"
     worker.postMessage {"imageData":imageData,"colorConstant":@colorConstant,"rgbTolerance":@rgbTolerance}
     
   removeSampleColor:(event)->

@@ -31,10 +31,10 @@ class Action extends RenderObject
   _emitter = {}
   
   loadedMetadata:()->
-    console.log "LOADED METADADA"
+    GameError.warn "LOADED METADADA"
     
   audioAvailable:()->
-    console.log "audioAvailable"
+    GameError.warn "audioAvailable"
   
 Action::name = "Action"
 

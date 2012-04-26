@@ -91,7 +91,6 @@ class Game
   
   handleImagePrefetch:->
     @_toFetchAssets--
-    console.log "pretch asset loaded " + @_toFetchAssets
     if @_toFetchAssets is 0
       @_prefetchTmp = []
       @checkForReady()
@@ -99,7 +98,6 @@ class Game
       @_requiredAssets--
   
   handleAudioPrefetch:(e)->
-    console.log "audio asset loaded"
     index = @_prefetchTmp.indexOf e.currentTarget,0
     if index >= 0
       @_prefetchTmp.splice index,index+1
@@ -107,7 +105,6 @@ class Game
       
   checkForReady:->
     @_requiredAssets--
-    console.log "checking " + @_requiredAssets
     if @_requiredAssets is 0
       Game::instance.notifySubscribers Game::Ready,{},{},[]
 
@@ -151,10 +148,10 @@ class Game
         _renderEngine.physicsEngine = new _physicsEngineClass()
     
     if @maps.length == 0
-        console.log "Blitgin_as :: [ERROR] :: you need at least one map."
+        GameError.warn  "you need at least one map."
     
     if @players.length == 0
-        console.log "Blitgin_as :: [ERROR] :: you need at least one player."
+        GameError.warn  "you need at least one player."
     
     _soundEngine = new SoundEngine()
     _renderEngine.soundEngine = _soundEngine

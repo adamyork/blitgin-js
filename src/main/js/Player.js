@@ -422,7 +422,7 @@ Player.prototype.__defineGetter__("thresholdX", function() {
 
 Player.prototype.__defineSetter__("thresholdX", function(val) {
   if (val > (this.width * .5)) {
-    console.log("You cant set a threshold this high. There would be no collision area.");
+    GameError.warn("You cant set a threshold this high. There would be no collision area.");
   }
   return this._thresholdX = val;
 });
@@ -433,7 +433,7 @@ Player.prototype.__defineGetter__("thresholdY", function() {
 
 Player.prototype.__defineSetter__("thresholdY", function(val) {
   if (val > (this.height * .5)) {
-    console.log("You cant set a threshold this high. There would be no collision area.");
+    GameError.warn("You cant set a threshold this high. There would be no collision area.");
   }
   return this._thresholdY = val;
 });

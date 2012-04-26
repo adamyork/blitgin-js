@@ -149,7 +149,6 @@ Game = (function() {
 
   Game.prototype.handleImagePrefetch = function() {
     this._toFetchAssets--;
-    console.log("pretch asset loaded " + this._toFetchAssets);
     if (this._toFetchAssets === 0) {
       this._prefetchTmp = [];
       return this.checkForReady();
@@ -160,7 +159,6 @@ Game = (function() {
 
   Game.prototype.handleAudioPrefetch = function(e) {
     var index;
-    console.log("audio asset loaded");
     index = this._prefetchTmp.indexOf(e.currentTarget, 0);
     if (index >= 0) {
       this._prefetchTmp.splice(index, index + 1);
@@ -170,7 +168,6 @@ Game = (function() {
 
   Game.prototype.checkForReady = function() {
     this._requiredAssets--;
-    console.log("checking " + this._requiredAssets);
     if (this._requiredAssets === 0) {
       return Game.prototype.instance.notifySubscribers(Game.prototype.Ready, {}, {}, []);
     }
@@ -220,12 +217,8 @@ Game = (function() {
     } else {
       _renderEngine.physicsEngine = new _physicsEngineClass();
     }
-    if (this.maps.length === 0) {
-      console.log("Blitgin_as :: [ERROR] :: you need at least one map.");
-    }
-    if (this.players.length === 0) {
-      console.log("Blitgin_as :: [ERROR] :: you need at least one player.");
-    }
+    if (this.maps.length === 0) GameError.warn("you need at least one map.");
+    if (this.players.length === 0) GameError.warn("you need at least one player.");
     _soundEngine = new SoundEngine();
     _renderEngine.soundEngine = _soundEngine;
     map = this.maps[_activeMap];

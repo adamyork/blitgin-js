@@ -78,14 +78,14 @@ class PhysicsEngine
           focus.x -= focus.width * focus.collisionCoefficient
           focus.velocityX = 0
       else
-          target.screenX -= focus.width + target.width
+          focus.screenX -= focus.width + target.width
           target.x += target.width * target.collisionCoefficient
           map.x += target.width * target.collisionCoefficient
           target.velocityX = 0
     @updateMapXIfEnemy(focus,target,target.direction)
 
   updateMapXIfEnemy:(focus,target,direction)->
-    if typeof focus is Enemy
+    if focus instanceof Enemy
       focus.mapX += (focus.width + target.width) * direction
 
   isTargetOutOfBounds:(target,map)->

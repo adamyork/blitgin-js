@@ -46,6 +46,6 @@ State::__defineGetter__ "frameBuffer",->
 State::__defineSetter__ "frameBuffer",(val)->
   if val > .9
     @_frameBuffer = .9
-    console.log "A frame buffer greater .9 will result in the frame always being 0."
+    GameError.warn "A frame buffer greater .9 will result in the frame always being 0."
     return
   @_frameBuffer = val

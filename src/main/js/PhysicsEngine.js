@@ -97,7 +97,7 @@ PhysicsEngine = (function() {
         focus.x -= focus.width * focus.collisionCoefficient;
         focus.velocityX = 0;
       } else {
-        target.screenX -= focus.width + target.width;
+        focus.screenX -= focus.width + target.width;
         target.x += target.width * target.collisionCoefficient;
         map.x += target.width * target.collisionCoefficient;
         target.velocityX = 0;
@@ -107,7 +107,7 @@ PhysicsEngine = (function() {
   };
 
   PhysicsEngine.prototype.updateMapXIfEnemy = function(focus, target, direction) {
-    if (typeof focus === Enemy) {
+    if (focus instanceof Enemy) {
       return focus.mapX += (focus.width + target.width) * direction;
     }
   };

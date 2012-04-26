@@ -76,7 +76,7 @@ State.prototype.__defineGetter__("frameBuffer", function() {
 State.prototype.__defineSetter__("frameBuffer", function(val) {
   if (val > .9) {
     this._frameBuffer = .9;
-    console.log("A frame buffer greater .9 will result in the frame always being 0.");
+    GameError.warn("A frame buffer greater .9 will result in the frame always being 0.");
     return;
   }
   return this._frameBuffer = val;

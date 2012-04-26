@@ -1,7 +1,7 @@
 class GameError
   constructor:(@name)->
     
-  warnNotUsed: (clazz,func) ->
-    logger.warn("WARNING :: "+func+"  is not used by "+clazz+". Stack is ")
+GameError::warn = (msg)->
+  console.log "blitgin-js :: WARNING :: " + msg
     
 GameError::name = "GameError"

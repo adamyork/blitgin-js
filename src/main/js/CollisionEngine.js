@@ -40,44 +40,51 @@ CollisionEngine = (function() {
   };
 
   CollisionEngine.prototype.checkForCollision = function(focus, target) {
-    var focusBase, intersection, targetBase;
+    var intersection;
     if (target.collisionRect.intersects(focus.collisionRect)) {
+      this.handleCollisionStates(focus, target);
       if (this.physicsEngine.isTargetMovingVertically(target)) {
         intersection = target.collisionRect.intersection(focus.collisionRect);
-        this.physicsEngine.handleVerticalCollision(target, focus, intersection);
-      }
-      try {
-        focusBase = focus.__proto__.name;
-        targetBase = target.__proto__.name;
-      } catch (error) {
-        focusBase = this.fullyEvalulateSuperClass(focus);
-        targetBase = this.fullyEvalulateSuperClass(target);
-      }
-      if (target.direction === 1 && focusBase !== CollisionEngine.prototype.TYPE_OF_MAPOBJECT) {
-        if (targetBase === CollisionEngine.prototype.TYPE_OF_ACTION) {
-          focus.state = focus.collisionLeft;
-          focus.isBusy = true;
-        } else {
-          target.state = target.collisionRight;
-          focus.state = focus.collisionLeft;
-          target.isBusy = true;
-          focus.isBusy = true;
+        if (target.damage < focus.health) {
+          this.physicsEngine.handleVerticalCollision(target, focus, intersection);
         }
-        this.physicsEngine.handleHorizontalCollision(target, focus, this.map);
-      } else if (target.direction === -1 && focusBase !== CollisionEngine.prototype.TYPE_OF_MAPOBJECT) {
-        if (targetBase === CollisionEngine.prototype.TYPE_OF_ACTION) {
-          focus.state = focus.collisionRight;
-          focus.isBusy = true;
-        } else {
-          target.state = target.collisionLeft;
-          focus.state = focus.collisionRight;
-          target.isBusy = true;
-          focus.isBusy = true;
-        }
+      } else {
         this.physicsEngine.handleHorizontalCollision(target, focus, this.map);
       }
       focus.health -= target.damage;
       return target.health -= focus.damage;
+    }
+  };
+
+  CollisionEngine.prototype.handleCollisionStates = function(focus, target) {
+    var focusBase, targetBase;
+    try {
+      focusBase = focus.__proto__.name;
+      targetBase = target.__proto__.name;
+    } catch (error) {
+      focusBase = this.fullyEvalulateSuperClass(focus);
+      targetBase = this.fullyEvalulateSuperClass(target);
+    }
+    if (target.direction === 1 && focusBase !== CollisionEngine.prototype.TYPE_OF_MAPOBJECT) {
+      if (targetBase === CollisionEngine.prototype.TYPE_OF_ACTION) {
+        focus.state = focus.collisionLeft;
+        return focus.isBusy = true;
+      } else {
+        target.state = target.collisionRight;
+        focus.state = focus.collisionLeft;
+        target.isBusy = true;
+        return focus.isBusy = true;
+      }
+    } else if (target.direction === -1 && focusBase !== CollisionEngine.prototype.TYPE_OF_MAPOBJECT) {
+      if (targetBase === CollisionEngine.prototype.TYPE_OF_ACTION) {
+        focus.state = focus.collisionRight;
+        return focus.isBusy = true;
+      } else {
+        target.state = target.collisionLeft;
+        focus.state = focus.collisionRight;
+        target.isBusy = true;
+        return focus.isBusy = true;
+      }
     }
   };
 

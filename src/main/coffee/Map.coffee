@@ -47,12 +47,12 @@ class Map extends RenderObject
           undefined != @mapObjects)
         @initializeAssets()
       else
-        console.log "Maps using paraxling require 3 assets and a collection of enemies."
+        GameError.warn "Maps using paraxling require 3 assets and a collection of enemies."
     else
       if(undefined != @foregroundAssetClass && undefined != @enemies && undefined != @collisionAssetClass)
         @initializeAssets()
       else
-        console.log "Maps require a foreground , collision asset , and a collection of enemies."
+        GameError.warn "Maps require a foreground , collision asset , and a collection of enemies."
 
   initializeAssets: ->
     if @paralaxing
@@ -127,10 +127,10 @@ class Map extends RenderObject
 
         try 
           tmpE = inactiveTargets[key]
-          if tmpE
-            return
         catch error
-
+          tmpE = undefined
+        if tmpE isnt undefined
+          return
         indep = group.independence
         if target is undefined
           if(@isEnemyOnScreen posX,posY,vw,vh,indep)
@@ -169,7 +169,6 @@ class Map extends RenderObject
     return undefined
 
   removeNis:(nis)->
-    console.log "need to remove my nis"
     index = @nis.indexOf nis, 0 
     arr = @nis.splice index, 1
     arr = undefined
@@ -224,7 +223,7 @@ Map::__defineGetter__ "bitmapData",->
       cd = @buildDataVO @collisionData,new Rectangle(Math.round(@_x),Math.round(yPos),vw,vh)
     {map:[bg,mid,fg,cd]}
   else
-    console.log 'You cannot start the game yet. Map assets are not loaded.'
+    GameError.warn 'You cannot start the game yet. Map assets are not loaded.'
 
 Map::__defineGetter__ "x",->
   @_x

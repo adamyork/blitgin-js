@@ -76,13 +76,13 @@ Map = (function(_super) {
       if (void 0 !== this.backgroundAssetClass && void 0 !== this.midgroundAssetClass && void 0 !== this.foregroundAssetClass && void 0 !== this.collisionAssetClass && void 0 !== this.enemies && void 0 !== this.mapObjects) {
         return this.initializeAssets();
       } else {
-        return console.log("Maps using paraxling require 3 assets and a collection of enemies.");
+        return GameError.warn("Maps using paraxling require 3 assets and a collection of enemies.");
       }
     } else {
       if (void 0 !== this.foregroundAssetClass && void 0 !== this.enemies && void 0 !== this.collisionAssetClass) {
         return this.initializeAssets();
       } else {
-        return console.log("Maps require a foreground , collision asset , and a collection of enemies.");
+        return GameError.warn("Maps require a foreground , collision asset , and a collection of enemies.");
       }
     }
   };
@@ -164,10 +164,10 @@ Map = (function(_super) {
         vh = Game.prototype.VIEWPORT_HEIGHT;
         try {
           tmpE = inactiveTargets[key];
-          if (tmpE) return;
         } catch (error) {
-
+          tmpE = void 0;
         }
+        if (tmpE !== void 0) return;
         indep = group.independence;
         if (target === void 0) {
           if (this.isEnemyOnScreen(posX, posY, vw, vh, indep)) {
@@ -217,7 +217,6 @@ Map = (function(_super) {
 
   Map.prototype.removeNis = function(nis) {
     var arr, index;
-    console.log("need to remove my nis");
     index = this.nis.indexOf(nis, 0);
     arr = this.nis.splice(index, 1);
     return arr = void 0;
@@ -283,7 +282,7 @@ Map.prototype.__defineGetter__("bitmapData", function() {
       map: [bg, mid, fg, cd]
     };
   } else {
-    return console.log('You cannot start the game yet. Map assets are not loaded.');
+    return GameError.warn('You cannot start the game yet. Map assets are not loaded.');
   }
 });
 

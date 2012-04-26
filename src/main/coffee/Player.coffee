@@ -294,7 +294,7 @@ Player::__defineGetter__ "thresholdX",->
 
 Player::__defineSetter__ "thresholdX",(val)->
   if val > (@width * .5)
-    console.log "You cant set a threshold this high. There would be no collision area."
+    GameError.warn "You cant set a threshold this high. There would be no collision area."
   @_thresholdX = val
   
 Player::__defineGetter__ "thresholdY",->
@@ -302,7 +302,7 @@ Player::__defineGetter__ "thresholdY",->
 
 Player::__defineSetter__ "thresholdY",(val)->
   if val > (@height * .5)
-    console.log "You cant set a threshold this high. There would be no collision area."
+    GameError.warn "You cant set a threshold this high. There would be no collision area."
   @_thresholdY = val
 
 Player::__defineGetter__ "damage",->

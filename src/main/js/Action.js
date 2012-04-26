@@ -72,11 +72,11 @@ Action = (function(_super) {
   _emitter = {};
 
   Action.prototype.loadedMetadata = function() {
-    return console.log("LOADED METADADA");
+    return GameError.warn("LOADED METADADA");
   };
 
   Action.prototype.audioAvailable = function() {
-    return console.log("audioAvailable");
+    return GameError.warn("audioAvailable");
   };
 
   return Action;

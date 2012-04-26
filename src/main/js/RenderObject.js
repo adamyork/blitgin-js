@@ -72,7 +72,7 @@ RenderObject = (function() {
       this.asset.onload = this.assetLoadComplete.bind(this);
       return this.asset.src = this.assetClass;
     } else {
-      return console.log("Set a cellwidth , cellheight , and assetClass before calling initialize.");
+      return GameError.warn("Set a cellwidth , cellheight , and assetClass before calling initialize.");
     }
   };
 
@@ -93,12 +93,11 @@ RenderObject = (function() {
   RenderObject.prototype.removeColorConstantAndCache = function(asset, targetData, cachePixels) {
     var imageData, ref, worker;
     if (this.colorConstant === void 0) {
-      console.log("Error : You need to set a hex value for colorConstant , or set tranparency true if no color is to be sampled out.");
+      GameError.warn("You need to set a hex value for colorConstant , or set tranparency true if no color is to be sampled out.");
     }
     this.workbench.width = asset.width;
     this.workbench.height = asset.height;
     this.ctx.drawImage(asset, 0, 0);
-    console.log("getting data " + asset.src);
     imageData = this.ctx.getImageData(0, 0, this.workbench.width, this.workbench.height);
     try {
       worker = new Worker('../src/main/js/RemoveColorTask.js');
@@ -109,22 +108,17 @@ RenderObject = (function() {
     }
     ref = this;
     worker.onmessage = function(e) {
-      if (cachePixels) {
-        console.log('pixels cached');
-        ref.collisionPixels = e.data;
-      }
+      if (cachePixels) ref.collisionPixels = e.data;
       ref.ctx.clearRect(0, 0, ref.workbench.width, ref.workbench.height);
       ref.ctx.putImageData(e.data, 0, 0);
       targetData.src = null;
       targetData.src = ref.workbench.toDataURL();
-      console.log("asset " + asset.src);
-      console.log("bout to clear ctx ref.workbench.width : " + ref.workbench.width + "ref.workbench.height : " + ref.workbench.height);
       ref.notifyReady();
       worker.terminate();
       return worker = null;
     };
     worker.onerror = function(e) {
-      return console.log("error in worker");
+      return GameError.warn("Error in worker");
     };
     return worker.postMessage({
       "imageData": imageData,

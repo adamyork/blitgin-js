@@ -6,12 +6,12 @@ GameError = (function() {
     this.name = name;
   }
 
-  GameError.prototype.warnNotUsed = function(clazz, func) {
-    return logger.warn("WARNING :: " + func + "  is not used by " + clazz + ". Stack is ");
-  };
-
   return GameError;
 
 })();
+
+GameError.prototype.warn = function(msg) {
+  return console.log("blitgin-js :: WARNING :: " + msg);
+};
 
 GameError.prototype.name = "GameError";
