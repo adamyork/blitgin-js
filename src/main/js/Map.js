@@ -3,13 +3,15 @@ var Map,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
 Map = (function(_super) {
-  var _activeEnemies, _activeMapObjects, _assetsLoaded, _backgroundAsset, _backgroundAssetClass, _backgroundData, _collisionAsset, _collisionAssetClass, _collisionData, _enemies, _floor, _foregroundAsset, _foregroundAssetClass, _foregroundData, _friction, _gravity, _inactiveEnemies, _inactiveMapObjects, _initializeComplete, _mapObjects, _midgroundAsset, _midgroundAssetClass, _midgroundData, _nis, _paralaxing, _platform, _showCollisionMap, _sound, _soundLoops;
+  var _activeEnemies, _activeMapObjects, _assetsLoaded, _backgroundAsset, _backgroundAssetClass, _backgroundData, _collisionAsset, _collisionAssetClass, _collisionData, _enemies, _floor, _foregroundAsset, _foregroundAssetClass, _foregroundData, _friction, _gravity, _inactiveEnemies, _inactiveMapObjects, _initializeComplete, _mapObjects, _mapType, _midgroundAsset, _midgroundAssetClass, _midgroundData, _nis, _paralaxing, _platform, _showCollisionMap, _sound, _soundLoops;
 
   __extends(Map, _super);
 
   function Map(name) {
     this.name = name;
   }
+
+  _mapType = '';
 
   _paralaxing = false;
 
@@ -72,17 +74,22 @@ Map = (function(_super) {
   Map.prototype.initialize = function() {
     this.workbench = document.createElement("canvas");
     this.ctx = this.workbench.getContext('2d');
-    if (this.paralaxing) {
-      if (void 0 !== this.backgroundAssetClass && void 0 !== this.midgroundAssetClass && void 0 !== this.foregroundAssetClass && void 0 !== this.collisionAssetClass && void 0 !== this.enemies && void 0 !== this.mapObjects) {
-        return this.initializeAssets();
+    if (this.mapType === Map.prototype.TYPE_TILE_BASED) return;
+    if (this.mapType === Map.prototype.TYPE_FREE_MOVE) {
+      return this.initializeFreeMoveAssets();
+    } else if (this.mapType === Map.prototype.TYPE_SIDESCROLL) {
+      if (this.paralaxing) {
+        if (void 0 !== this.backgroundAssetClass && void 0 !== this.midgroundAssetClass && void 0 !== this.foregroundAssetClass && void 0 !== this.collisionAssetClass && void 0 !== this.enemies && void 0 !== this.mapObjects) {
+          return this.initializeAssets();
+        } else {
+          return GameError.warn("Maps using paraxling require 3 assets and a collection of enemies.");
+        }
       } else {
-        return GameError.warn("Maps using paraxling require 3 assets and a collection of enemies.");
-      }
-    } else {
-      if (void 0 !== this.foregroundAssetClass && void 0 !== this.enemies && void 0 !== this.collisionAssetClass) {
-        return this.initializeAssets();
-      } else {
-        return GameError.warn("Maps require a foreground , collision asset , and a collection of enemies.");
+        if (void 0 !== this.foregroundAssetClass && void 0 !== this.enemies && void 0 !== this.collisionAssetClass) {
+          return this.initializeAssets();
+        } else {
+          return GameError.warn("Maps require a foreground , collision asset , and a collection of enemies.");
+        }
       }
     }
   };
@@ -107,6 +114,8 @@ Map = (function(_super) {
     this.foregroundData = new Image();
     return this.collisionData = new Image();
   };
+
+  Map.prototype.initializeFreeMoveAssets = function() {};
 
   Map.prototype.imageLoadComplete = function(e) {
     _assetsLoaded++;
@@ -259,6 +268,12 @@ Map = (function(_super) {
 })(RenderObject);
 
 Map.prototype.name = "Map";
+
+Map.prototype.TYPE_SIDESCROLL = "sidescroll";
+
+Map.prototype.TYPE_FREE_MOVE = "freemove";
+
+Map.prototype.TYPE_TILE_BASED = "tilebased";
 
 Map.prototype.__defineGetter__("bitmapData", function() {
   var bg, cd, fg, mid, vh, vw, yPos;
@@ -514,6 +529,14 @@ Map.prototype.__defineGetter__("floor", function() {
 
 Map.prototype.__defineSetter__("floor", function(val) {
   return this._floor = val;
+});
+
+Map.prototype.__defineGetter__("mapType", function() {
+  return this._mapType;
+});
+
+Map.prototype.__defineSetter__("mapType", function(val) {
+  return this._mapType = val;
 });
 
 Map.prototype.MANAGE_ENEMIES = "manageEnemies";

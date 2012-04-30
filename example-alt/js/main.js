@@ -36,15 +36,7 @@ function loadDependenciesMin() {
 
 function loadCustomClasses() {
     $LAB
-    .script("js/CustomAction.js").wait()
-    .script("js/CustomComposite.js").wait()
-    .script("js/CustomComplexAction.js").wait()
-    .script("js/CustomParticle.js").wait()
-    .script("js/CustomParticleAction.js").wait()
     .script("js/CustomPlayer.js").wait()
-    .script("js/CustomEnemy.js").wait()
-    .script("js/CustomNis.js").wait()
-    .script("js/CustomMapObject.js").wait()
     .script("js/CustomMap.js").wait(function(){
     	createGame();
     });
@@ -64,9 +56,9 @@ function createGame() {
     game.useMultipleCanvas = false;
     game.frameWait = 1;
     game.preinitialize(this,1024,432);
-    game.prefetch([CustomAction,CustomEnemy,CustomComplexAction]);
+    game.prefetch([]);
     game.subscribe(this);
-    //game.server = {address:'ws://echo.websocket.org',sendEvery:100,msgTransform:this.msgTransform};
+    game.server = {address:'ws://echo.websocket.org',sendEvery:100,msgTransform:this.msgTransform};
 }
 
 function msgTransform(event,map,player,actions) {

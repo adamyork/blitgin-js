@@ -12,28 +12,30 @@ PhysicsEngine = (function() {
   _friction = 0;
 
   PhysicsEngine.prototype.adjustPlayerVerically = function(player, map) {
-    player.y -= player.velocityY;
-    player.velocityY -= map.gravity;
-    player.y += map.gravity;
+    player.y -= Math.round(player.velocityY * Game.prototype.DeltaTime);
+    player.velocityY -= Math.round(map.gravity * Game.prototype.DeltaTime);
+    player.y += Math.round(map.gravity * Game.prototype.DeltaTime);
     if (player.y - player.height <= 0 && player.floor) {
-      if (map.floor === void 0) map.floor = map.y;
-      map.floor += map.gravity;
+      if (map.floor === void 0) {
+        map.floor = Math.round(map.y * Game.prototype.DeltaTime);
+      }
+      map.floor += map.gravity * Math.round(Game.prototype.DeltaTime);
       return;
     }
-    return map.y += map.gravity;
+    return map.y += map.gravity * Math.round(Game.prototype.DeltaTime);
   };
 
   PhysicsEngine.prototype.applyPlayerInput = function(player, input) {
     if (player.direction !== input.direction) {
-      player.velocityX = player.velocityX * (player.easeCoefficient / 100);
+      player.velocityX = Math.round(player.velocityX * (player.easeCoefficient / 100) * Game.prototype.DeltaTime);
     }
     player.direction = input.direction;
-    return player.velocityX += player.easeCoefficient;
+    return player.velocityX += Math.round(player.easeCoefficient * Game.prototype.DeltaTime);
   };
 
   PhysicsEngine.prototype.adjustPlayerHorizontally = function(player, map) {
-    player.x = player.x + (player.velocityX * player.direction);
-    player.velocityX -= map.friction;
+    player.x = Math.round(player.x + (player.velocityX * player.direction) * Game.prototype.DeltaTime);
+    player.velocityX -= Math.round(map.friction * Game.prototype.DeltaTime);
     if (this.doesMapNeedToMove(player, map)) {
       map.x = map.x + (player.velocityX * player.direction);
       return this.enforcePositionThreshold(player);

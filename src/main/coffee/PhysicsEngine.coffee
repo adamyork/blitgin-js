@@ -5,25 +5,25 @@ class PhysicsEngine
   _friction = 0
 
   adjustPlayerVerically:(player,map)->
-    player.y -= player.velocityY
-    player.velocityY-= map.gravity
-    player.y += map.gravity
+    player.y -= Math.round(player.velocityY * Game::DeltaTime)
+    player.velocityY-= Math.round(map.gravity * Game::DeltaTime)
+    player.y += Math.round(map.gravity * Game::DeltaTime)
     if player.y - player.height <= 0 and player.floor
-      if map.floor is undefined then map.floor = map.y
-      map.floor += map.gravity
+      if map.floor is undefined then map.floor = Math.round(map.y * Game::DeltaTime)
+      map.floor += map.gravity * Math.round(Game::DeltaTime)
       return
-    map.y += map.gravity
+    map.y += map.gravity * Math.round(Game::DeltaTime)
 
   applyPlayerInput:(player,input)->
     if player.direction isnt input.direction
       #reduce any velocity when changing direction
-      player.velocityX = player.velocityX * (player.easeCoefficient / 100)
+      player.velocityX = Math.round(player.velocityX * (player.easeCoefficient / 100) * Game::DeltaTime)
     player.direction = input.direction
-    player.velocityX += player.easeCoefficient
+    player.velocityX += Math.round(player.easeCoefficient * Game::DeltaTime)
 
   adjustPlayerHorizontally:(player,map)->
-    player.x = player.x + (player.velocityX * player.direction)
-    player.velocityX -= map.friction
+    player.x = Math.round(player.x + (player.velocityX * player.direction) * Game::DeltaTime)
+    player.velocityX -= Math.round(map.friction * Game::DeltaTime)
     if @doesMapNeedToMove(player, map)
       map.x = map.x + (player.velocityX * player.direction)
       @enforcePositionThreshold(player)

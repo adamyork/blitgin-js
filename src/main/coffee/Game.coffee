@@ -3,10 +3,13 @@ class Game
     Game::instance = @
     @keyboard = new Keyboard()
     @setAnimationFrameRequest()
-    @_start = window.mozAnimationStartTime || Date.now()
     @_requiredAssets = 0
     @_useMultipleCanvas = false
     @_frameWait = 0
+    @_socketReady = false
+    @_socketFrame = 0
+    @_framerateBuffer = 2
+    @_currentFrame = 0
    
   _subscribers = []
   _pause = false
@@ -41,19 +44,34 @@ class Game
   _container = {}
   _useMultipleCanvas = false
   _frameWait = 0
+  _server = {}
+  _socket = {}
+  _socketReady = false
+  _socketFrame = 0
+  _framerateBuffer = 2
+  _currentFrame = 0
   
   render:(timestamp)->
-    progress = timestamp - @_start
+    _animationFrameRequest @render.bind @
+    if @_currentFrame isnt @_framerateBuffer
+      @_currentFrame++
+      return
+    delta = Date.now() - @_start
+    if delta is NaN or delta is undefined
+      delta = 0
+    Game::DeltaTime = 1 + ((((delta * 1000) - 32 ) / 32 ) / 1000)
     _renderEngine.render _input
-    #TODO determine if 2000 needs to be configurable
-    if progress < 2000
-      requestAnimationFrame @render.bind @
-
+    @_start = Date.now()
+    @_currentFrame = 0
+    
   renderDelegate:->
     if @_pause
         return
     if _animationFrameRequest
-      _animationFrameRequest @render.bind @
+      @_start = Date.now()
+      @_currentFrame = 0
+      @render()
+      #_animationFrameRequest @render.bind @
     else
       _renderEngine.render _input
 
@@ -63,7 +81,8 @@ class Game
     
   start: ->
     if not _isStarted
-      _timer = setInterval @renderDelegate.bind(@) , 80
+      #_timer = setInterval @renderDelegate.bind(@) , 84
+      @renderDelegate()
       _isStarted = true
   
   prefetch:(items)->
@@ -244,6 +263,11 @@ class Game
     _screen = undefined
 
   notifySubscribers:(event,map,player,actions)->
+    if @_socketReady and @_socketFrame is @_server.sendEvery
+      console.log "met sending"
+      @_socket.send JSON.stringify(@_server.msgTransform(event,map,player,actions))
+      @_socketFrame = 0
+    if @_socketReady then @_socketFrame++
     subscriber.notify(event,map, player, actions) for subscriber in _subscribers
 
   subscribe:(subscriber)->
@@ -251,11 +275,39 @@ class Game
 
   unsubscribe:(subscriber)->
     _subscribers[_subscribers.indexOf(subscriber).._subscribers.indexOf(subscriber)]
+  
+  handleSocketMessage:(e)->
+    #TODO handle game state validation here
+    console.log "msg from server"
+    console.log "msg type" + e.type
+    console.log "msg origin " + e.origin
+    console.log "msg timestamp " + e.timeStamp
+    console.log "msg data " + e.data
+  
+  closeSocket:->
+    if @_socket then @_socket.close()
 
 Game::name = "Game"
 Game::Ready = "Ready"
 Game::Rendered = "Rendered"
-  
+
+Game::__defineGetter__ "server",->
+  @_server
+
+Game::__defineSetter__ "server",(val)->
+  try
+    WebSocket
+  catch error
+    GameError.warn "WebSockets are not supported by this client"
+    return
+  ref = @
+  @_server = val
+  @_socket = new WebSocket(@_server.address)
+  @_socket.onopen = (e)->
+    ref._socketReady = true
+  @_socket.onmessage = @handleSocketMessage.bind @
+
+            
 Game::__defineGetter__ "instance",->
   @_instance
 

@@ -1,4 +1,5 @@
 var CustomMap = ext(Map, function() {
+    this.mapType = Map.prototype.TYPE_SIDESCROLL;
     this.backgroundAssetClass = "img/level-one-bg-multi.png";
     this.midgroundAssetClass = "img/level-one-mg-multi.png";
     this.foregroundAssetClass = "img/level-one-fg-multi.png";

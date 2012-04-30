@@ -35,10 +35,10 @@
 
 ## Todo...
 - its possible that a composites asset is not a single row 
-- make fcount configurable
 - this needs to be expanded upon. Check more than just number of enemies
-- determine if 2000 needs to be configurable allow author to specify container for screens 
-- this does not support sampling of color this assumes are particle sprite sheets are a single row 
+- determine if 2000 needs to be configurable
+- this does not support sampling of color
+- this assumes are particle sprite sheets are a single row 
 - allow for dependency loader to be defined by implementer
 - unit test
 

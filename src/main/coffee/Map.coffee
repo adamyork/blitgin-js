@@ -1,6 +1,7 @@
 class Map extends RenderObject
   constructor:(@name)->
-    
+  
+  _mapType = ''
   _paralaxing = false
   _platform = false
   _showCollisionMap = false
@@ -41,18 +42,23 @@ class Map extends RenderObject
   initialize: ->
     @workbench = document.createElement "canvas"
     @ctx = @workbench.getContext '2d'
-    if @paralaxing
-      if (undefined != @backgroundAssetClass && undefined != @midgroundAssetClass && undefined !=
-          @foregroundAssetClass && undefined != @collisionAssetClass && undefined != @enemies &&
-          undefined != @mapObjects)
-        @initializeAssets()
+    if @mapType is Map::TYPE_TILE_BASED
+      return
+    if @mapType is Map::TYPE_FREE_MOVE
+      @initializeFreeMoveAssets()
+    else if @mapType is Map::TYPE_SIDESCROLL   
+      if @paralaxing
+        if (undefined != @backgroundAssetClass && undefined != @midgroundAssetClass && undefined !=
+            @foregroundAssetClass && undefined != @collisionAssetClass && undefined != @enemies &&
+            undefined != @mapObjects)
+          @initializeAssets()
+        else
+          GameError.warn "Maps using paraxling require 3 assets and a collection of enemies."
       else
-        GameError.warn "Maps using paraxling require 3 assets and a collection of enemies."
-    else
-      if(undefined != @foregroundAssetClass && undefined != @enemies && undefined != @collisionAssetClass)
-        @initializeAssets()
-      else
-        GameError.warn "Maps require a foreground , collision asset , and a collection of enemies."
+        if(undefined != @foregroundAssetClass && undefined != @enemies && undefined != @collisionAssetClass)
+          @initializeAssets()
+        else
+          GameError.warn "Maps require a foreground , collision asset , and a collection of enemies."
 
   initializeAssets: ->
     if @paralaxing
@@ -76,6 +82,8 @@ class Map extends RenderObject
 
     @foregroundData = new Image()
     @collisionData = new Image()
+  
+  initializeFreeMoveAssets:->
   
   imageLoadComplete:(e)->
     _assetsLoaded++
@@ -205,6 +213,9 @@ class Map extends RenderObject
     @collisionPixels.data[index+3]
 
 Map::name = "Map"
+Map::TYPE_SIDESCROLL = "sidescroll"
+Map::TYPE_FREE_MOVE = "freemove"
+Map::TYPE_TILE_BASED = "tilebased"
   
 Map::__defineGetter__ "bitmapData",->
   if @_initializeComplete
@@ -397,6 +408,12 @@ Map::__defineGetter__ "floor",->
 
 Map::__defineSetter__ "floor",(val)->
   @_floor = val
+
+Map::__defineGetter__ "mapType",->
+  @_mapType
+
+Map::__defineSetter__ "mapType",(val)->
+  @_mapType = val
 
 Map::MANAGE_ENEMIES = "manageEnemies"
 Map::MANAGE_MAP_OBJECTS = "manageMapObjects"

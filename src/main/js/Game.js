@@ -1,17 +1,20 @@
 var Game;
 
 Game = (function() {
-  var _activeMap, _activePlayer, _animationFrameRequest, _collisionEngineClass, _container, _customKey, _customKeys, _downKeys, _fgscreen, _frameWait, _input, _instance, _isStarted, _jumpKeys, _leftKeys, _maps, _movement, _parent, _pause, _physicsEngineClass, _players, _prefetchTmp, _renderEngine, _renderEngineClass, _requiredAssets, _rightKeys, _screen, _soundEngine, _subscribers, _timer, _toFetchAssets, _upKeys, _useMultipleCanvas;
+  var _activeMap, _activePlayer, _animationFrameRequest, _collisionEngineClass, _container, _currentFrame, _customKey, _customKeys, _downKeys, _fgscreen, _frameWait, _framerateBuffer, _input, _instance, _isStarted, _jumpKeys, _leftKeys, _maps, _movement, _parent, _pause, _physicsEngineClass, _players, _prefetchTmp, _renderEngine, _renderEngineClass, _requiredAssets, _rightKeys, _screen, _server, _socket, _socketFrame, _socketReady, _soundEngine, _subscribers, _timer, _toFetchAssets, _upKeys, _useMultipleCanvas;
 
   function Game(name) {
     this.name = name;
     Game.prototype.instance = this;
     this.keyboard = new Keyboard();
     this.setAnimationFrameRequest();
-    this._start = window.mozAnimationStartTime || Date.now();
     this._requiredAssets = 0;
     this._useMultipleCanvas = false;
     this._frameWait = 0;
+    this._socketReady = false;
+    this._socketFrame = 0;
+    this._framerateBuffer = 2;
+    this._currentFrame = 0;
   }
 
   _subscribers = [];
@@ -80,17 +83,39 @@ Game = (function() {
 
   _frameWait = 0;
 
+  _server = {};
+
+  _socket = {};
+
+  _socketReady = false;
+
+  _socketFrame = 0;
+
+  _framerateBuffer = 2;
+
+  _currentFrame = 0;
+
   Game.prototype.render = function(timestamp) {
-    var progress;
-    progress = timestamp - this._start;
+    var delta;
+    _animationFrameRequest(this.render.bind(this));
+    if (this._currentFrame !== this._framerateBuffer) {
+      this._currentFrame++;
+      return;
+    }
+    delta = Date.now() - this._start;
+    if (delta === NaN || delta === void 0) delta = 0;
+    Game.prototype.DeltaTime = 1 + ((((delta * 1000) - 32) / 32) / 1000);
     _renderEngine.render(_input);
-    if (progress < 2000) return requestAnimationFrame(this.render.bind(this));
+    this._start = Date.now();
+    return this._currentFrame = 0;
   };
 
   Game.prototype.renderDelegate = function() {
     if (this._pause) return;
     if (_animationFrameRequest) {
-      return _animationFrameRequest(this.render.bind(this));
+      this._start = Date.now();
+      this._currentFrame = 0;
+      return this.render();
     } else {
       return _renderEngine.render(_input);
     }
@@ -104,7 +129,7 @@ Game = (function() {
 
   Game.prototype.start = function() {
     if (!_isStarted) {
-      _timer = setInterval(this.renderDelegate.bind(this), 80);
+      this.renderDelegate();
       return _isStarted = true;
     }
   };
@@ -309,6 +334,12 @@ Game = (function() {
 
   Game.prototype.notifySubscribers = function(event, map, player, actions) {
     var subscriber, _i, _len, _results;
+    if (this._socketReady && this._socketFrame === this._server.sendEvery) {
+      console.log("met sending");
+      this._socket.send(JSON.stringify(this._server.msgTransform(event, map, player, actions)));
+      this._socketFrame = 0;
+    }
+    if (this._socketReady) this._socketFrame++;
     _results = [];
     for (_i = 0, _len = _subscribers.length; _i < _len; _i++) {
       subscriber = _subscribers[_i];
@@ -325,6 +356,18 @@ Game = (function() {
     return _subscribers.slice(_subscribers.indexOf(subscriber), _subscribers.indexOf(subscriber) + 1 || 9e9);
   };
 
+  Game.prototype.handleSocketMessage = function(e) {
+    console.log("msg from server");
+    console.log("msg type" + e.type);
+    console.log("msg origin " + e.origin);
+    console.log("msg timestamp " + e.timeStamp);
+    return console.log("msg data " + e.data);
+  };
+
+  Game.prototype.closeSocket = function() {
+    if (this._socket) return this._socket.close();
+  };
+
   return Game;
 
 })();
@@ -334,6 +377,27 @@ Game.prototype.name = "Game";
 Game.prototype.Ready = "Ready";
 
 Game.prototype.Rendered = "Rendered";
+
+Game.prototype.__defineGetter__("server", function() {
+  return this._server;
+});
+
+Game.prototype.__defineSetter__("server", function(val) {
+  var ref;
+  try {
+    WebSocket;
+  } catch (error) {
+    GameError.warn("WebSockets are not supported by this client");
+    return;
+  }
+  ref = this;
+  this._server = val;
+  this._socket = new WebSocket(this._server.address);
+  this._socket.onopen = function(e) {
+    return ref._socketReady = true;
+  };
+  return this._socket.onmessage = this.handleSocketMessage.bind(this);
+});
 
 Game.prototype.__defineGetter__("instance", function() {
   return this._instance;
