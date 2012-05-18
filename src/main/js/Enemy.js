@@ -10,7 +10,7 @@ Enemy = (function(_super) {
     this.name = name;
   }
 
-  Enemy.prototype.behavior = function(args) {};
+  Enemy.prototype.behavior = function(suggestedX, suggestedY, suggestedVelcoityY) {};
 
   return Enemy;
 
@@ -31,6 +31,10 @@ Enemy.prototype.__defineGetter__("y", function() {
 });
 
 Enemy.prototype.__defineSetter__("y", function(val) {
+  if (val >= (Game.prototype.VIEWPORT_HEIGHT - this.cellHeight)) {
+    this._screenY = Game.prototype.VIEWPORT_HEIGHT - this.cellHeight;
+    return;
+  }
   return this._screenY = val;
 });
 
@@ -47,7 +51,6 @@ Enemy.prototype.__defineGetter__("frame", function() {
 });
 
 Enemy.prototype.__defineSetter__("frame", function(val) {
-  if (!this.isBusy) this.behavior();
   if (val >= this.state.duration) {
     if (!this.state.persistent) {
       this.state = this._previousState;

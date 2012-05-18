@@ -52,6 +52,7 @@ function loadCustomClasses() {
 
 function createGame() {
     game = new Game();
+    game.fps = 24;
     game.maps = [CustomMap];
     game.players = [CustomPlayer];
     game.activeMap = 0;

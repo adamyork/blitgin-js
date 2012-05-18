@@ -8,8 +8,9 @@ class Game
     @_frameWait = 0
     @_socketReady = false
     @_socketFrame = 0
-    @_framerateBuffer = 2
+    @_framerateBuffer = 0
     @_currentFrame = 0
+    @fps = 60
    
   _subscribers = []
   _pause = false
@@ -50,17 +51,19 @@ class Game
   _socketFrame = 0
   _framerateBuffer = 2
   _currentFrame = 0
+  _fps = 60
   
   render:(timestamp)->
-    if @_currentFrame isnt @_framerateBuffer
-      @_currentFrame++
-      _animationFrameRequest @render.bind @
-      return
+    mspf = Math.ceil(1000/@fps)
     delta = timestamp - @_start
-    Game::DeltaTime = delta/1000
-    _renderEngine.render _input
-    @_start = timestamp
-    @_currentFrame = 0
+    if delta >= mspf
+      msoverfps = delta - mspf
+      tmp = (msoverfps / @fps)
+      Game::DeltaFrames = tmp.toFixed(2);
+      _renderEngine.render _input
+      @_start = timestamp
+    else
+      Game::DeltaFrames = 0
     _animationFrameRequest @render.bind @
     
   renderDelegate:->
@@ -68,7 +71,6 @@ class Game
         return
     if _animationFrameRequest
       @_start = Date.now()
-      @_currentFrame = 0
       @render @_start
     else
       _renderEngine.render _input
@@ -78,6 +80,7 @@ class Game
     _animationFrameRequest = w.requestAnimationFrame or w.webkitRequestAnimationFrame or w.mozRequestAnimationFrame or w.oRequestAnimationFrame or w.msRequestAnimationFrame
     
   start: ->
+    @_framerateBuffer = Math.round(60/@fps)
     if not _isStarted
       #_timer = setInterval @renderDelegate.bind(@) , 27
       @renderDelegate()
@@ -419,3 +422,13 @@ Game::__defineGetter__ "frameWait",->
 
 Game::__defineSetter__ "frameWait",(val)->
   @_frameWait = val
+  
+Game::__defineGetter__ "fps",->
+  @_fps
+
+Game::__defineSetter__ "fps",(val)->
+  if val <= 60 and val > 0
+    @_fps = val
+  else
+    @_fps = 60
+    GameError::warn "FPS will be 60 because max FPS is 60 and min is 1"

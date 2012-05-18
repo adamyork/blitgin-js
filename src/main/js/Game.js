@@ -1,7 +1,7 @@
 var Game;
 
 Game = (function() {
-  var _activeMap, _activePlayer, _animationFrameRequest, _collisionEngineClass, _container, _currentFrame, _customKey, _customKeys, _downKeys, _fgscreen, _frameWait, _framerateBuffer, _input, _instance, _isStarted, _jumpKeys, _leftKeys, _maps, _movement, _parent, _pause, _physicsEngineClass, _players, _prefetchTmp, _renderEngine, _renderEngineClass, _requiredAssets, _rightKeys, _screen, _server, _socket, _socketFrame, _socketReady, _soundEngine, _subscribers, _timer, _toFetchAssets, _upKeys, _useMultipleCanvas;
+  var _activeMap, _activePlayer, _animationFrameRequest, _collisionEngineClass, _container, _currentFrame, _customKey, _customKeys, _downKeys, _fgscreen, _fps, _frameWait, _framerateBuffer, _input, _instance, _isStarted, _jumpKeys, _leftKeys, _maps, _movement, _parent, _pause, _physicsEngineClass, _players, _prefetchTmp, _renderEngine, _renderEngineClass, _requiredAssets, _rightKeys, _screen, _server, _socket, _socketFrame, _socketReady, _soundEngine, _subscribers, _timer, _toFetchAssets, _upKeys, _useMultipleCanvas;
 
   function Game(name) {
     this.name = name;
@@ -13,8 +13,9 @@ Game = (function() {
     this._frameWait = 0;
     this._socketReady = false;
     this._socketFrame = 0;
-    this._framerateBuffer = 2;
+    this._framerateBuffer = 0;
     this._currentFrame = 0;
+    this.fps = 60;
   }
 
   _subscribers = [];
@@ -95,18 +96,21 @@ Game = (function() {
 
   _currentFrame = 0;
 
+  _fps = 60;
+
   Game.prototype.render = function(timestamp) {
-    var delta;
-    if (this._currentFrame !== this._framerateBuffer) {
-      this._currentFrame++;
-      _animationFrameRequest(this.render.bind(this));
-      return;
-    }
+    var delta, msoverfps, mspf, tmp;
+    mspf = Math.ceil(1000 / this.fps);
     delta = timestamp - this._start;
-    Game.prototype.DeltaTime = delta / 1000;
-    _renderEngine.render(_input);
-    this._start = timestamp;
-    this._currentFrame = 0;
+    if (delta >= mspf) {
+      msoverfps = delta - mspf;
+      tmp = msoverfps / this.fps;
+      Game.prototype.DeltaFrames = tmp.toFixed(2);
+      _renderEngine.render(_input);
+      this._start = timestamp;
+    } else {
+      Game.prototype.DeltaFrames = 0;
+    }
     return _animationFrameRequest(this.render.bind(this));
   };
 
@@ -114,7 +118,6 @@ Game = (function() {
     if (this._pause) return;
     if (_animationFrameRequest) {
       this._start = Date.now();
-      this._currentFrame = 0;
       return this.render(this._start);
     } else {
       return _renderEngine.render(_input);
@@ -128,6 +131,7 @@ Game = (function() {
   };
 
   Game.prototype.start = function() {
+    this._framerateBuffer = Math.round(60 / this.fps);
     if (!_isStarted) {
       this.renderDelegate();
       return _isStarted = true;
@@ -549,4 +553,17 @@ Game.prototype.__defineGetter__("frameWait", function() {
 
 Game.prototype.__defineSetter__("frameWait", function(val) {
   return this._frameWait = val;
+});
+
+Game.prototype.__defineGetter__("fps", function() {
+  return this._fps;
+});
+
+Game.prototype.__defineSetter__("fps", function(val) {
+  if (val <= 60 && val > 0) {
+    return this._fps = val;
+  } else {
+    this._fps = 60;
+    return GameError.prototype.warn("FPS will be 60 because max FPS is 60 and min is 1");
+  }
 });

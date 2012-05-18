@@ -5,29 +5,30 @@ class PhysicsEngine
   _friction = 0
 
   adjustPlayerVerically:(player,map)->
-    player.y -= player.velocityY + Math.ceil(player.velocityY * Game::DeltaTime)
-    player.velocityY-= map.gravity + Math.ceil(map.gravity * Game::DeltaTime)
-    player.y += map.gravity + Math.ceil(map.gravity * Game::DeltaTime)
+    player.velocityY-= map.gravity + Math.floor(map.gravity * Game::DeltaFrames)
+    player.y -= player.velocityY
+    player.y += map.gravity + Math.floor(map.gravity * Game::DeltaFrames)
     if player.y - player.height <= 0 and player.floor
-      if map.floor is undefined then map.floor = map.y + Math.ceil(map.y * Game::DeltaTime)
-      map.floor += map.gravity + Math.ceil(map.gravity * Game::DeltaTime)
+      if map.floor is undefined then map.floor = map.y
+      map.floor += map.gravity + Math.floor(map.gravity * Game::DeltaFrames)
       return
-    map.y += map.gravity + Math.ceil(map.gravity * Game::DeltaTime)
-    console.log "maps y " + map.y
+    map.y += map.gravity + Math.floor(map.gravity * Game::DeltaFrames)
 
   applyPlayerInput:(player,input)->
     if player.direction isnt input.direction
       #reduce any velocity when changing direction
       tar = (player.velocityX * (player.easeCoefficient / 100))
-      player.velocityX = tar + Math.ceil(tar * Game::DeltaTime)
+      player.velocityX = tar + Math.floor(tar* Game::DeltaFrames)
     player.direction = input.direction
-    player.velocityX += player.easeCoefficient + Math.ceil(player.easeCoefficient * Game::DeltaTime)
+    player.velocityX += player.easeCoefficient + Math.floor(player.easeCoefficient * Game::DeltaFrames)
 
   adjustPlayerHorizontally:(player,map)->
-    player.x = (player.x + (player.velocityX * player.direction))
-    player.velocityX -= map.friction + Math.ceil(map.friction * Game::DeltaTime)
+    tar = (player.x + (player.velocityX * player.direction)) 
+    player.x = tar
+    player.velocityX -= map.friction + Math.floor(map.friction * Game::DeltaFrames)
     if @doesMapNeedToMove(player, map)
-      map.x = map.x + (player.velocityX * player.direction)
+      tar = map.x + (player.velocityX * player.direction)
+      map.x = tar
       @enforcePositionThreshold(player)
 
   doesMapNeedToMove:(player,map)->
@@ -140,20 +141,32 @@ class PhysicsEngine
     if enemy.applyGravityAndFriction
       if @doesMapNeedToMove(player,map)
         enemy.screenX = enemy.screenX + (player.velocityX * -(player.direction))
-      enemy.screenY += map.gravity + Math.ceil(map.gravity * Game::DeltaTime)
-      enemy.screenX = enemy.screenX + (enemy.velocityX * enemy.direction)
-      enemy.velocityX -= map.friction
+        enemy.originalX = enemy.screenX
+      suggestedVelocityY = enemy.velocityY
+      suggestedVelocityY -= Math.ceil(map.gravity + Math.floor(map.gravity * Game::DeltaFrames))
+      if suggestedVelocityY > enemy.maxVelocityY then suggestedVelocityY = enemy.maxVelocityY
+      if suggestedVelocityY < 0 then suggestedVelocityY = 0
+      suggestedScreenY = enemy.screenY
+      suggestedScreenY -= enemy.velocityY
+      suggestedScreenY += map.gravity
+      
+      suggestedVelocityX = enemy.velocityX
+      suggestedVelocityX += enemy.easeCoefficient + Math.floor(enemy.easeCoefficient * Game::DeltaFrames)
+      if suggestedVelocityX > enemy.maxVelocityX then suggestedVelocityY = enemy.maxVelocityX
+      if suggestedVelocityX < 0 then suggestedVelocityX = 0
+      suggestedScreenX = enemy.screenX + (suggestedVelocityX * enemy.direction)
+      suggestedVelocityX -= map.friction + Math.floor(map.friction * Game::DeltaFrames)
     else
-      enemy.screenX = enemy.mapX - map.x + (Math.ceil(map.x * Game::DeltaTime))
-      enemy.screenY = enemy.mapY - map.y  + (Math.ceil(map.y * Game::DeltaTime))
+      suggestedScreenX = enemy.mapX - map.x + (Math.ceil(map.x * Game::DeltaFrames))
+      suggestedScreenY = enemy.mapY - map.y  + (Math.ceil(map.y * Game::DeltaFrames))
+    enemy.behavior suggestedScreenX,suggestedScreenY,suggestedVelocityX,suggestedVelocityX
 
   adjustAction:(action,map)->
-    #TODO Account for delta time
-    action.velocityX += action.easeCoefficient
+    action.velocityX += action.easeCoefficient + Math.ceil(action.easeCoefficient * Game::DeltaFrames)
     action.x += (action.direction * action.velocityX)
     #velocity should not always be reduced by .5
     action.y += map.gravity - (action.velocityX * .5)
-    action.velocityX -= map.friction
+    action.velocityX -= map.friction + + Math.ceil(map.friction * Game::DeltaFrames)
 
   adjustMapObject:(mapObj,player,map)->
      #TODO Account for delta time

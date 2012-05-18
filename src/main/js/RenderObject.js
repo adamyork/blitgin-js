@@ -1,7 +1,7 @@
 var RenderObject;
 
 RenderObject = (function() {
-  var _asset, _assetClass, _assetData, _callback, _cellHeight, _cellWidth, _collisionPixels, _colorConstant, _ctx, _direction, _duration, _easeCoefficient, _frame, _frameBuffer, _height, _index, _lifeSpan, _objectKeyframeLength, _rgbTolerance, _showBounds, _transparency, _velocityX, _velocityY, _width, _workbench, _x, _y;
+  var _asset, _assetClass, _assetData, _callback, _cellHeight, _cellWidth, _collisionPixels, _colorConstant, _ctx, _direction, _duration, _easeCoefficient, _frame, _frameBuffer, _height, _index, _lifeSpan, _objectKeyframeLength, _originalX, _originalY, _rgbTolerance, _showBounds, _transparency, _velocityX, _velocityY, _width, _workbench, _x, _y;
 
   function RenderObject(name) {
     this.name = name;
@@ -22,6 +22,10 @@ RenderObject = (function() {
   _x = 0;
 
   _y = 0;
+
+  _originalX = 0;
+
+  _originalY = 0;
 
   _width = 0;
 
@@ -204,6 +208,22 @@ RenderObject.prototype.__defineGetter__("y", function() {
 
 RenderObject.prototype.__defineSetter__("y", function(val) {
   return this._y = val;
+});
+
+RenderObject.prototype.__defineGetter__("originalX", function() {
+  return this._originalX;
+});
+
+RenderObject.prototype.__defineSetter__("originalX", function(val) {
+  return this._originalX = val;
+});
+
+RenderObject.prototype.__defineGetter__("originalY", function() {
+  return this._originalY;
+});
+
+RenderObject.prototype.__defineSetter__("originalY", function(val) {
+  return this._originalY = val;
 });
 
 RenderObject.prototype.__defineGetter__("width", function() {

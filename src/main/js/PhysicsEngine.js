@@ -12,35 +12,36 @@ PhysicsEngine = (function() {
   _friction = 0;
 
   PhysicsEngine.prototype.adjustPlayerVerically = function(player, map) {
-    player.y -= player.velocityY + Math.ceil(player.velocityY * Game.prototype.DeltaTime);
-    player.velocityY -= map.gravity + Math.ceil(map.gravity * Game.prototype.DeltaTime);
-    player.y += map.gravity + Math.ceil(map.gravity * Game.prototype.DeltaTime);
+    console.log("Game::DeltaFrames " + Game.prototype.DeltaFrames);
+    player.velocityY -= map.gravity + Math.floor(map.gravity * Game.prototype.DeltaFrames);
+    player.y -= player.velocityY;
+    player.y += map.gravity + Math.floor(map.gravity * Game.prototype.DeltaFrames);
     if (player.y - player.height <= 0 && player.floor) {
-      if (map.floor === void 0) {
-        map.floor = map.y + Math.ceil(map.y * Game.prototype.DeltaTime);
-      }
-      map.floor += map.gravity + Math.ceil(map.gravity * Game.prototype.DeltaTime);
+      if (map.floor === void 0) map.floor = map.y;
+      map.floor += map.gravity + Math.floor(map.gravity * Game.prototype.DeltaFrames);
       return;
     }
-    map.y += map.gravity + Math.ceil(map.gravity * Game.prototype.DeltaTime);
-    return console.log("maps y " + map.y);
+    return map.y += map.gravity + Math.floor(map.gravity * Game.prototype.DeltaFrames);
   };
 
   PhysicsEngine.prototype.applyPlayerInput = function(player, input) {
     var tar;
     if (player.direction !== input.direction) {
       tar = player.velocityX * (player.easeCoefficient / 100);
-      player.velocityX = tar + Math.ceil(tar * Game.prototype.DeltaTime);
+      player.velocityX = tar + Math.floor(tar * Game.prototype.DeltaFrames);
     }
     player.direction = input.direction;
-    return player.velocityX += player.easeCoefficient + Math.ceil(player.easeCoefficient * Game.prototype.DeltaTime);
+    return player.velocityX += player.easeCoefficient + Math.floor(player.easeCoefficient * Game.prototype.DeltaFrames);
   };
 
   PhysicsEngine.prototype.adjustPlayerHorizontally = function(player, map) {
-    player.x = player.x + (player.velocityX * player.direction);
-    player.velocityX -= map.friction + Math.ceil(map.friction * Game.prototype.DeltaTime);
+    var tar;
+    tar = player.x + (player.velocityX * player.direction);
+    player.x = tar;
+    player.velocityX -= map.friction + Math.floor(map.friction * Game.prototype.DeltaFrames);
     if (this.doesMapNeedToMove(player, map)) {
-      map.x = map.x + (player.velocityX * player.direction);
+      tar = map.x + (player.velocityX * player.direction);
+      map.x = tar;
       return this.enforcePositionThreshold(player);
     }
   };
@@ -176,24 +177,41 @@ PhysicsEngine = (function() {
   };
 
   PhysicsEngine.prototype.adjustEnemy = function(enemy, player, map) {
+    var suggestedScreenX, suggestedScreenY, suggestedVelocityX, suggestedVelocityY;
     if (enemy.applyGravityAndFriction) {
       if (this.doesMapNeedToMove(player, map)) {
         enemy.screenX = enemy.screenX + (player.velocityX * -player.direction);
+        enemy.originalX = enemy.screenX;
       }
-      enemy.screenY += map.gravity + Math.ceil(map.gravity * Game.prototype.DeltaTime);
-      enemy.screenX = enemy.screenX + (enemy.velocityX * enemy.direction);
-      return enemy.velocityX -= map.friction;
+      suggestedVelocityY = enemy.velocityY;
+      suggestedVelocityY -= Math.ceil(map.gravity + Math.floor(map.gravity * Game.prototype.DeltaFrames));
+      if (suggestedVelocityY > enemy.maxVelocityY) {
+        suggestedVelocityY = enemy.maxVelocityY;
+      }
+      if (suggestedVelocityY < 0) suggestedVelocityY = 0;
+      suggestedScreenY = enemy.screenY;
+      suggestedScreenY -= enemy.velocityY;
+      suggestedScreenY += map.gravity;
+      suggestedVelocityX = enemy.velocityX;
+      suggestedVelocityX += enemy.easeCoefficient + Math.floor(enemy.easeCoefficient * Game.prototype.DeltaFrames);
+      if (suggestedVelocityX > enemy.maxVelocityX) {
+        suggestedVelocityY = enemy.maxVelocityX;
+      }
+      if (suggestedVelocityX < 0) suggestedVelocityX = 0;
+      suggestedScreenX = enemy.screenX + (suggestedVelocityX * enemy.direction);
+      suggestedVelocityX -= map.friction + Math.floor(map.friction * Game.prototype.DeltaFrames);
     } else {
-      enemy.screenX = enemy.mapX - map.x + (Math.ceil(map.x * Game.prototype.DeltaTime));
-      return enemy.screenY = enemy.mapY - map.y + (Math.ceil(map.y * Game.prototype.DeltaTime));
+      suggestedScreenX = enemy.mapX - map.x + (Math.ceil(map.x * Game.prototype.DeltaFrames));
+      suggestedScreenY = enemy.mapY - map.y + (Math.ceil(map.y * Game.prototype.DeltaFrames));
     }
+    return enemy.behavior(suggestedScreenX, suggestedScreenY, suggestedVelocityX, suggestedVelocityX);
   };
 
   PhysicsEngine.prototype.adjustAction = function(action, map) {
-    action.velocityX += action.easeCoefficient;
+    action.velocityX += action.easeCoefficient + Math.ceil(action.easeCoefficient * Game.prototype.DeltaFrames);
     action.x += action.direction * action.velocityX;
     action.y += map.gravity - (action.velocityX * .5);
-    return action.velocityX -= map.friction;
+    return action.velocityX -= map.friction + +Math.ceil(map.friction * Game.prototype.DeltaFrames);
   };
 
   PhysicsEngine.prototype.adjustMapObject = function(mapObj, player, map) {

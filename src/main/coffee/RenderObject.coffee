@@ -10,6 +10,8 @@ class RenderObject
   _workbench = {}
   _x = 0
   _y = 0
+  _originalX = 0
+  _originalY = 0
   _width = 0
   _height = 0
   _duration = 0
@@ -135,6 +137,18 @@ RenderObject::__defineGetter__ "y",->
 
 RenderObject::__defineSetter__ "y",(val)->
   @_y = val
+  
+RenderObject::__defineGetter__ "originalX",->
+  @_originalX
+
+RenderObject::__defineSetter__ "originalX",(val)->
+  @_originalX = val
+    
+RenderObject::__defineGetter__ "originalY",->
+  @_originalY
+
+RenderObject::__defineSetter__ "originalY",(val)->
+  @_originalY = val
   
 RenderObject::__defineGetter__ "width",->
   @cellWidth
