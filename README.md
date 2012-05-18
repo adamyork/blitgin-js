@@ -11,7 +11,7 @@
 						   |_) |   |  |  / _ | |\ | 
 						   |_) | , |  |  \ / | | \| js.
 
-## To use...
+## To use... [Note : blitgin is under development]
 ### Create an instance of Bootstrap , then ...
 - Include blitgin-js classes individually
 **or**
@@ -34,12 +34,14 @@
  - Safari **Doesnt work yet.**
 
 ## Todo...
-- its possible that a composites asset is not a single row 
-- this needs to be expanded upon. Check more than just number of enemies
-- determine if 2000 needs to be configurable
-- this does not support sampling of color
-- this assumes are particle sprite sheets are a single row 
-- allow for dependency loader to be defined by implementer
-- unit test
+- It's possible that a composites asset is not a single row
+- Particles and Composities need to support sampling of color
+- Particles and Composities need to support multiple row sprite sheets
+- Nis logic needs to be expanded upon.
+- Nis logic should check more than just number of enemies
+- Allow for dependency loader to be defined by implementer
+- Update shell script for build process
+- Allow for multiple players
+- Unit test
 
 contact : vertigo.index@gmail.com
