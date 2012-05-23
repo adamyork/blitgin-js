@@ -151,7 +151,7 @@ class Map extends RenderObject
             obj.uniqueID = key
             activeTargets[obj.uniqueID] = obj
         else if target
-          enemyOffScreen = !(@isEnemyOnScreen posX,posY,vw,vh,indep)
+          enemyOffScreen = !(@isEnemyOnScreen posX,posY,vw,vh,indep,target)
           if enemyOffScreen or target.isDead
             delete activeTargets[target.uniqueID]
           if(target.isDead)
@@ -160,9 +160,14 @@ class Map extends RenderObject
   generateKey:(group,i)->
     return group.type::name + "" + group.positions[i].x + "" + group.positions[i].y + "" + i
 
-  isEnemyOnScreen:(posX,posY,vw,vh,indep)->
-    hBounds = (((posX - indep) - @x) - vw) <= 0 && (((posX + indep) - @x) - vw) >= -(vw)
-    vBounds = (((posY + indep) - @y) - vh) <= 0 && (((posY - indep) - @y) - vh) >= -(vh)
+  isEnemyOnScreen:(posX,posY,vw,vh,indep,target)->
+    distanceFromOriginX = 0
+    distanceFromOriginY = 0
+    if target isnt undefined
+      distanceFromOriginX = (target.x - posX) + @x
+      distanceFromOriginY = (target.y - posY) + @y
+    hBounds = ((((posX+distanceFromOriginX) - indep) - @x) - vw) <= 0 && ((((posX+distanceFromOriginX) + indep) - @x) - vw) >= -(vw)
+    vBounds = ((((posY+distanceFromOriginY)  + indep) - @y) - vh) <= 0 && ((((posY+distanceFromOriginY)  - indep) - @y) - vh) >= -(vh)
     return (hBounds && vBounds)
 
   checkForNis:(player)->

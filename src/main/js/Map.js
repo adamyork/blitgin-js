@@ -190,7 +190,7 @@ Map = (function(_super) {
             activeTargets[obj.uniqueID] = obj;
           }
         } else if (target) {
-          enemyOffScreen = !(this.isEnemyOnScreen(posX, posY, vw, vh, indep));
+          enemyOffScreen = !(this.isEnemyOnScreen(posX, posY, vw, vh, indep, target));
           if (enemyOffScreen || target.isDead) {
             delete activeTargets[target.uniqueID];
           }
@@ -204,10 +204,16 @@ Map = (function(_super) {
     return group.type.prototype.name + "" + group.positions[i].x + "" + group.positions[i].y + "" + i;
   };
 
-  Map.prototype.isEnemyOnScreen = function(posX, posY, vw, vh, indep) {
-    var hBounds, vBounds;
-    hBounds = (((posX - indep) - this.x) - vw) <= 0 && (((posX + indep) - this.x) - vw) >= -vw;
-    vBounds = (((posY + indep) - this.y) - vh) <= 0 && (((posY - indep) - this.y) - vh) >= -vh;
+  Map.prototype.isEnemyOnScreen = function(posX, posY, vw, vh, indep, target) {
+    var distanceFromOriginX, distanceFromOriginY, hBounds, vBounds;
+    distanceFromOriginX = 0;
+    distanceFromOriginY = 0;
+    if (target !== void 0) {
+      distanceFromOriginX = (target.x - posX) + this.x;
+      distanceFromOriginY = (target.y - posY) + this.y;
+    }
+    hBounds = ((((posX + distanceFromOriginX) - indep) - this.x) - vw) <= 0 && ((((posX + distanceFromOriginX) + indep) - this.x) - vw) >= -vw;
+    vBounds = ((((posY + distanceFromOriginY) + indep) - this.y) - vh) <= 0 && ((((posY + distanceFromOriginY) - indep) - this.y) - vh) >= -vh;
     return hBounds && vBounds;
   };
 

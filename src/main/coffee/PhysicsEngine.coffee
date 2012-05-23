@@ -141,7 +141,7 @@ class PhysicsEngine
     if enemy.applyGravityAndFriction
       if @doesMapNeedToMove(player,map)
         enemy.screenX = enemy.screenX + (player.velocityX * -(player.direction))
-        enemy.originalX = enemy.screenX
+        enemy.originalX += (player.velocityX * -(player.direction))
       suggestedVelocityY = enemy.velocityY
       suggestedVelocityY -= Math.ceil(map.gravity + Math.floor(map.gravity * Game::DeltaFrames))
       if suggestedVelocityY > enemy.maxVelocityY then suggestedVelocityY = enemy.maxVelocityY

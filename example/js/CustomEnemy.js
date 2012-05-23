@@ -29,23 +29,23 @@ CustomEnemy.prototype.__defineSetter__("screenX", function(val) {
         this.velocityX = 0;
         this.velocityY = 0;
         this.originalX = val; 
+        this.distanceTraveled = 0;
         return
     }
     this._screenX = val;
 });
 
 CustomEnemy.prototype.behavior = function(suggestedX,suggestedY,suggestedVelocityX,suggestedVelocityY) {
-    if(suggestedX >= this.originalX + this.maxDistance) {
+    this.distanceTraveled = Math.abs(suggestedX-this.originalX);
+    if(this.distanceTraveled >= this.maxDistance) {
         this.velocityX = 0;
-        this.direction = -1
-    } else if(suggestedX <= this.originalX - this.maxDistance){
-        this.velocityX = 0;
-        this.direction = 1
+        this.direction = this.direction * -1;
+        this.originalX = this.screenX;
     } else {
         this.screenX = Math.ceil(suggestedX);
     }
 
     this.screenY = suggestedY;
     this.velocityX = suggestedVelocityX;
-    this.velocityY = 0;
+    this.velocityY = suggestedVelocityY;
 }
