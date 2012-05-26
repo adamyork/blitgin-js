@@ -97,18 +97,25 @@ class CollisionEngine
     verticalMin = @physicsEngine.getVerticalMin @player,@map
     verticalMax = @physicsEngine.getVerticalMax @player,@map
     i = 0
+    @collisionAreaWidth = 0
     for i in [verticalMin .. verticalMax-1]
       point = @map.collisionDataPixel Math.round(destination),Math.round(i)
       if point isnt 0
         @checkForWall point,Math.round(destination),Math.round(i)
-        if @player.direction is 1
+        if @player.direction is 1 || @player.directionOfCollision is 1
           destination -= @player.width
+          @player.directionOfCollision = undefined
+        destination += (@collisionAreaWidth * @player.direction)
         @physicsEngine.manageHorizontalBounds @player,@map,destination
         return
         
   checkForWall:(point,destination,position)->
     while point isnt 0
-      destination -= @player.direction
+      @collisionAreaWidth++
+      dir = @player.direction
+      if @player.directionOfCollision isnt undefined
+        dir = @player.directionOfCollision
+      destination -= dir
       point = @map.collisionDataPixel Math.round(destination),Math.round(position)
       
   checkForFloor:(point,destination,position,target)->

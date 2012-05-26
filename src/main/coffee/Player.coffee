@@ -39,6 +39,7 @@ class Player extends RenderObject
   _composite = {}
   _compositePoint = {}
   _emitter = {}
+  _directionOfCollision = undefined
   
   initialize:->
     super @updateInherentStates
@@ -156,7 +157,13 @@ Player::__defineGetter__ "direction",->
 
 Player::__defineSetter__ "direction",(val)->
   @_direction = val
-  @state = if @direction is -1 then @_moveLeft else @_moveRight  
+  @state = if @direction is -1 then @_moveLeft else @_moveRight
+
+Player::__defineGetter__ "directionOfCollision",->
+  @_directionOfCollision 
+
+Player::__defineSetter__ "directionOfCollision",(val)->
+  @_directionOfCollision = val
   
 Player::__defineGetter__ "frame",->
   @_frame
@@ -190,9 +197,12 @@ Player::__defineGetter__ "vOrigin",->
 
 Player::__defineGetter__ "hOrigin",->
   val = 0
-  if @direction is -1
+  dir = @direction
+  if @directionOfCollision isnt undefined
+    dir = @directionOfCollision
+  if dir is -1
       val = @x
-  else if @direction is 1
+  else if dir is 1
       val = @width + @x
   val
 
@@ -262,7 +272,7 @@ Player::__defineSetter__ "floor",(val)->
 Player::__defineGetter__ "collisionCoefficient",->
   @_collisionCoefficient
 
-Player::__defineSetter__ "collisionCoefficient,",(val)->
+Player::__defineSetter__ "collisionCoefficient",(val)->
   @_collisionCoefficient = val
 
 Player::__defineGetter__ "maxVelocityX",->

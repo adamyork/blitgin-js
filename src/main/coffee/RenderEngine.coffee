@@ -123,6 +123,7 @@ class RenderEngine
     @physicsEngine.adjustEnemy enemy,@player,@map
     @collisionEngine.checkVerticalMapCollision enemy
     @collisionEngine.manageCollisions enemy,@player
+    @collisionEngine.checkHorizontalMapCollision()
     
   manageNewActions:(input)->
     if input.customKey isnt 0

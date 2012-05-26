@@ -164,7 +164,8 @@ RenderEngine = (function() {
     enemy.frame++;
     this.physicsEngine.adjustEnemy(enemy, this.player, this.map);
     this.collisionEngine.checkVerticalMapCollision(enemy);
-    return this.collisionEngine.manageCollisions(enemy, this.player);
+    this.collisionEngine.manageCollisions(enemy, this.player);
+    return this.collisionEngine.checkHorizontalMapCollision();
   };
 
   RenderEngine.prototype.manageNewActions = function(input) {

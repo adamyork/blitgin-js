@@ -72,19 +72,23 @@ class PhysicsEngine
           focus.x += focus.width * focus.collisionCoefficient
           focus.velocityX = 0
       else
-          focus.screenX += focus.width + target.width
+          focus.screenX += focus.width * focus.collisionCoefficient
           target.x -= target.width * target.collisionCoefficient
-          map.x -= target.width * target.collisionCoefficient
+          target.directionOfCollision = -1
+          #map.x -= target.width * target.collisionCoefficient
+          focus.velocityX = 0
           target.velocityX = 0
     else if target.direction is -1
       if targetBase is CollisionEngine::TYPE_OF_ACTION
           focus.x -= focus.width * focus.collisionCoefficient
           focus.velocityX = 0
       else
-          focus.screenX -= focus.width + target.width
+          focus.screenX -= focus.width * focus.collisionCoefficient
           target.x += target.width * target.collisionCoefficient
-          map.x += target.width * target.collisionCoefficient
+          target.directionOfCollision = 1
+          #map.x += target.width * target.collisionCoefficient
           target.velocityX = 0
+          focus.velocityX = 0
     @updateMapXIfEnemy(focus,target,target.direction)
 
   updateMapXIfEnemy:(focus,target,direction)->
@@ -107,8 +111,13 @@ class PhysicsEngine
     if(target.y < 0 and map.platform is false)
       target.y = 0
 
-  getHorizontalDesitination:(player,map)->    
-    (player.hOrigin + map.x - (player.thresholdX * player.direction))
+  getHorizontalDesitination:(player,map)->
+    dir = player.direction
+    if player.directionOfCollision
+      dir = player.directionOfCollision
+    val = (player.hOrigin + map.x - (player.thresholdX * dir))
+    ctx.fillRect(val - Math.round(map.x), player.y, 10, 300)
+    (player.hOrigin + map.x - (player.thresholdX * dir))
 
   getVerticalMin:(player,map)->
     (player.y + map.y)

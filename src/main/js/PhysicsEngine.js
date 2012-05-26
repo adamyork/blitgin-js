@@ -92,9 +92,10 @@ PhysicsEngine = (function() {
         focus.x += focus.width * focus.collisionCoefficient;
         focus.velocityX = 0;
       } else {
-        focus.screenX += focus.width + target.width;
+        focus.screenX += focus.width * focus.collisionCoefficient;
         target.x -= target.width * target.collisionCoefficient;
-        map.x -= target.width * target.collisionCoefficient;
+        target.directionOfCollision = -1;
+        focus.velocityX = 0;
         target.velocityX = 0;
       }
     } else if (target.direction === -1) {
@@ -102,10 +103,11 @@ PhysicsEngine = (function() {
         focus.x -= focus.width * focus.collisionCoefficient;
         focus.velocityX = 0;
       } else {
-        focus.screenX -= focus.width + target.width;
+        focus.screenX -= focus.width * focus.collisionCoefficient;
         target.x += target.width * target.collisionCoefficient;
-        map.x += target.width * target.collisionCoefficient;
+        target.directionOfCollision = 1;
         target.velocityX = 0;
+        focus.velocityX = 0;
       }
     }
     return this.updateMapXIfEnemy(focus, target, target.direction);
@@ -138,7 +140,12 @@ PhysicsEngine = (function() {
   };
 
   PhysicsEngine.prototype.getHorizontalDesitination = function(player, map) {
-    return player.hOrigin + map.x - (player.thresholdX * player.direction);
+    var dir, val;
+    dir = player.direction;
+    if (player.directionOfCollision) dir = player.directionOfCollision;
+    val = player.hOrigin + map.x - (player.thresholdX * dir);
+    ctx.fillRect(val - Math.round(map.x), player.y, 10, 300);
+    return player.hOrigin + map.x - (player.thresholdX * dir);
   };
 
   PhysicsEngine.prototype.getVerticalMin = function(player, map) {

@@ -125,11 +125,16 @@ CollisionEngine = (function() {
     verticalMin = this.physicsEngine.getVerticalMin(this.player, this.map);
     verticalMax = this.physicsEngine.getVerticalMax(this.player, this.map);
     i = 0;
+    this.collisionAreaWidth = 0;
     for (i = verticalMin, _ref = verticalMax - 1; verticalMin <= _ref ? i <= _ref : i >= _ref; verticalMin <= _ref ? i++ : i--) {
       point = this.map.collisionDataPixel(Math.round(destination), Math.round(i));
       if (point !== 0) {
         this.checkForWall(point, Math.round(destination), Math.round(i));
-        if (this.player.direction === 1) destination -= this.player.width;
+        if (this.player.direction === 1 || this.player.directionOfCollision === 1) {
+          destination -= this.player.width;
+          this.player.directionOfCollision = void 0;
+        }
+        destination += this.collisionAreaWidth * this.player.direction;
         this.physicsEngine.manageHorizontalBounds(this.player, this.map, destination);
         return;
       }
@@ -137,10 +142,15 @@ CollisionEngine = (function() {
   };
 
   CollisionEngine.prototype.checkForWall = function(point, destination, position) {
-    var _results;
+    var dir, _results;
     _results = [];
     while (point !== 0) {
-      destination -= this.player.direction;
+      this.collisionAreaWidth++;
+      dir = this.player.direction;
+      if (this.player.directionOfCollision !== void 0) {
+        dir = this.player.directionOfCollision;
+      }
+      destination -= dir;
       _results.push(point = this.map.collisionDataPixel(Math.round(destination), Math.round(position)));
     }
     return _results;

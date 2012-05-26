@@ -3,7 +3,7 @@ var Player,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
 Player = (function(_super) {
-  var _actions, _applyGravityAndFriction, _collisionCoefficient, _collisionLeft, _collisionRight, _composite, _compositePoint, _damage, _emitter, _floor, _frame, _health, _isBusy, _isDead, _jumpLeft, _jumpRight, _mapBoundsMax, _mapBoundsMin, _mapX, _mapY, _maxVelocityX, _maxVelocityY, _minVelocity, _moveLeft, _moveRight, _previousState, _screenX, _screenY, _showCollisionRect, _state, _thresholdX, _thresholdY, _uniqueID;
+  var _actions, _applyGravityAndFriction, _collisionCoefficient, _collisionLeft, _collisionRight, _composite, _compositePoint, _damage, _directionOfCollision, _emitter, _floor, _frame, _health, _isBusy, _isDead, _jumpLeft, _jumpRight, _mapBoundsMax, _mapBoundsMin, _mapX, _mapY, _maxVelocityX, _maxVelocityY, _minVelocity, _moveLeft, _moveRight, _previousState, _screenX, _screenY, _showCollisionRect, _state, _thresholdX, _thresholdY, _uniqueID;
 
   __extends(Player, _super);
 
@@ -81,6 +81,8 @@ Player = (function(_super) {
   _compositePoint = {};
 
   _emitter = {};
+
+  _directionOfCollision = void 0;
 
   Player.prototype.initialize = function() {
     Player.__super__.initialize.call(this, this.updateInherentStates);
@@ -245,6 +247,14 @@ Player.prototype.__defineSetter__("direction", function(val) {
   return this.state = this.direction === -1 ? this._moveLeft : this._moveRight;
 });
 
+Player.prototype.__defineGetter__("directionOfCollision", function() {
+  return this._directionOfCollision;
+});
+
+Player.prototype.__defineSetter__("directionOfCollision", function(val) {
+  return this._directionOfCollision = val;
+});
+
 Player.prototype.__defineGetter__("frame", function() {
   return this._frame;
 });
@@ -286,11 +296,13 @@ Player.prototype.__defineGetter__("vOrigin", function() {
 });
 
 Player.prototype.__defineGetter__("hOrigin", function() {
-  var val;
+  var dir, val;
   val = 0;
-  if (this.direction === -1) {
+  dir = this.direction;
+  if (this.directionOfCollision !== void 0) dir = this.directionOfCollision;
+  if (dir === -1) {
     val = this.x;
-  } else if (this.direction === 1) {
+  } else if (dir === 1) {
     val = this.width + this.x;
   }
   return val;
@@ -380,7 +392,7 @@ Player.prototype.__defineGetter__("collisionCoefficient", function() {
   return this._collisionCoefficient;
 });
 
-Player.prototype.__defineSetter__("collisionCoefficient,", function(val) {
+Player.prototype.__defineSetter__("collisionCoefficient", function(val) {
   return this._collisionCoefficient = val;
 });
 
