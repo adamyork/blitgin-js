@@ -6,6 +6,7 @@ class PhysicsEngine
 
   adjustPlayerVerically:(player,map)->
     player.velocityY-= map.gravity + Math.floor(map.gravity * Game::DeltaFrames)
+    # console.log "player.velocityY " + player.velocityY
     player.y -= player.velocityY
     player.y += map.gravity + Math.floor(map.gravity * Game::DeltaFrames)
     if player.y - player.height <= 0 and player.floor
@@ -115,8 +116,6 @@ class PhysicsEngine
     dir = player.direction
     if player.directionOfCollision
       dir = player.directionOfCollision
-    val = (player.hOrigin + map.x - (player.thresholdX * dir))
-    ctx.fillRect(val - Math.round(map.x), player.y, 10, 300)
     (player.hOrigin + map.x - (player.thresholdX * dir))
 
   getVerticalMin:(player,map)->

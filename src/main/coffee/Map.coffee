@@ -168,7 +168,7 @@ class Map extends RenderObject
       distanceFromOriginY = (target.y - posY) + @y
     hBounds = ((((posX+distanceFromOriginX) - indep) - @x) - vw) <= 0 && ((((posX+distanceFromOriginX) + indep) - @x) - vw) >= -(vw)
     vBounds = ((((posY+distanceFromOriginY)  + indep) - @y) - vh) <= 0 && ((((posY+distanceFromOriginY)  - indep) - @y) - vh) >= -(vh)
-    return (hBounds && vBounds)
+    return (hBounds && vBounds)   
 
   checkForNis:(player)->
     if player is undefined
@@ -216,6 +216,12 @@ class Map extends RenderObject
   collisionDataPixel:(x,y)->
     index = 4 * (y * @collisionData.width + x)
     @collisionPixels.data[index+3]
+  
+  adjustElementsVertically:(val)->
+    for enemy of @activeEnemies
+      if enemy is "__defineGetter__" or enemy is "__defineSetter__"
+        continue
+      @activeEnemies[enemy].y -= val
 
 Map::name = "Map"
 Map::TYPE_SIDESCROLL = "sidescroll"
@@ -256,15 +262,20 @@ Map::__defineGetter__ "y",->
   @_y
 
 Map::__defineSetter__ "y",(val)->
+  console.log @floor
   if (val >= @collisionData.height - Game::VIEWPORT_HEIGHT)
+    @adjustElementsVertically (@collisionData.height - Game::VIEWPORT_HEIGHT)-@_y
     @_y = @collisionData.height - Game::VIEWPORT_HEIGHT
     return
   if (val < 0)
+    @adjustElementsVertically -@_y
     @_y = 0
     return
   if @floor isnt undefined and val >= @floor
+    @adjustElementsVertically @floor - @_y
     @_y = @floor
     return
+  @adjustElementsVertically val-@_y
   @_y = val
 
 Map::__defineGetter__ "backgroundAssetClass",->
