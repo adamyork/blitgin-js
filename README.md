@@ -43,5 +43,3 @@
 - Update shell script for build process
 - Allow for multiple players
 - Unit test
-
-contact : vertigo.index@gmail.com
